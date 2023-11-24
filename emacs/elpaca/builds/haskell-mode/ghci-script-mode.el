@@ -1,0 +1,1 @@
+/home/tatephughes/.config/emacs/elpaca/repos/haskell-mode/ghci-script-mode.el

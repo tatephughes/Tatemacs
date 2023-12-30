@@ -3,9 +3,9 @@
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-			      :ref nil
-			      :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-			      :build (:not elpaca--activate-package)))
+                              :ref nil
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
@@ -15,18 +15,18 @@
     (make-directory repo t)
     (when (< emacs-major-version 28) (require 'subr-x))
     (condition-case-unless-debug err
-	(if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-		 ((zerop (call-process "git" nil buffer t "clone"
-				       (plist-get order :repo) repo)))
-		 ((zerop (call-process "git" nil buffer t "checkout"
-				       (or (plist-get order :ref) "--"))))
-		 (emacs (concat invocation-directory invocation-name))
-		 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-				       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-		 ((require 'elpaca))
-		 ((elpaca-generate-autoloads "elpaca" repo)))
-	    (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-	  (error "%s" (with-current-buffer buffer (buffer-string))))
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (call-process "git" nil buffer t "clone"
+                                       (plist-get order :repo) repo)))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
       ((error) (warn "%s" err) (delete-directory repo 'recursive))))
   (unless (require 'elpaca-autoloads nil t)
     (require 'elpaca)
@@ -37,10 +37,10 @@
 
 ;; Install use-package support
 (elpaca elpaca-use-package
-	;; Enable :elpaca use-package keyword.
-	(elpaca-use-package-mode)
-	;; Assume :elpaca t unless otherwise specified.
-	(setq elpaca-use-package-by-default t))
+        ;; Enable :elpaca use-package keyword.
+        (elpaca-use-package-mode)
+        ;; Assume :elpaca t unless otherwise specified.
+        (setq elpaca-use-package-by-default t))
 
 ;; Block until current queue processed.
 (elpaca-wait)
@@ -49,8 +49,8 @@
 ;;(e.g. a package which adds a use-package key word),
 ;;use `elpaca-wait' to block until that package has been installed/configured.
 ;;For example:
-;;(use-package general :demand t)
-;;(elpaca-wait)
+(use-package general :demand t)
+(elpaca-wait)
 
 
 ;;Turns off elpaca-use-package-mode current declaration
@@ -61,69 +61,48 @@
 ;; Don't install anything. Defer execution of BODY
 ;; (elpaca nil (message "deferred"))
 
-(use-package general)
+(add-to-list 'load-path "~/.config/emacs/lisp/")
 
+;; Display the line numbers at the side of the window
 (global-set-key (kbd "C-c l") 'display-line-numbers-mode)
 
+;; Quickly reload this file after making edits. Refers to a function defined under the tab 'neat-tricks'
 (global-set-key (kbd "C-c r") 'reload-init-file)
 
-(global-set-key (kbd "C-c C-c") 'go-to-config)
+;; Quickly get to this file
+(global-set-key (kbd "C-c C-<return>") 'go-to-config)
 
-(global-set-key (kbd "C-c <up>") 'buf-move-up)
-(global-set-key (kbd "C-c <down>") 'buf-move-down)
-(global-set-key (kbd "C-c <left>") 'buf-move-left)
-(global-set-key (kbd "C-c <right>") 'buf-move-right)
+;; Rearrange the buffers
+(global-set-key (kbd "C-M-<up>") 'buf-move-up)
+(global-set-key (kbd "C-M-<down>") 'buf-move-down)
+(global-set-key (kbd "C-M-<left>") 'buf-move-left)
+(global-set-key (kbd "C-M-<right>") 'buf-move-right)
 
-(global-set-key (kbd "C-c C-<up>") 'windmove-up)
-(global-set-key (kbd "C-c C-<down>") 'windmove-down)
-(global-set-key (kbd "C-c C-<left>") 'windmove-left)
-(global-set-key (kbd "C-c C-<right>") 'windmove-right)
+;; Move focus
+(global-set-key (kbd "C-<up>") 'windmove-up)
+(global-set-key (kbd "C-<down>") 'windmove-down)
+(global-set-key (kbd "C-<left>") 'windmove-left)
+(global-set-key (kbd "C-<right>") 'windmove-right)
 
+;; Todo
 (global-set-key (kbd "C-c t") 'org-toggle-item)
 (global-set-key (kbd "C-c d") 'org-todo)
 
-(set-face-attribute 'default nil
-                    :font "JetBrains Mono"
-                    :height 110
-                    :weight 'medium)
+;; Return to dashboard
+(global-set-key (kbd "C-c <return>") 'dashboard-open)
 
-(set-face-attribute 'variable-pitch nil
-                    :font "Ubuntu"
-                    :height 120
-                    :weight 'medium)
-(set-face-attribute 'fixed-pitch nil
-                     :font "JetBrains Mono"
-                     :height 110
-                     :weight 'medium)
+;; Org-Agenda Shortcut
+(global-set-key (kbd "C-c o") 'org-agenda)
 
-;; For a bit of added spice
-(set-face-attribute 'font-lock-comment-face nil
-                    :slant 'italic)
-(set-face-attribute 'font-lock-keyword-face nil
-                      :slant 'italic)
+(defun reload-init-file ()
+  (interactive) ;; (interactive allows you to call the function with M-x
+  (load-file user-init-file)
+  (load-file user-init-file)
+  (previous-buffer))
 
-;; and to make sure client windows open with these fonts
-(add-to-list 'default-frame-alist '(font . "JetBrains Mono-11"))
-
-(use-package doom-themes
-  :ensure t
-  :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-dracula t)
-
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  (doom-themes-neotree-config)
-  ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  (doom-themes-treemacs-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
-
-(add-to-list 'default-frame-alist '(alpha-background . 80))
+(defun go-to-config ()
+  (interactive)
+  (find-file "~/.config/emacs/config.org"))
 
 (require 'windmove)
 
@@ -194,6 +173,104 @@ one, an error is signaled."
       (set-window-buffer other-win buf-this-buf)
       (select-window other-win))))
 
+;; Make sure everything is utf-8
+
+(set-language-environment 'utf-8)
+(setq locale-coding-system 'utf-8)
+
+(prefer-coding-system 'utf-8)
+(setq default-file-name-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+
+
+;; Actually set the fonts
+(set-face-attribute 'default nil
+                    :font "ProggyCleanNerdFont"
+                    :height 165
+                    :weight 'medium)
+
+(set-face-attribute 'variable-pitch nil
+                    :font "Ubuntu"
+                    :height 180
+                    :weight 'medium)
+(set-face-attribute 'fixed-pitch nil
+                     :font "JetBrains Mono"
+                     :height 165
+                     :weight 'medium)
+
+;; For a bit of added spice (seems broken with ProggyClean)
+(set-face-attribute 'font-lock-comment-face nil
+                    :slant 'italic)
+(set-face-attribute 'font-lock-keyword-face nil
+                      :slant 'italic)
+
+;; and to make sure client windows open with these fonts
+(add-to-list 'default-frame-alist '(font . "ProggyCleanNerdFont"))
+
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-dracula t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
+;; In this house, we use shortcuts damnit!!!'
+
+;; Get rid of pesky GUI elements
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(setq default-frame-alist '((undecorated . t)))
+
+;; Some nice transparency
+(add-to-list 'default-frame-alist '(alpha-background . 95))
+
+;; Make the modeline pretty
+(use-package solaire-mode
+  :config (solaire-global-mode))
+
+;; not sure where to put this lol
+(delete-selection-mode 1)
+
+;; Margin Adjust
+(setq left-margin-width 3)
+(setq right-margin-width 3)
+
+(setq org-agenda-files
+      '("~/MyProjects/Notes/APTS" "~/MyProjects/Notes/APTS/StatsComputation" "~/MyProjects/Notes/APTS/StatsInference" "~/orgfiles"))
+
+(setq org-agenda-custom-commands
+      '(("v" "PhD Tasks"
+         ((tags "general"
+                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                 (org-agenda-overriding-header "General Statistics Tasks")))
+          (tags "APTS"
+                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                 (org-agenda-overriding-header "Tasks from the Warwick APTS Course")))
+          (tags "org"
+                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                 (org-agenda-overriding-header "Tasks relating to org and the config file")))
+          (tags "reading"
+                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                 (org-agenda-overriding-header "Tasks relating to the reading list")))
+          (agenda "")
+          (alltodo "")))))
+
 (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
   "Create parent directory if not exists while visiting file."
   (unless (file-exists-p filename)
@@ -201,35 +278,43 @@ one, an error is signaled."
       (unless (file-exists-p dir)
         (make-directory dir t)))))
 
+
+
+(use-package nerd-icons)
+
 (use-package dashboard
-  :ensure t 
-  :init
-  (setq initial-buffer-choice 'dashboard-open)
-  (setq dashboard-set-heading-icons t)
-  (setq dashboard-set-file-icons t)
-  (setq dashboard-banner-logo-title "woah what how did he get here")
-  ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-  (setq dashboard-startup-banner "/home/tatephughes/Pictures/wohhowdidhegethere/toby.gif")  ;; use custom image as banner
-  (setq dashboard-center-content nil) ;; set to 't' for centered content
-  (setq dashboard-items '((recents . 5)))
-  :custom
-  (dashboard-modify-heading-icons '((recents . "file-text")
-                                    (bookmarks . "book")))
-  :config
-  (dashboard-setup-startup-hook))
+    :ensure t 
+    :init
+    (setq initial-buffer-choice 'dashboard-open)
+    (setq dashboard-set-heading-icons t)
+    (setq dashboard-set-file-icons t)
+    (setq dashboard-banner-logo-title "woah what how did he get here")
+    ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+    (setq dashboard-startup-banner "/home/tate/Tatemacs/wohhowdidhegethere/toby.gif")  ;; use custom image as banner
+    (setq dashboard-center-content nil) ;; set to 't' for centered content
+    (setq dashboard-items '((recents . 50)
+                            (bookmarks . 10)))
+    :custom
+    (dashboard-modify-heading-icons '((recents . "file-text")
+                                      ))
+    :config
+    (dashboard-setup-startup-hook)
+    )
 
-;; In this house, we use shortcuts damnit!!!'
+(setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
+(setq dashboard-display-icons-p t) ;; display icons on both GUI and terminal
+(setq dashboard-icon-type 'nerd-icons) ;; use `nerd-icons' package
 
-;; comment or uncomment as your will decides.
-  (menu-bar-mode -1)
-  (tool-bar-mode -1)
-  ;;(scroll-bar-mode -1)
+(use-package beacon
+  :ensure t
+  :config (beacon-mode))
 
-(global-display-line-numbers-mode 1)
+(global-display-line-numbers-mode 0)
 (global-visual-line-mode t)
 
 (use-package neotree)
 (global-set-key [f8] 'neotree-toggle)
+(setq neo-window-width 50)
 
 (use-package all-the-icons
   :ensure t
@@ -237,6 +322,15 @@ one, an error is signaled."
 
 (use-package all-the-icons-dired
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
+
+;; clean up the mode-line
+(use-package diminish)
+
+(use-package smart-mode-line
+  :config (sml/setup))
+
+(use-package mode-icons
+  :config (mode-icons-mode))
 
 (use-package counsel
   :after ivy
@@ -268,51 +362,51 @@ one, an error is signaled."
   (ivy-set-display-transformer 'ivy-switch-buffer
                                'ivy-rich-switch-buffer-transformer))
 
-;;; package --- Complete Any
-(use-package company
-  :defer 2
-  :diminish
-  :custom
-  (company-begin-commands '(self-insert-command))
-  (company-begin-idle-delay .1)
-  (company-minimum-prefix-length 2)
-  (company-show-numbers t)
-  (company-tooltip-align-annotations 't)
-  (global-company-mode t)
-  (setq lsp-completion-provider :capf))
-
-(use-package company-box
-  :after company
-  :diminish
-  :hook (company-mode . company-box-mode))
-
-(use-package flycheck
-  :ensure t
-  :defer t
-  :diminish
-  :init (global-flycheck-mode))
-
-(use-package haskell-mode)
-
-(use-package auctex
-    :ensure t
-    :hook
-    (LaTeX-mode . prettify-symbols-mode))
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 3.0))
-
-;;emacs has built-in python support, but i may add some config stuff here later
-
 (use-package quarto-mode
   :mode (("\\.Rmd" . poly-quarto-mode))
   )
 (setq markdown-enable-math t)
 
+(use-package auctex
+:defer t
+:ensure t)
+(setq org-highlight-latex-and-related '(native))
+
+(use-package cdlatex)
+(add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
+(add-hook 'latex-mode-hook 'turn-on-cdlatex)
+(add-hook 'org-mode-hook #'turn-on-org-cdlatex)
+
+;; Line below currently breaks things
+;; (add-hook 'after-save-hook #'org-latex-export-to-pdf)
+
+(use-package ess)
+
+(require 'package)
+
+;; Add melpa to your packages repositories
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+
+(package-initialize)
+
+;; Install use-package if not already installed
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(require 'use-package)
+
+;; Enable defer and ensure by default for use-package Keep
+;; auto-save/backup files separate from source code:
+;; https://github.com/scalameta/metals/issues/1027
+(setq use-package-always-defer t
+      use-package-always-ensure t
+      backup-directory-alist `((".*" . ,temporary-file-directory))
+      auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+
 ;; Enable scala-mode for highlighting, indentation and motion commands
 (use-package scala-mode
-  :interpreter ("scala" . scala-mode)
-  :mode "\\.s\\(cala\\|bt\\)$"
-  :config
-  (load-file "~/.config/emacs/lisp/ob-scala.el"))
+  :interpreter ("scala" . scala-mode))
 
 ;; Enable sbt mode for executing sbt commands
 (use-package sbt-mode
@@ -327,11 +421,75 @@ one, an error is signaled."
    ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
    (setq sbt:program-options '("-Dsbt.supershell=false")))
 
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (python . t)))
+;; Enable nice rendering of diagnostics like compile errors.
+(use-package flycheck
+  :diminish
+  :init (global-flycheck-mode))
 
+(use-package lsp-mode
+  :diminish
+  ;; Optional - enable lsp-mode automatically in scala files
+  ;; You could also swap out lsp for lsp-deffered in order to defer loading
+  :hook  (scala-mode . lsp)
+         (lsp-mode . lsp-lens-mode)
+  :config
+  ;; Uncomment following section if you would like to tune lsp-mode performance according to
+  ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
+  ;; (setq gc-cons-threshold 100000000) ;; 100mb
+  ;; (setq read-process-output-max (* 1024 1024)) ;; 1mb
+  ;; (setq lsp-idle-delay 0.500)
+  ;; (setq lsp-log-io nil)
+  ;; (setq lsp-completion-provider :capf)
+  (setq lsp-prefer-flymake nil)
+  ;; Makes LSP shutdown the metals server when all buffers in the project are closed.
+  ;; https://emacs-lsp.github.io/lsp-mode/page/settings/mode/#lsp-keep-workspace-alive
+  (setq lsp-keep-workspace-alive nil))
+
+;; Add metals backend for lsp-mode
+(use-package lsp-metals)
+
+;; Enable nice rendering of documentation on hover
+;;   Warning: on some systems this package can reduce your emacs responsiveness significally.
+;;   (See: https://emacs-lsp.github.io/lsp-mode/page/performance/)
+;;   In that case you have to not only disable this but also remove from the packages since
+;;   lsp-mode can activate it automatically.
+(use-package lsp-ui)
+
+;; lsp-mode supports snippets, but in order for them to work you need to use yasnippet
+;; If you don't want to use snippets set lsp-enable-snippet to nil in your lsp-mode settings
+;; to avoid odd behavior with snippets and indentation
+(use-package yasnippet)
+(use-package ivy-yasnippet
+  :hook (yas-minor-mode . ivy-yasnippet))
+
+;; Use company-capf as a completion provider.
+;;
+;; To Company-lsp users:
+;;   Company-lsp is no longer maintained and has been removed from MELPA.
+;;   Please migrate to company-capf.
+(use-package company
+  :diminish
+  :hook (scala-mode . company-mode)
+  :config
+  (setq lsp-completion-provider :capf))
+
+;; Posframe is a pop-up tool that must be manually installed for dap-mode
+(use-package posframe)
+
+;; Use the Debug Adapter Protocol for running tests and debugging
+(use-package dap-mode
+  :hook
+  (lsp-mode . dap-mode)
+  (lsp-mode . dap-ui-mode))
+
+(org-babel-do-load-languages
+  'org-babel-load-languages
+  '(
+    (R . t)
+    (latex . t)
+))
+
+;; disable the confirmation message
 (setq org-confirm-babel-evaluate nil)
 
 (use-package toc-org
@@ -342,26 +500,36 @@ one, an error is signaled."
 (add-hook 'org-mode-hook 'org-indent-mode)
 
 ;; Use Bullets instead of Aterickses
-(use-package org-bullets)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+;;(use-package org-bullets)
+;;(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
 (electric-indent-mode -1)
 
 (require 'org-tempo) ;; now we can write '<s' then press <TAB> for immediate src action!
 
+(setq org-image-actual-width 500) ;; Sets the width of image previewq in org-mode
+
+;; Sets the size of LaTeX previews 
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 0.9))
+
+(use-package org-fragtog)
+(add-hook 'org-mode-hook 'org-fragtog-mode)
+
+(use-package math-preview
+  :load-path "/home/tate/.asdf/plugins/math-preview"
+  :custom (math-preview-command "/home/tate/.asdf/plugins/math-preview/math-preview.js"))
+
+(setq org-preview-latex-image-directory ".ltximg/")
+
+(use-package ox-pandoc)
+(use-package auto-org-md)
+
 (use-package no-littering)
 
-(defun reload-init-file ()
-  (interactive) ;; (interactive allows you to call the function with M-x
-  (load-file user-init-file)
-  (load-file user-init-file)
-  (previous-buffer))
-
-(defun go-to-config ()
-  (interactive)
-  (find-file "~/.config/emacs/config.org"))
 
 
+(use-package sublimity
+  :config (sublimity-mode))
 
 (use-package sudo-edit)
 
@@ -381,3 +549,8 @@ one, an error is signaled."
         which-key-max-description-lenght 25
         which-key-allow-imprecise-window-fit nil
         which-key-seperator "➢"))
+
+(setq org-agenda-file-menu-enabled t)
+
+(setq org-agenda-files
+        '("~/MyProjects/Notes/APTS" "~/MyProjects/Notes/APTS/StatsComputation" "~/MyProjects/Notes/APTS/StatsInference" "~/orgfiles"))

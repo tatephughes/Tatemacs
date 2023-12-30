@@ -1,1 +1,0 @@
-/home/tatephughes/.config/emacs/elpaca/repos/flycheck/flycheck-buttercup.el

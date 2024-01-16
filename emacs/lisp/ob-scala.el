@@ -12,7 +12,7 @@
 (defvar org-babel-tangle-lang-exts) ;; Autoloaded
 (add-to-list 'org-babel-tangle-lang-exts '("scala" . "scala"))
 (defvar org-babel-default-header-args:scala '())
-(defvar org-babel-scala-command "scala"
+(defvar org-babel-scala-command "amm"
   "Name of the command to use for executing Scala code.")
 
 (defun org-babel-execute:scala (body params)

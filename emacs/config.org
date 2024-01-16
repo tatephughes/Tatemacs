@@ -1,66 +1,20 @@
 #+TITLE: Tate's Emacs Configuration
 #+AUTHOR: Evan Tate Paterson Hughes
 #+DESCRIPTION: Mostly following DT's guide https://www.youtube.com/watch?v=d1fgypEiQkE, but I'm not quite as EVIL
-#+OPTIONS: toc:2
-
 
 * To-do for the config
-*** TODO add more verbose descriptions to all of these things         :org:
-*** TODO Rearrange some lines of code for better crash-handling and readability :org:
-*** TODO Reorganise Keybindings to use ~General~ and be somewhat more pneumonic :org:
-*** TODO Work out Flycheck                                            :org:
+*** DONE add more verbose descriptions to all of these things         :org:
+*** DONE Rearrange some lines of code for better crash-handling and readability :org:
+*** DONE Reorganise Keybindings to use ~General~ and be somewhat more pneumonic :org:
+*** DONE Work out Flycheck                                            :org:
+*** TODO Move everything to general for better verbose descriptions
+*** TODO 'Hydra' enables some of the keybinding stuff i wanted to try for something... but I can't remember what it was at the moment
+**** again though, general might be better in /general/
+*** TODO Flyspell still doesn't quite work right, it doesn't suggest corrections until i force it too, look into this
 
 
-* TABLE OF CONTENTS :toc:
-- [[#to-do-for-the-config][To-do for the config]]
-- [[#elpaca-and-keybindings][Elpaca and Keybindings]]
-  - [[#elpaca-package-manager][Elpaca Package Manager]]
-  - [[#my-keybindings][My Keybindings]]
-  - [[#general-keybindings][General Keybindings]]
-  - [[#some-neat-tricks][Some neat tricks]]
-- [[#a-tale-of-themes-and-fonts][A Tale of Themes and Fonts]]
-  - [[#setting-the-font-face][Setting the font face]]
-  - [[#themes-of-dooommmmmm][Themes... of DOOOMMMMMM]]
-  - [[#other-aesthetic-changes][Other Aesthetic Changes]]
-- [[#agenda][Agenda]]
-  - [[#agenda-files][Agenda Files]]
-  - [[#custom-agenda][Custom agenda]]
-- [[#conveniences][Conveniences]]
-  - [[#automatically-create-directories-wtih-c-x-c-f][Automatically create directories wtih C-x C-f]]
-  - [[#smarter-parentheses][Smarter Parentheses]]
-- [[#dashboard][Dashboard]]
-- [[#gui-tweaks][GUI tweaks]]
-  - [[#beacon][Beacon]]
-  - [[#display-line-numbers-os-gwelwch-yn-dda][Display line numbers, os gwelwch yn dda]]
-  - [[#neo-tree-for-easy-file-navigation][Neo-tree for easy file navigation]]
-  - [[#mode-line][Mode-line]]
-- [[#pamala-isley-ivy][Pamala Isley (Ivy)]]
-- [[#languages-tools-etc][Languages, tools, etc]]
-  - [[#quarto][Quarto]]
-  - [[#latex][LaTeX]]
-  - [[#r-and-ess][R and ESS]]
-  - [[#scala][Scala]]
-  - [[#org-babel][Org-Babel]]
-- [[#make-org-mode-good-actually][Make org-mode good, actually]]
-  - [[#table-of-contents][Table of contents]]
-  - [[#shootin-bullets][Shootin' Bullets]]
-  - [[#disable-that-weird-indentation][Disable that weird indentation]]
-  - [[#make-writing-lisp-blocks-easier][Make Writing Lisp blocks easier]]
-  - [[#settings-tweaks][Settings Tweaks]]
-  - [[#other-latex-tweaks][Other LaTeX tweaks]]
-  - [[#auto-export-to-org][Auto Export to org]]
-- [[#no-littering-][No Littering >:|]]
-- [[#projectile][Projectile]]
-  - [[#look-inot-this-and-learn-about-projects-in-this-sense][Look inot this and learn about projects in this sense]]
-- [[#shells-and-terminals][Shells and terminals]]
-  - [[#eshell][Eshell]]
-- [[#sublimity][Sublimity]]
-- [[#sudo-edit-do-you-know-who-i-am][Sudo-Edit; Do you know who I am?]]
-- [[#which-key-oh-that-key][Which-Key? Oh, that key]]
 
-* Elpaca and Keybindings
-
-** Elpaca Package Manager
+* Elpaca
 
 Using the elpaca file manager. has some nice stuff like async. Since I'm very unlikely to touch this code (it's basically ripped from their github), I may move this block elsewhere.
 
@@ -104,10 +58,10 @@ Using the elpaca file manager. has some nice stuff like async. Since I'm very un
 
   ;; Install use-package support
   (elpaca elpaca-use-package
-          ;; Enable :elpaca use-package keyword.
-          (elpaca-use-package-mode)
-          ;; Assume :elpaca t unless otherwise specified.
-          (setq elpaca-use-package-by-default t))
+    ;; Enable :elpaca use-package keyword.
+    (elpaca-use-package-mode)
+    ;; Assume :elpaca t unless otherwise specified.
+    (setq elpaca-use-package-by-default t))
 
   ;; Block until current queue processed.
   (elpaca-wait)
@@ -131,13 +85,13 @@ Using the elpaca file manager. has some nice stuff like async. Since I'm very un
   (add-to-list 'load-path "~/.config/emacs/lisp/")
 #+end_src
 
-** My Keybindings
+* My Keybindings
+
+*** Old Bindings
 
 Custom keybinds. As the to-do list suggests, I should get into ~General~, setting a overall header to something unique like ~C-<space>~ then using a bunch of pneumonic commands, for a sort of 'vim-emacs' mashup. ~C-<space>~ is currently bound to some marking feature though.
 
 #+begin_src emacs-lisp
-  ;; Display the line numbers at the side of the window
-  (global-set-key (kbd "C-c l") 'display-line-numbers-mode)
 
   ;; Quickly reload this file after making edits. Refers to a function defined under the tab 'neat-tricks'
   (global-set-key (kbd "C-c r") 'reload-init-file)
@@ -169,53 +123,229 @@ Custom keybinds. As the to-do list suggests, I should get into ~General~, settin
 
 #+end_src
 
-** General Keybindings
+*** Leader key definitions
 
-#+begin_src emacs-nope
-    (require 'general)
+Below is a modified setup from [[http://xahlee.info/emacs/emacs/emacs_menu_app_keys.html][here]], adding the ~<menu>~ key (which I map CAPS LOCK to in gnome), as a start in defining my own set of personal keybindings.
 
-    (global-unset-key (kbd "C-c"))
-    (global-unset-key (kbd "C-x"))
-    (global-unset-key (kbd "C-v"))
-    (global-unset-key (kbd "C-SPC"))
-    (global-set-key (kbd "C-c") nil)
+#+begin_src emacs-lisp
 
-    (general-create-definer my-leader-def
-      ;; :prefix my-leader
-      ;; or without a variable
-      :prefix "C-SPC")
+  (define-key key-translation-map (kbd "<apps>") (kbd "<menu>"))
 
+  ;; make the menu key as leader key
+  (global-set-key (kbd "<menu>") 'my-leader-key-map)(define-key key-translation-map (kbd "<apps>") (kbd "<menu>"))
 
-    (my-leader-def
-      "a" 'org-agenda
-      "b" 'counsel-bookmark
-      "c" 'org-capture
-      "s" 'save-buffer
-      "r c" 'reload-init-file
-      "t l" 'display-line-numbers-mode
-      "g c" 'go-to-config
-      "g d" 'go-to-dashboard
-      "g f" 'find-file
-  )
+  (define-prefix-command 'my-leader-key-map)
 
-
-
-    (general-define-key
-     "C-c" 'kill-ring-save
-     "C-x" 'kill-region
-     "C-v" 'yank
-     "C-h" 'backward-char
-     "C-j" 'next-line
-     "C-k" 'previous-line
-     "C-l" 'forward-char
-     "C-<up>" 'windmove-up
-     "C-<down>" 'windmove-down
-     "C-<left>" 'windmove-left
-     "C-<right>" 'windmove-right)
 #+end_src
-** Some neat tricks
 
-Here we actually define the functions references in the above keybindings
+*** Motions
+    
+#+begin_src emacs-lisp
+
+  (define-key my-leader-key-map (kbd "RET") 'insert-new-line-below)
+  (define-key my-leader-key-map (kbd "<left>") 'previous-buffer)
+  (define-key my-leader-key-map (kbd "<right>") 'next-buffer)
+  (define-key my-leader-key-map (kbd "<up>") 'beginning-of-buffer)
+  (define-key my-leader-key-map (kbd "<down>") 'end-of-buffer)
+
+  (define-key my-leader-key-map (kbd "=") 'jump-lines)
+  (define-key my-leader-key-map (kbd "-") 'jump-lines-back)
+
+  (define-key my-leader-key-map (kbd "b") 'ibuffer-list-buffers)
+
+#+end_src
+
+*** Window Manipulation
+
+
+#+begin_src emacs-lisp
+
+  (define-key my-leader-key-map (kbd "0") 'delete-window)
+  (define-key my-leader-key-map (kbd "1") 'delete-other-windows)
+  (define-key my-leader-key-map (kbd "2") 'split-window-below)
+  (define-key my-leader-key-map (kbd "3") 'split-window-right)
+
+#+end_src
+
+*** Insert
+
+#+begin_src emacs-lisp
+
+  (define-key my-leader-key-map (kbd "i l") 'org-insert-link)
+  (define-key my-leader-key-map (kbd "i c") 'org-cite-insert)
+  (define-key my-leader-key-map (kbd "i i") 'org-insert-image)
+
+#+end_src
+
+*** Org
+
+**** Vanilla org
+
+#+begin_src emacs-lisp
+
+  ;;org keys
+  (define-key my-leader-key-map (kbd "o t") 'org-toggle-item)
+  (define-key my-leader-key-map (kbd "o l") 'org-open-at-point)
+  (define-key my-leader-key-map (kbd "o s") 'set-org-latex-scale)
+  (define-key my-leader-key-map (kbd "c '") 'org-edit-special)
+
+  (define-key org-src-mode-map (kbd "C-c '") nil) ; unbind the original key
+  (define-key org-src-mode-map (kbd "C-c C-c") 'org-edit-src-exit) ; bind to your key
+
+
+#+end_src
+
+**** Org-roam
+
+#+begin_src emacs-lisp
+
+  ;;org roam keys
+  (define-key my-leader-key-map (kbd "n i") 'org-roam-node-insert)
+  (define-key my-leader-key-map (kbd "n f") 'org-roam-node-find)
+  (define-key my-leader-key-map (kbd "n u") 'org-roam-ui-mode)
+  (define-key my-leader-key-map (kbd "n #") 'org-roam-tag-add)
+  (define-key my-leader-key-map (kbd "n c") 'org-roam-add-citation)
+
+#+end_src
+
+*** Navigation
+
+#+begin_src emacs-lisp
+
+  ;;go to
+  (define-key my-leader-key-map (kbd "g c") 'go-to-config)
+  (define-key my-leader-key-map (kbd "g d") 'dashboard-open)
+  (define-key my-leader-key-map (kbd "g a") 'org-agenda)
+  (define-key my-leader-key-map (kbd "x f") 'find-file)
+
+#+end_src
+
+*** Code execution
+
+#+begin_src emacs-lisp
+
+  ;;run/reload
+  (define-key my-leader-key-map (kbd "r c") 'reload-init-file)
+  (define-key my-leader-key-map (kbd "r b") 'org-babel-execute-buffer)
+  (define-key my-leader-key-map (kbd "r l") 'org-latex-refresh)
+
+#+end_src
+
+*** Code selection, cutting, copying and pasting
+
+#+begin_src emacs-lisp
+
+    (define-key my-leader-key-map (kbd "<menu>") 'set-mark-command)
+
+#+end_src
+
+#+begin_src emacs-lisp
+
+    ;;selections ('m' is for mark, 's' is taken by 'save')
+    (define-key my-leader-key-map (kbd "m l") 'select-current-line)
+    (define-key my-leader-key-map (kbd "m a") 'select-buffer)
+    (define-key my-leader-key-map (kbd "m p") 'select-paragraph)
+
+#+end_src
+
+#+begin_src emacs-lisp
+
+    ;;murder
+    (define-key my-leader-key-map (kbd "k l") 'kill-whole-line)
+    (define-key my-leader-key-map (kbd "k f") 'kill-line)
+    (define-key my-leader-key-map (kbd "k b") 'kill-to-start-of-line)
+    (define-key my-leader-key-map (kbd "k r") 'kill-region)
+    (define-key my-leader-key-map (kbd "k p") 'kill-whole-paragraph)
+    (define-key my-leader-key-map (kbd "k RET") 'save-buffers-kill-terminal)
+
+#+end_src
+
+#+begin_src emacs-lisp
+
+  ;;irrevocably murder
+  (define-key my-leader-key-map (kbd "d r") 'delete-region)
+  (define-key my-leader-key-map (kbd "d l") 'delete-line)
+  (define-key my-leader-key-map (kbd "d f") 'delete-line-forward)
+  (define-key my-leader-key-map (kbd "d b") 'delete-line-backward)
+  (define-key my-leader-key-map (kbd "d p") 'delete-paragraph)
+#+end_src
+
+#+begin_src emacs-lisp
+
+    ;;copy
+    (define-key my-leader-key-map (kbd "c r") 'kill-ring-save)
+    (define-key my-leader-key-map (kbd "c l") 'copy-line)
+    (define-key my-leader-key-map (kbd "c p") 'copy-paragraph)
+
+#+end_src
+
+#+begin_src emacs-lisp
+
+    ;;yank
+    (define-key my-leader-key-map (kbd "y") 'yank)
+
+#+end_src
+
+*** Saving
+
+#+begin_src emacs-lisp
+
+  ;;save
+  (define-key my-leader-key-map (kbd "s a") 'org-save-all-org-buffers)
+  (define-key my-leader-key-map (kbd "s s") 'save-buffer)
+  (define-key my-leader-key-map (kbd "s e") 'org-gfm-export-to-markdown-with-mdoc)
+
+#+end_src
+*** Toggles
+#+begin_src emacs-lisp
+
+    (define-key my-leader-key-map (kbd "t l") 'global-display-line-numbers-mode)
+
+#+end_src
+*** Ac un am lwc
+
+#+begin_src emacs-lisp
+
+  ;; make the menu key as leader key
+  (global-set-key (kbd "<menu>") 'my-leader-key-map)
+
+#+end_src
+*** Command Execution
+
+#+begin_src emacs-lisp
+
+  (define-key my-leader-key-map (kbd "?") 'counsel-M-x)
+
+#+end_src
+*** Vterm
+
+#+begin_src emacs-lisp
+
+  (define-key my-leader-key-map (kbd "/") 'vterm)
+
+#+end_src
+
+*** Swiper
+
+Swiper is a search replacement from the *ivy* package. Has a nicer little interface. I've kept the original 'C-s' binding to normal isearch for muscle memory though.
+
+#+begin_src emacs-lisp
+
+  (define-key my-leader-key-map (kbd "f") 'swiper)
+  (define-key my-leader-key-map (kbd "C-f") 'swiper-backward)
+
+#+end_src
+*** Flyspell
+
+#+begin_src emacs-lisp
+
+  (define-key my-leader-key-map (kbd "#") 'flyspell-correct-word-before-point)
+
+#+end_src
+* Some neat tricks
+
+Here we actually define the functions references in the above keybindings. I've moved this up towards the top of the doc for better stability.
+
 *** Reload Init
 #+begin_src emacs-lisp
   (defun reload-init-file ()
@@ -304,11 +434,204 @@ Can't actually remember where i got this code oops
         (set-window-buffer other-win buf-this-buf)
         (select-window other-win))))
 #+end_src
+
+*** Selections and Killings
+
+Quick commands to select and kill things
+
+#+begin_src emacs-lisp
+  (defun select-current-line ()
+    "Select the current line."
+    (interactive)
+    (beginning-of-line) ; move to the beginning of the line
+    (set-mark-command nil) ; set the mark here
+    (end-of-line)) ; move to the end of the line
+
+  (defun select-buffer ()
+    "Select the whole buffer."
+    (interactive)
+    (beginning-of-buffer) ; move to the beginning of the buffer
+    (set-mark-command nil) ; set the mark here
+    (end-of-buffer)) ; move to the end of the buffer
+
+  (defun select-paragraph ()
+      "Select the whole paragraph."
+      (interactive)
+      (backward-paragraph) ; move to the beginning of the buffer
+      (set-mark-command nil) ; set the mark here
+      (forward-paragraph)) ; move to the end of the buffer
+
+  (defun kill-to-start-of-line ()
+    "Kill from the current position to the start of the line."
+    (interactive)
+    (kill-line 0)) ; 0 as argument to kill-line kills text before the cursor
+
+  (defun copy-line ()
+    "Copy the current line."
+    (interactive)
+    (let ((begin (line-beginning-position))
+          (end (line-end-position)))
+      (kill-ring-save begin end)))
+
+  (defun copy-paragraph ()
+    "Copy the current paragraph."
+    (interactive)
+    (let ((start (progn (backward-paragraph) (point)))
+        (end (progn (forward-paragraph) (point))))
+    (kill-ring-save start end)))
+
+  (defun kill-whole-paragraph ()
+    "Kill the current paragraph."
+    (interactive)
+    (let ((start (progn (backward-paragraph) (point)))
+        (end (progn (forward-paragraph) (point))))
+    (kill-region start end)))
+
+  (defun delete-paragraph ()
+    "Delete the current paragraph."
+    (interactive)
+    (let ((start (progn (backward-paragraph) (point)))
+        (end (progn (forward-paragraph) (point))))
+    (delete-region start end)))
+
+  (defun delete-line ()
+    "Delete the current line."
+    (interactive)
+    (let ((begin (line-beginning-position))
+          (end (line-end-position)))
+    (delete-region begin end)))
+
+  (defun delete-line-forward ()
+    "Delete the current line."
+    (interactive)
+    (let ((begin (point))
+          (end (line-end-position)))
+    (delete-region begin end)))
+
+  (defun delete-line-backward ()
+    "Delete the current line."
+    (interactive)
+    (let ((begin (point))
+          (end (line-beginning-position)))
+    (delete-region begin end)))
+#+end_src
+*** Motions
+
+#+begin_src emacs-lisp
+
+  (defun insert-new-line-below ()
+    "Insert a new line below the current line and move the cursor to that line."
+    (interactive)
+    (end-of-line)
+    (newline-and-indent))
+
+  (defun jump-lines ()
+    "Prompt for a number and move down by that many lines."
+    (interactive)
+    (display-line-numbers-mode 1)
+    (let ((num (read-number "Number of lines to jump: ")))
+      (forward-line num))
+    (display-line-numbers-mode 0))
+
+  (defun jump-lines-back ()
+    "Prompt for a number and move up by that many lines."
+    (interactive)
+    (display-line-numbers-mode 1)
+    (let ((num (read-number "Number of lines to jump: ")))
+      (forward-line (- num)))
+    (display-line-numbers-mode 0))
+#+end_src
+
+*** Enclose in YASnippet
+
+#+begin_src emacs-lisp
+
+  (defun enclose-in-yas-snippet (start end)
+    "Enclose the selected region within a YASnippet."
+    (interactive "r")
+    (let ((region (buffer-substring start end)))
+      (delete-region start end)
+      (insert (concat "${1:" region "}$0"))))
+
+#+end_src
+
+*** Refresh Latex Snippets
+
+#+begin_src emacs-lisp
+
+  (defun org-latex-refresh ()
+    "Delete the ./.ltximg directory and regenerate all the LaTeX fragments in the current org buffer."
+    (interactive)
+    ;; Delete the ./.ltximg directory if it exists
+    (let ((ltximg-dir (expand-file-name ".ltximg" default-directory)))
+      (when (file-exists-p ltximg-dir)
+        (delete-directory ltximg-dir t)))
+    ;; Regenerate all the LaTeX fragments in the buffer
+    (org-toggle-latex-fragment '(64))
+    (org-toggle-latex-fragment '(16))
+  )
+
+  (defun set-org-latex-scale ()
+    "Prompt the user to input a scale factor and set it for org-format-latex-options."
+    (interactive)
+    ;; Prompt the user to input a number
+    (let ((scale (read-number "Enter the scale factor: ")))
+      ;; Set the scale property of org-format-latex-options
+      (setq org-format-latex-options (plist-put org-format-latex-options :scale scale))
+      ;; Display a message to confirm the change
+      (message "The scale factor is now set to %s." scale))
+    (org-latex-refresh))
+
+#+end_src
+
+*** Add to Roam Bibliography
+
+Adds the contents of the clipboard to the bibliography for roam.
+
+#+begin_src emacs-lisp
+  (defun org-roam-add-citation ()
+    (interactive)
+    (let ((filename "~/RoamNotes/Bibliography.bib")
+          (text (read-string "Citation to append:")))
+      (with-temp-buffer
+        (insert "\n")
+        (insert text)
+        (insert "\n")
+        (append-to-file (point-min) (point-max) filename))))
+#+end_src
+*** Org-Numbering updates
+
+Thanks to these [[https://stackoverflow.com/questions/26090651/emacs-org-mode-increment-equation-numbers-with-latex-preview][legends]]
+
+#+begin_src emacs-lisp
+
+  (defun update-tag ()
+    (interactive)
+    (save-excursion
+      (goto-char (point-min))
+      (let ((count 1))
+        (while (re-search-forward "\\tag{\\([0-9]+\\)}" nil t)
+          (replace-match (format "%d" count) nil nil nil 1)
+          (setq count (1+ count)))))
+    )
+#+end_src
+*** Org-insert-image
+
+#+begin_src emacs-lisp
+
+  (defun org-insert-image ()
+    (interactive)
+    (let* ((path (read-file-name "Enter image path: "))
+           (caption (read-string "Enter caption: "))
+           (name (read-string "Enter name: ")))
+      (insert (format "#+CAPTION: %s\n#+NAME: fig:%s\n[[file:%s]]" caption name path))))
+#+end_src
 * A Tale of Themes and Fonts
 
 ** Setting the font face
 
 Self-explanatory. Plan to mess around with new fonts periodically. Go [[https://github.com/ryanoasis/nerd-fonts][here]] to download the nerd fonts (which play nicely with org-bullets and stuff)
+
 #+begin_src emacs-lisp
 
   ;; Make sure everything is utf-8
@@ -327,7 +650,7 @@ Self-explanatory. Plan to mess around with new fonts periodically. Go [[https://
 
   ;; Actually set the fonts
   (set-face-attribute 'default nil
-                      :font "ProggyCleanNerdFont"
+                      :font "ProggyCleanSZNerdFont"
                       :height 165
                       :weight 'medium)
 
@@ -347,13 +670,14 @@ Self-explanatory. Plan to mess around with new fonts periodically. Go [[https://
                         :slant 'italic)
 
   ;; and to make sure client windows open with these fonts
-  (add-to-list 'default-frame-alist '(font . "ProggyCleanNerdFont"))
+  (add-to-list 'default-frame-alist '(font . "ProggyCleanSZNerdFont"))
 
 #+end_src
 
 ** Themes... of DOOOMMMMMM
 
 The package [[https://github.com/doomemacs/themes][doom-themes]] provides some nice themes, including the dracula theme I've been loving.
+
 #+begin_src emacs-lisp
   (use-package doom-themes
     :ensure t
@@ -373,9 +697,11 @@ The package [[https://github.com/doomemacs/themes][doom-themes]] provides some n
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
 #+end_src
+
 ** Other Aesthetic Changes
 
 Miscellaneous aesthetic changes
+
 #+begin_src emacs-lisp
 
   ;; In this house, we use shortcuts damnit!!!'
@@ -387,11 +713,17 @@ Miscellaneous aesthetic changes
   (setq default-frame-alist '((undecorated . t)))
 
   ;; Some nice transparency
-  (add-to-list 'default-frame-alist '(alpha-background . 95))
+  (add-to-list 'default-frame-alist '(alpha-background . 90))
 
   ;; Make the modeline pretty
-  (use-package solaire-mode
-    :config (solaire-global-mode))
+  ;;(use-package solaire-mode
+  ;;  :config (solaire-global-mode))
+
+  ;; or use doom-modeline
+  (use-package doom-modeline
+    :ensure t
+    :config
+    (doom-modeline-mode))
 
   ;; not sure where to put this lol
   (delete-selection-mode 1)
@@ -412,12 +744,12 @@ Seems like this variable likes to change itself, don't be afraid to ~C-h v org-a
 
 #+begin_src emacs-lisp
   (setq org-agenda-files
-        '("~/MyProjects/Notes/APTS" "~/MyProjects/Notes/APTS/StatsComputation" "~/MyProjects/Notes/APTS/StatsInference" "~/orgfiles"))
+        '("google-drive://etatephughes@gmail.com/0AHvOgA12jWhUk9PVA/RoamNotes"))
 #+end_src
 
 ** Custom agenda
 
-Custom agenda view; so far it's just one for all my PhD tasks
+Custom agenda view; so far it's just one for all my PhD tasks. This is very much getting out of hand though, and I'd also like to know how to make this view a bit cleaner.
 
 #+begin_src emacs-lisp
   (setq org-agenda-custom-commands
@@ -425,54 +757,67 @@ Custom agenda view; so far it's just one for all my PhD tasks
            ((tags "general"
                   ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                    (org-agenda-overriding-header "General Statistics Tasks")))
-            (tags "APTS"
-                  ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                   (org-agenda-overriding-header "Tasks from the Warwick APTS Course")))
             (tags "org"
                   ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                    (org-agenda-overriding-header "Tasks relating to org and the config file")))
             (tags "reading"
                   ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                    (org-agenda-overriding-header "Tasks relating to the reading list")))
-            (agenda "")
-            (alltodo "")))))
+            ))))
 #+end_src
 
 * Conveniences
 
 ** Automatically create directories wtih C-x C-f
 
-What it says on the tin
+Exactly what it says on the tin
+
 #+begin_src emacs-lisp
-(defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
-  "Create parent directory if not exists while visiting file."
-  (unless (file-exists-p filename)
-    (let ((dir (file-name-directory filename)))
-      (unless (file-exists-p dir)
-        (make-directory dir t)))))
+
+ (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
+    "Create parent directory if not exists while visiting file."
+    (unless (file-exists-p filename)
+      (let ((dir (file-name-directory filename)))
+        (unless (file-exists-p dir)
+          (make-directory dir t)))))
 #+end_src
+
 ** Smarter Parentheses
 
-*** TODO Get this to /actually/ work
+I'm vaguely aware that it is possible to make parentheses a lot smarter in some modes, although a lot of these features are already sorted with cdlatex.
+
+*** DONE Investigate getting smarter parentheses                      :org:
 #+begin_src emacs-lisp
+#+end_src
+
+** Skip "Active Processes Exist" prompt
+
+Use with caution, obviously, but right now there are no 'active processes' that i care about
+
+#+begin_src emacs-lisp
+
+  (setq confirm-kill-processes nil)
+
 #+end_src
 * Dashboard
 
 The nice dashboard. wait whats that fluffy white thing
+
 #+begin_src emacs-lisp
   (use-package nerd-icons)
 
   (use-package dashboard
       :ensure t 
+      :elpaca t
       :init
       (setq initial-buffer-choice 'dashboard-open)
       (setq dashboard-set-heading-icons t)
       (setq dashboard-set-file-icons t)
       (setq dashboard-banner-logo-title "woah what how did he get here")
       ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-      (setq dashboard-startup-banner "/home/tate/Tatemacs/wohhowdidhegethere/toby.gif")  ;; use custom image as banner
+      (setq dashboard-startup-banner "/home/tate/Tatemacs/wohhowdidhegethere/toby.png")  ;; use custom image as banner
       (setq dashboard-center-content nil) ;; set to 't' for centered content
-      (setq dashboard-items '((recents . 50)
+      (setq dashboard-items '((recents . 20)
                               (bookmarks . 10)))
       :custom
       (dashboard-modify-heading-icons '((recents . "file-text")
@@ -483,6 +828,8 @@ The nice dashboard. wait whats that fluffy white thing
 
   (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
   (setq dashboard-display-icons-p t) ;; display icons on both GUI and terminal
+  (setq dashboard-center-content t)
+
   (setq dashboard-icon-type 'nerd-icons) ;; use `nerd-icons' package
 #+end_src
 
@@ -496,24 +843,23 @@ Make the cursor glowwww
       :ensure t
       :config (beacon-mode))
 #+end_src
+
 ** Display line numbers, os gwelwch yn dda
 
 Makes displaying line numbers the deafult. Toggle this with ~C-c l~ as defined under 'Keybindings'.
 
-
-
 #+begin_src emacs-lisp
 
-  (global-display-line-numbers-mode 0)
-  (global-visual-line-mode t)
-  
+  ;;(setq display-line-numbers 'relative)
+  ;;(global-display-line-numbers-mode)
+
 #+end_src
 
-*** TODO Make this a hook to only enable in programming modes and not org-mode
+*** DONE Make this a hook to only enable in programming modes and not org-mode :org:
 
 ** Neo-tree for easy file navigation
 
-A nice file navigator for bigger 
+A nice file navigator for bigger projects
 
 #+begin_src emacs-lisp
   (use-package neotree)
@@ -529,17 +875,43 @@ A nice file navigator for bigger
 #+end_src
 
 ** Mode-line
+
+That line at the bottom of the screen with key onfo (current buffer, file paths, modes, zoom etc etc). I'm not completely happy with it aesthetically, but it'll do for now.
+
 #+begin_src emacs-lisp
     ;; clean up the mode-line
     (use-package diminish)
 
-    (use-package smart-mode-line
-      :config (sml/setup))
+    ;;(use-package smart-mode-line
+      ;;:config (sml/setup))
 
-    (use-package mode-icons
-      :config (mode-icons-mode))
+    ;;(use-package mode-icons
+      ;;:config (mode-icons-mode))
 #+end_src
+
+* Helpful
+
+Helpful is a package that replaces some of the default help commands with improved versions.
+
+Gonna decide on how /helpful/ it really is soon, although it seems good so far. Got a few errors initially booting it up though, so we'll see.
+
+#+begin_src emacs-lisp
+
+  (use-package helpful)
+
+  ;; Note that the built-in `describe-function' includes both functions
+  ;; and macros. `helpful-function' is functions only, so we provide
+  ;; `helpful-callable' as a drop-in replacement.
+  (global-set-key (kbd "C-h f") #'helpful-callable)
+
+  (global-set-key (kbd "C-h v") #'helpful-variable)
+  (global-set-key (kbd "C-h k") #'helpful-key)
+  (global-set-key (kbd "C-h x") #'helpful-command)
+
+#+end_src
+
 * Pamala Isley (Ivy)
+
 Ivy is a generic completion mechanism for emacs, which comes with 'counsel', a collection of Ivy-enhanced versions of normal emacs commands.
 Ivy-rich allows adding descriptions alongside the commands in M-x
 
@@ -573,21 +945,48 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
     :config
     (ivy-set-display-transformer 'ivy-switch-buffer
                                  'ivy-rich-switch-buffer-transformer))
-#+end_src
 
+
+  (setq ivy-initial-inputs-alist
+        '((counsel-M-x . "")
+          ;; other commands can be added here
+         ))
+
+#+end_src
 * Languages, tools, etc
+
 ** Quarto
+
+On Darren's recommendation, although I've pretty dramatically switched to using org-mode exclusively. I can't deny that the webpages quarto creates do look nice though, and some preliminary testing has shown that making a complicated string from org to markdown to quarto (maybe even with scala mdoc inbetween) should be possible, but this is something to think wabout when I actually want to publish something.
+
+- Update; thanks to a function under the org-mode tab, I can now export from org-mode to a markdown file readable by quarto. With some slight modification, I can even make it a ~.qmd~ file for evaluation; basically, why not both?
+
 #+begin_src emacs-lisp
   (use-package quarto-mode
     :mode (("\\.Rmd" . poly-quarto-mode))
     )
   (setq markdown-enable-math t)
 #+end_src
+
+** Haskell
+
+Lazier than I am (and i'm so lazy I stole this joke from doom emacs)
+
+#+begin_src emacs-lisp
+
+  (use-package haskell-mode
+    :ensure t)
+
+#+end_src
+
 ** LaTeX
+
+Ahhh my glorious LaTeX. You are incredible. If a bit of a mess in emacs.
+
 #+begin_src emacs-lisp
   (use-package auctex
-  :defer t
-  :ensure t)
+    :defer t
+    :ensure t)
   (setq org-highlight-latex-and-related '(native))
 
   (use-package cdlatex)
@@ -598,11 +997,22 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
   ;; Line below currently breaks things
   ;; (add-hook 'after-save-hook #'org-latex-export-to-pdf)
 #+end_src
+
 ** R and ESS
+
+Does emacs really speak statistics? I don't think emacs can speak.
+
+(tbf this is a really good package that plays so nicely with org babel, I love this, even if I don't love R)
+
 #+begin_src emacs-lisp
   (use-package ess)
 #+end_src
+
 ** Scala
+
+Scala needs no introduction. Also, wow that is a lot of code to set up one programming language jeez
+
+This code is taken from somewhere and has a bunch of redundancy; clean this up!
 
 #+begin_src emacs-lisp
   (require 'package)
@@ -616,8 +1026,6 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
     (package-install 'use-package))
-
-  (require 'use-package)
 
   ;; Enable defer and ensure by default for use-package Keep
   ;; auto-save/backup files separate from source code:
@@ -681,9 +1089,6 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
   ;; lsp-mode supports snippets, but in order for them to work you need to use yasnippet
   ;; If you don't want to use snippets set lsp-enable-snippet to nil in your lsp-mode settings
   ;; to avoid odd behavior with snippets and indentation
-  (use-package yasnippet)
-  (use-package ivy-yasnippet
-    :hook (yas-minor-mode . ivy-yasnippet))
 
   ;; Use company-capf as a completion provider.
   ;;
@@ -692,7 +1097,10 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
   ;;   Please migrate to company-capf.
   (use-package company
     :diminish
-    :hook (scala-mode . company-mode)
+    :hook (prog-mode . company-mode)
+          (prog-mode . (lambda () (setq display-line-numbers 'absolute)))
+          (prog-mode . display-line-numbers-mode)
+          (org-mode . company-mode)
     :config
     (setq lsp-completion-provider :capf))
 
@@ -705,24 +1113,39 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
     (lsp-mode . dap-mode)
     (lsp-mode . dap-ui-mode))
 
-
 #+end_src
 
-** Org-Babel
+*** TODO Clean this scala-installer up, seperate out the stuff that should be elsewhere, like ~company mode~, and remove the redundant bits :org:
+** Company Mode
+
 #+begin_src emacs-lisp
-      (org-babel-do-load-languages
-      'org-babel-load-languages
-      '(
-	(R . t)
-	(latex . t)
-    ))
+ #+end_src
+** Org-Babel
 
-    ;; disable the confirmation message
-    (setq org-confirm-babel-evaluate nil)
+This allows for on-the-fly evaluation of code for specific languages within org files. It is very cool, but also limited; I can't get Scala 3, in particular, to function properly. The task shouldn't actually be too difficult though, and it could be beneficial to learn a bit of elisp and create my own ~scala.ob~.
+
+#+begin_src emacs-lisp
+
+  (org-babel-do-load-languages
+    'org-babel-load-languages
+    '(
+      (R . t)
+      (latex . t)
+      (haskell . t)
+     )
+  )
+
+  ;; disable the confirmation message
+  (setq org-confirm-babel-evaluate nil)
 #+end_src
-
 * Make org-mode good, actually
+*** TODO Organise this please :org:
 ** Table of contents
+
+Generates that nice toc at the top of the config file (or in theory are org document).
+
+I am considering removing this as often a good old Shift-Tab can do the trick and effectively make the whole document it's own toc; thats kinda the magic of org-mode.
+
 #+begin_src emacs-lisp
   (use-package toc-org
     :commands toc-org-enable
@@ -730,6 +1153,9 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
 #+end_src
 
 ** Shootin' Bullets
+
+This is a package to add pretty bullet points to org mode. With the font I am currently using they do look out of place, so most of this is disabled (other than the indentation which I do tend to gravitate towards).
+
 #+begin_src emacs-lisp
 
   ;; Make the different levels indented
@@ -742,25 +1168,42 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
 #+end_src
 
 ** Disable that weird indentation
+
+Code blocks have some strange indentation behaviour sometimes, and this seems to at least improve it.
+
 #+begin_src emacs-lisp
   (electric-indent-mode -1)
 #+end_src
 
 ** Make Writing Lisp blocks easier
+
+A lovely completion framework fo org-mode.
+
 #+begin_src emacs-lisp
   (require 'org-tempo) ;; now we can write '<s' then press <TAB> for immediate src action!
 #+end_src
+
 ** Settings Tweaks
+
+Miscellaneous settings tweaks for org mode. I may move the latex scale thing elsewhere, or perhaps even better write a shortcut to quickly change it as I seem to change it quite frequently and org-mode offers no good options for auto sizing.
+
 #+begin_src emacs-lisp
   (setq org-image-actual-width 500) ;; Sets the width of image previewq in org-mode
 
   ;; Sets the size of LaTeX previews 
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 0.9))
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 0.6))
+
+  (add-hook 'org-mode-hook 'visual-line-mode)
+
 #+end_src
-*** TODO Make a keybinding to quickly set the size of latex previews :config:
+
 ** Other LaTeX tweaks
+
+A couple of tweaks relating to the org-mode latex previews.
+
 #+begin_src emacs-lisp
-  (use-package org-fragtog)
+  (use-package org-fragtog
+    :ensure t)
   (add-hook 'org-mode-hook 'org-fragtog-mode)
 
   (use-package math-preview
@@ -769,19 +1212,155 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
 
   (setq org-preview-latex-image-directory ".ltximg/")
 #+end_src
-** Auto Export to org
+
+** Auto Export to md
+
+On some things I like to automatically export the org file to a markdown file, and the package ~auto-org-md~ provides a minor mode for this, hooking into the save command. I have slightly edited this to use use pandoc (this may break if auto org md updates), as it deals with code blockms much better than the default exporter does.
+
 #+begin_src emacs-lisp
   (use-package ox-pandoc)
   (use-package auto-org-md)
+  (use-package ox-gfm)
+
+  (defun org-gfm-export-to-markdown-with-mdoc ()
+    "Save and Export current buffer to a GitHub Flavored Markdown file with mdoc for Scala."
+    (interactive)
+
+    (let* ((single-window (one-window-p))
+           (name (file-name-sans-extension (file-name-nondirectory buffer-file-name)))
+           (new-name (concat "./docs/" name ".md")))
+      (save-buffer)
+      (require 'ox-gfm)
+      (org-gfm-export-as-markdown)
+      (goto-char (point-min))
+      (while (search-forward "```scala" nil t)
+        (replace-match "```scala mdoc"))
+      (goto-char (point-min))
+      (while (search-forward "```scala mdoc\n//silent" nil t)
+        (replace-match "```scala mdoc:silent"))
+      (goto-char (point-min))
+      (while (search-forward "```scalnope" nil t)
+        (replace-match "```scala"))
+      (goto-char (point-min))
+      (while (search-forward "```emacs-lisp" nil t)
+        (replace-match "```lisp"))
+      (write-file new-name)
+      (switch-to-prev-buffer)
+      (when single-window
+        (delete-window)
+        )))
+
+
+    ;;(save-buffer)
+    ;;(require 'ox-gfm)
+    ;;(org-gfm-export-as-markdown)
+    ;;(goto-char (point-min))
+    ;;(while (search-forward "```scala" nil t)
+    ;;  (replace-match "```scala mdoc"))
+    ;;(write-file "./docs/readme.md")
+    ;;(delete-window))
 #+end_src
+
+** Org-Download
+
+Allow easy loading of images into org-mode.
+
+#+begin_src emacs-lisp
+
+  (use-package org-download
+    :ensure t
+  )
+
+#+end_src
+
+** Org-Modern
+
+#+begin_src emacs-lisp
+
+  (use-package org-modern
+    :hook
+    (org-mode . org-modern-mode)
+    :config
+    (global-org-modern-mode))
+
+#+end_src
+** Org-Ref
+#+begin_src emacs-lisp
+
+  (use-package org-ref
+    :config
+    (require 'org-ref-ivy)
+  )
+
+
+#+end_src
+** Enable fly-spell in org-mode
+
+#+begin_src emacs-lisp
+
+(add-hook 'org-mode-hook 'flyspell-mode)
+
+#+end_src
+
+* Org-Roam around-a-round-a-round
+
+Blahblah some 'second brain' bullshit. Regardless, this stuff is really cool and is becoming the centre of my note-taking system.
+
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :ensure t
+    :custom
+    (org-roam-directory (file-truename "~/RoamNotes"))
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find)
+           ("C-c n g" . org-roam-graph)
+           ("C-c n i" . org-roam-node-insert)
+           ("C-c n c" . org-roam-capture)
+           ;; Dailies
+           ("C-c n j" . org-roam-dailies-capture-today)
+           ("C-c n u" . org-roam-ui-open)
+           ("C-c n m" . org-roam-ui-mode))
+    :config
+    ;; If you're using a vertical completion framework, you might want a more informative completion interface
+    (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+    (org-roam-db-autosync-mode)
+    ;; For completeion everywhere
+    (setq org-roam-completion-everywhere t)
+    ;; If using org-roam-protocol
+    (require 'org-roam-protocol))
+
+#+end_src
+** Org-roam UI
+
+A pretty web-ui visualiser for my org-roam.
+
+#+begin_src emacs-lisp
+  (use-package org-roam-ui
+      :after org-roam
+      :ensure t
+      :config
+      (setq org-roam-ui-sync-theme t
+            org-roam-ui-follow t
+            org-roam-ui-update-on-save t
+            org-roam-ui-open-on-start t))
+#+end_src
+
 * No Littering >:|
+
+Emacs litters. a lot. This attempts to reduce that, and does a reasonably good job as long as I remember to save things.
+
 #+begin_src emacs-lisp
 
 (use-package no-littering)
 
 #+end_src
+
 * Projectile
-** TODO Look inot this and learn about projects in this sense
+
+Projectile is a project organisation system (which emacs-dashboard has support for) which could, hypothetically, streamline working on multiple projects at once. This is not currently the case, but this will be worth looking into.
+
+** TODO Look into projectile and learn about projects in this sense :org:
+
 #+begin_src emacs-lispx
   (use-package projectile
     :config
@@ -789,25 +1368,28 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
 #+end_src
 
 * Shells and terminals
-Honestly, my terminal solution makes me too happy to move to an emacs shell, but I'll make this placeholder anyway
-** Eshell
+
+Honestly, Kitty is a perfectly fine terminal, and I have no strong desire to move to an emacs-based terminal, but I'll leave this here in case that changes ever.
+
 #+begin_src emacs-lisp
 
-#+end_src
+  (use-package vterm
+    :ensure )
 
-* Sublimity
-Smooth-scrolling and a scrolling minimap (which doesn't seem to work)
-#+begin_src emacs-lisp
-    (use-package sublimity
-      :config (sublimity-mode))
 #+end_src
 
 * Sudo-Edit; Do you know who I am?
+
+Enables editing sudo-protected files with emacs (please make sure you know what you're doing with this, you've broken or nearly broken things too many times...)
+
 #+begin_src emacs-lisp
   (use-package sudo-edit)
 #+end_src
 
 * Which-Key? Oh, that key
+
+I think this is the thing that gives some nice hints when you partially enter a macro.
+
 #+begin_src emacs-lisp
 
   (use-package which-key
@@ -829,15 +1411,40 @@ Smooth-scrolling and a scrolling minimap (which doesn't seem to work)
 
 #+end_src
 
+* YASnippet
 
-
-FFS LOAD THE AGENDA FILES
+YASSnippet is the defacto snippet organiser for emacs and org. this may be breaking things...
 
 #+begin_src emacs-lisp
 
-(setq org-agenda-file-menu-enabled t)
+  (use-package yasnippet
+    :ensure t
+    :after org
+    :config
+    (setq yas-snippet-dirs '("~/.config/emacs/snippets"))
+    (yas-global-mode 1)
+    :hook
+    (org-mode . yas-minor-mode)
+  )
+#+end_src
 
-(setq org-agenda-files
-        '("~/MyProjects/Notes/APTS" "~/MyProjects/Notes/APTS/StatsComputation" "~/MyProjects/Notes/APTS/StatsInference" "~/orgfiles"))
+* Display line numbers again
+
+I'm not sure why i need this
+
+#+begin_src emacs-lisp
+
+  ;;(add-hook 'org-mode-hook (lambda () (setq display-line-numbers 'relative)))
+
+  ;;(add-hook 'org-mode (lambda () (setq display-line-numbers 'relative)))
+
+  ;;(setq display-line-numbers-type 'relative)
+  ;;(global-display-line-numbers-mode)
+#+end_src
+
+* Ivy keymap
+#+begin_src emacs-nope
+
+  (define-key ivy-minibuffer-map (kbd "C-j") 'ivy-immediate-done) 
 
 #+end_src

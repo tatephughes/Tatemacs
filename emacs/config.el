@@ -37,10 +37,10 @@
 
 ;; Install use-package support
 (elpaca elpaca-use-package
-        ;; Enable :elpaca use-package keyword.
-        (elpaca-use-package-mode)
-        ;; Assume :elpaca t unless otherwise specified.
-        (setq elpaca-use-package-by-default t))
+  ;; Enable :elpaca use-package keyword.
+  (elpaca-use-package-mode)
+  ;; Assume :elpaca t unless otherwise specified.
+  (setq elpaca-use-package-by-default t))
 
 ;; Block until current queue processed.
 (elpaca-wait)
@@ -62,9 +62,6 @@
 ;; (elpaca nil (message "deferred"))
 
 (add-to-list 'load-path "~/.config/emacs/lisp/")
-
-;; Display the line numbers at the side of the window
-(global-set-key (kbd "C-c l") 'display-line-numbers-mode)
 
 ;; Quickly reload this file after making edits. Refers to a function defined under the tab 'neat-tricks'
 (global-set-key (kbd "C-c r") 'reload-init-file)
@@ -93,6 +90,109 @@
 
 ;; Org-Agenda Shortcut
 (global-set-key (kbd "C-c o") 'org-agenda)
+
+(define-key key-translation-map (kbd "<apps>") (kbd "<menu>"))
+
+;; make the menu key as leader key
+(global-set-key (kbd "<menu>") 'my-leader-key-map)(define-key key-translation-map (kbd "<apps>") (kbd "<menu>"))
+
+(define-prefix-command 'my-leader-key-map)
+
+(define-key my-leader-key-map (kbd "RET") 'insert-new-line-below)
+(define-key my-leader-key-map (kbd "<left>") 'previous-buffer)
+(define-key my-leader-key-map (kbd "<right>") 'next-buffer)
+(define-key my-leader-key-map (kbd "<up>") 'beginning-of-buffer)
+(define-key my-leader-key-map (kbd "<down>") 'end-of-buffer)
+
+(define-key my-leader-key-map (kbd "=") 'jump-lines)
+(define-key my-leader-key-map (kbd "-") 'jump-lines-back)
+
+(define-key my-leader-key-map (kbd "b") 'ibuffer-list-buffers)
+
+(define-key my-leader-key-map (kbd "0") 'delete-window)
+(define-key my-leader-key-map (kbd "1") 'delete-other-windows)
+(define-key my-leader-key-map (kbd "2") 'split-window-below)
+(define-key my-leader-key-map (kbd "3") 'split-window-right)
+
+(define-key my-leader-key-map (kbd "i l") 'org-insert-link)
+(define-key my-leader-key-map (kbd "i c") 'org-cite-insert)
+(define-key my-leader-key-map (kbd "i i") 'org-insert-image)
+
+;;org keys
+(define-key my-leader-key-map (kbd "o t") 'org-toggle-item)
+(define-key my-leader-key-map (kbd "o l") 'org-open-at-point)
+(define-key my-leader-key-map (kbd "o s") 'set-org-latex-scale)
+(define-key my-leader-key-map (kbd "c '") 'org-edit-special)
+
+(define-key org-src-mode-map (kbd "C-c '") nil) ; unbind the original key
+(define-key org-src-mode-map (kbd "C-c C-c") 'org-edit-src-exit) ; bind to your key
+
+;;org roam keys
+(define-key my-leader-key-map (kbd "n i") 'org-roam-node-insert)
+(define-key my-leader-key-map (kbd "n f") 'org-roam-node-find)
+(define-key my-leader-key-map (kbd "n u") 'org-roam-ui-mode)
+(define-key my-leader-key-map (kbd "n #") 'org-roam-tag-add)
+(define-key my-leader-key-map (kbd "n c") 'org-roam-add-citation)
+
+;;go to
+(define-key my-leader-key-map (kbd "g c") 'go-to-config)
+(define-key my-leader-key-map (kbd "g d") 'dashboard-open)
+(define-key my-leader-key-map (kbd "g a") 'org-agenda)
+(define-key my-leader-key-map (kbd "x f") 'find-file)
+
+;;run/reload
+(define-key my-leader-key-map (kbd "r c") 'reload-init-file)
+(define-key my-leader-key-map (kbd "r b") 'org-babel-execute-buffer)
+(define-key my-leader-key-map (kbd "r l") 'org-latex-refresh)
+
+(define-key my-leader-key-map (kbd "<menu>") 'set-mark-command)
+
+;;selections ('m' is for mark, 's' is taken by 'save')
+(define-key my-leader-key-map (kbd "m l") 'select-current-line)
+(define-key my-leader-key-map (kbd "m a") 'select-buffer)
+(define-key my-leader-key-map (kbd "m p") 'select-paragraph)
+
+;;murder
+(define-key my-leader-key-map (kbd "k l") 'kill-whole-line)
+(define-key my-leader-key-map (kbd "k f") 'kill-line)
+(define-key my-leader-key-map (kbd "k b") 'kill-to-start-of-line)
+(define-key my-leader-key-map (kbd "k r") 'kill-region)
+(define-key my-leader-key-map (kbd "k p") 'kill-whole-paragraph)
+(define-key my-leader-key-map (kbd "k RET") 'save-buffers-kill-terminal)
+
+;;irrevocably murder
+(define-key my-leader-key-map (kbd "d r") 'delete-region)
+(define-key my-leader-key-map (kbd "d l") 'delete-line)
+(define-key my-leader-key-map (kbd "d f") 'delete-line-forward)
+(define-key my-leader-key-map (kbd "d b") 'delete-line-backward)
+(define-key my-leader-key-map (kbd "d p") 'delete-paragraph)
+
+;;copy
+(define-key my-leader-key-map (kbd "c r") 'kill-ring-save)
+(define-key my-leader-key-map (kbd "c l") 'copy-line)
+(define-key my-leader-key-map (kbd "c p") 'copy-paragraph)
+
+;;yank
+(define-key my-leader-key-map (kbd "y") 'yank)
+
+;;save
+(define-key my-leader-key-map (kbd "s a") 'org-save-all-org-buffers)
+(define-key my-leader-key-map (kbd "s s") 'save-buffer)
+(define-key my-leader-key-map (kbd "s e") 'org-gfm-export-to-markdown-with-mdoc)
+
+(define-key my-leader-key-map (kbd "t l") 'global-display-line-numbers-mode)
+
+;; make the menu key as leader key
+(global-set-key (kbd "<menu>") 'my-leader-key-map)
+
+(define-key my-leader-key-map (kbd "?") 'counsel-M-x)
+
+(define-key my-leader-key-map (kbd "/") 'vterm)
+
+(define-key my-leader-key-map (kbd "f") 'swiper)
+(define-key my-leader-key-map (kbd "C-f") 'swiper-backward)
+
+(define-key my-leader-key-map (kbd "#") 'flyspell-correct-word-before-point)
 
 (defun reload-init-file ()
   (interactive) ;; (interactive allows you to call the function with M-x
@@ -173,6 +273,160 @@ one, an error is signaled."
       (set-window-buffer other-win buf-this-buf)
       (select-window other-win))))
 
+(defun select-current-line ()
+  "Select the current line."
+  (interactive)
+  (beginning-of-line) ; move to the beginning of the line
+  (set-mark-command nil) ; set the mark here
+  (end-of-line)) ; move to the end of the line
+
+(defun select-buffer ()
+  "Select the whole buffer."
+  (interactive)
+  (beginning-of-buffer) ; move to the beginning of the buffer
+  (set-mark-command nil) ; set the mark here
+  (end-of-buffer)) ; move to the end of the buffer
+
+(defun select-paragraph ()
+    "Select the whole paragraph."
+    (interactive)
+    (backward-paragraph) ; move to the beginning of the buffer
+    (set-mark-command nil) ; set the mark here
+    (forward-paragraph)) ; move to the end of the buffer
+
+(defun kill-to-start-of-line ()
+  "Kill from the current position to the start of the line."
+  (interactive)
+  (kill-line 0)) ; 0 as argument to kill-line kills text before the cursor
+
+(defun copy-line ()
+  "Copy the current line."
+  (interactive)
+  (let ((begin (line-beginning-position))
+        (end (line-end-position)))
+    (kill-ring-save begin end)))
+
+(defun copy-paragraph ()
+  "Copy the current paragraph."
+  (interactive)
+  (let ((start (progn (backward-paragraph) (point)))
+      (end (progn (forward-paragraph) (point))))
+  (kill-ring-save start end)))
+
+(defun kill-whole-paragraph ()
+  "Kill the current paragraph."
+  (interactive)
+  (let ((start (progn (backward-paragraph) (point)))
+      (end (progn (forward-paragraph) (point))))
+  (kill-region start end)))
+
+(defun delete-paragraph ()
+  "Delete the current paragraph."
+  (interactive)
+  (let ((start (progn (backward-paragraph) (point)))
+      (end (progn (forward-paragraph) (point))))
+  (delete-region start end)))
+
+(defun delete-line ()
+  "Delete the current line."
+  (interactive)
+  (let ((begin (line-beginning-position))
+        (end (line-end-position)))
+  (delete-region begin end)))
+
+(defun delete-line-forward ()
+  "Delete the current line."
+  (interactive)
+  (let ((begin (point))
+        (end (line-end-position)))
+  (delete-region begin end)))
+
+(defun delete-line-backward ()
+  "Delete the current line."
+  (interactive)
+  (let ((begin (point))
+        (end (line-beginning-position)))
+  (delete-region begin end)))
+
+(defun insert-new-line-below ()
+  "Insert a new line below the current line and move the cursor to that line."
+  (interactive)
+  (end-of-line)
+  (newline-and-indent))
+
+(defun jump-lines ()
+  "Prompt for a number and move down by that many lines."
+  (interactive)
+  (display-line-numbers-mode 1)
+  (let ((num (read-number "Number of lines to jump: ")))
+    (forward-line num))
+  (display-line-numbers-mode 0))
+
+(defun jump-lines-back ()
+  "Prompt for a number and move up by that many lines."
+  (interactive)
+  (display-line-numbers-mode 1)
+  (let ((num (read-number "Number of lines to jump: ")))
+    (forward-line (- num)))
+  (display-line-numbers-mode 0))
+
+(defun enclose-in-yas-snippet (start end)
+  "Enclose the selected region within a YASnippet."
+  (interactive "r")
+  (let ((region (buffer-substring start end)))
+    (delete-region start end)
+    (insert (concat "${1:" region "}$0"))))
+
+(defun org-latex-refresh ()
+  "Delete the ./.ltximg directory and regenerate all the LaTeX fragments in the current org buffer."
+  (interactive)
+  ;; Delete the ./.ltximg directory if it exists
+  (let ((ltximg-dir (expand-file-name ".ltximg" default-directory)))
+    (when (file-exists-p ltximg-dir)
+      (delete-directory ltximg-dir t)))
+  ;; Regenerate all the LaTeX fragments in the buffer
+  (org-toggle-latex-fragment '(64))
+  (org-toggle-latex-fragment '(16))
+)
+
+(defun set-org-latex-scale ()
+  "Prompt the user to input a scale factor and set it for org-format-latex-options."
+  (interactive)
+  ;; Prompt the user to input a number
+  (let ((scale (read-number "Enter the scale factor: ")))
+    ;; Set the scale property of org-format-latex-options
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale scale))
+    ;; Display a message to confirm the change
+    (message "The scale factor is now set to %s." scale))
+  (org-latex-refresh))
+
+(defun org-roam-add-citation ()
+  (interactive)
+  (let ((filename "~/RoamNotes/Bibliography.bib")
+        (text (read-string "Citation to append:")))
+    (with-temp-buffer
+      (insert "\n")
+      (insert text)
+      (insert "\n")
+      (append-to-file (point-min) (point-max) filename))))
+
+(defun update-tag ()
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (let ((count 1))
+      (while (re-search-forward "\\tag{\\([0-9]+\\)}" nil t)
+        (replace-match (format "%d" count) nil nil nil 1)
+        (setq count (1+ count)))))
+  )
+
+(defun org-insert-image ()
+  (interactive)
+  (let* ((path (read-file-name "Enter image path: "))
+         (caption (read-string "Enter caption: "))
+         (name (read-string "Enter name: ")))
+    (insert (format "#+CAPTION: %s\n#+NAME: fig:%s\n[[file:%s]]" caption name path))))
+
 ;; Make sure everything is utf-8
 
 (set-language-environment 'utf-8)
@@ -189,7 +443,7 @@ one, an error is signaled."
 
 ;; Actually set the fonts
 (set-face-attribute 'default nil
-                    :font "ProggyCleanNerdFont"
+                    :font "ProggyCleanSZNerdFont"
                     :height 165
                     :weight 'medium)
 
@@ -209,7 +463,7 @@ one, an error is signaled."
                       :slant 'italic)
 
 ;; and to make sure client windows open with these fonts
-(add-to-list 'default-frame-alist '(font . "ProggyCleanNerdFont"))
+(add-to-list 'default-frame-alist '(font . "ProggyCleanSZNerdFont"))
 
 (use-package doom-themes
   :ensure t
@@ -238,11 +492,17 @@ one, an error is signaled."
 (setq default-frame-alist '((undecorated . t)))
 
 ;; Some nice transparency
-(add-to-list 'default-frame-alist '(alpha-background . 95))
+(add-to-list 'default-frame-alist '(alpha-background . 90))
 
 ;; Make the modeline pretty
-(use-package solaire-mode
-  :config (solaire-global-mode))
+;;(use-package solaire-mode
+;;  :config (solaire-global-mode))
+
+;; or use doom-modeline
+(use-package doom-modeline
+  :ensure t
+  :config
+  (doom-modeline-mode))
 
 ;; not sure where to put this lol
 (delete-selection-mode 1)
@@ -252,47 +512,46 @@ one, an error is signaled."
 (setq right-margin-width 3)
 
 (setq org-agenda-files
-      '("~/MyProjects/Notes/APTS" "~/MyProjects/Notes/APTS/StatsComputation" "~/MyProjects/Notes/APTS/StatsInference" "~/orgfiles"))
+      '("google-drive://etatephughes@gmail.com/0AHvOgA12jWhUk9PVA/RoamNotes"))
 
 (setq org-agenda-custom-commands
       '(("v" "PhD Tasks"
          ((tags "general"
                 ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                  (org-agenda-overriding-header "General Statistics Tasks")))
-          (tags "APTS"
-                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                 (org-agenda-overriding-header "Tasks from the Warwick APTS Course")))
           (tags "org"
                 ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                  (org-agenda-overriding-header "Tasks relating to org and the config file")))
           (tags "reading"
                 ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                  (org-agenda-overriding-header "Tasks relating to the reading list")))
-          (agenda "")
-          (alltodo "")))))
+          ))))
 
 (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
-  "Create parent directory if not exists while visiting file."
-  (unless (file-exists-p filename)
-    (let ((dir (file-name-directory filename)))
-      (unless (file-exists-p dir)
-        (make-directory dir t)))))
+   "Create parent directory if not exists while visiting file."
+   (unless (file-exists-p filename)
+     (let ((dir (file-name-directory filename)))
+       (unless (file-exists-p dir)
+         (make-directory dir t)))))
 
 
+
+(setq confirm-kill-processes nil)
 
 (use-package nerd-icons)
 
 (use-package dashboard
     :ensure t 
+    :elpaca t
     :init
     (setq initial-buffer-choice 'dashboard-open)
     (setq dashboard-set-heading-icons t)
     (setq dashboard-set-file-icons t)
     (setq dashboard-banner-logo-title "woah what how did he get here")
     ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-    (setq dashboard-startup-banner "/home/tate/Tatemacs/wohhowdidhegethere/toby.gif")  ;; use custom image as banner
+    (setq dashboard-startup-banner "/home/tate/Tatemacs/wohhowdidhegethere/toby.png")  ;; use custom image as banner
     (setq dashboard-center-content nil) ;; set to 't' for centered content
-    (setq dashboard-items '((recents . 50)
+    (setq dashboard-items '((recents . 20)
                             (bookmarks . 10)))
     :custom
     (dashboard-modify-heading-icons '((recents . "file-text")
@@ -303,14 +562,16 @@ one, an error is signaled."
 
 (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
 (setq dashboard-display-icons-p t) ;; display icons on both GUI and terminal
+(setq dashboard-center-content t)
+
 (setq dashboard-icon-type 'nerd-icons) ;; use `nerd-icons' package
 
 (use-package beacon
   :ensure t
   :config (beacon-mode))
 
-(global-display-line-numbers-mode 0)
-(global-visual-line-mode t)
+;;(setq display-line-numbers 'relative)
+;;(global-display-line-numbers-mode)
 
 (use-package neotree)
 (global-set-key [f8] 'neotree-toggle)
@@ -326,11 +587,22 @@ one, an error is signaled."
 ;; clean up the mode-line
 (use-package diminish)
 
-(use-package smart-mode-line
-  :config (sml/setup))
+;;(use-package smart-mode-line
+  ;;:config (sml/setup))
 
-(use-package mode-icons
-  :config (mode-icons-mode))
+;;(use-package mode-icons
+  ;;:config (mode-icons-mode))
+
+(use-package helpful)
+
+;; Note that the built-in `describe-function' includes both functions
+;; and macros. `helpful-function' is functions only, so we provide
+;; `helpful-callable' as a drop-in replacement.
+(global-set-key (kbd "C-h f") #'helpful-callable)
+
+(global-set-key (kbd "C-h v") #'helpful-variable)
+(global-set-key (kbd "C-h k") #'helpful-key)
+(global-set-key (kbd "C-h x") #'helpful-command)
 
 (use-package counsel
   :after ivy
@@ -362,14 +634,23 @@ one, an error is signaled."
   (ivy-set-display-transformer 'ivy-switch-buffer
                                'ivy-rich-switch-buffer-transformer))
 
+
+(setq ivy-initial-inputs-alist
+      '((counsel-M-x . "")
+        ;; other commands can be added here
+       ))
+
 (use-package quarto-mode
   :mode (("\\.Rmd" . poly-quarto-mode))
   )
 (setq markdown-enable-math t)
 
+(use-package haskell-mode
+  :ensure t)
+
 (use-package auctex
-:defer t
-:ensure t)
+  :defer t
+  :ensure t)
 (setq org-highlight-latex-and-related '(native))
 
 (use-package cdlatex)
@@ -393,8 +674,6 @@ one, an error is signaled."
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
-
-(require 'use-package)
 
 ;; Enable defer and ensure by default for use-package Keep
 ;; auto-save/backup files separate from source code:
@@ -458,9 +737,6 @@ one, an error is signaled."
 ;; lsp-mode supports snippets, but in order for them to work you need to use yasnippet
 ;; If you don't want to use snippets set lsp-enable-snippet to nil in your lsp-mode settings
 ;; to avoid odd behavior with snippets and indentation
-(use-package yasnippet)
-(use-package ivy-yasnippet
-  :hook (yas-minor-mode . ivy-yasnippet))
 
 ;; Use company-capf as a completion provider.
 ;;
@@ -469,7 +745,10 @@ one, an error is signaled."
 ;;   Please migrate to company-capf.
 (use-package company
   :diminish
-  :hook (scala-mode . company-mode)
+  :hook (prog-mode . company-mode)
+        (prog-mode . (lambda () (setq display-line-numbers 'absolute)))
+        (prog-mode . display-line-numbers-mode)
+        (org-mode . company-mode)
   :config
   (setq lsp-completion-provider :capf))
 
@@ -482,12 +761,16 @@ one, an error is signaled."
   (lsp-mode . dap-mode)
   (lsp-mode . dap-ui-mode))
 
+
+
 (org-babel-do-load-languages
   'org-babel-load-languages
   '(
     (R . t)
     (latex . t)
-))
+    (haskell . t)
+   )
+)
 
 ;; disable the confirmation message
 (setq org-confirm-babel-evaluate nil)
@@ -510,9 +793,12 @@ one, an error is signaled."
 (setq org-image-actual-width 500) ;; Sets the width of image previewq in org-mode
 
 ;; Sets the size of LaTeX previews 
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 0.9))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 0.6))
 
-(use-package org-fragtog)
+(add-hook 'org-mode-hook 'visual-line-mode)
+
+(use-package org-fragtog
+  :ensure t)
 (add-hook 'org-mode-hook 'org-fragtog-mode)
 
 (use-package math-preview
@@ -523,13 +809,98 @@ one, an error is signaled."
 
 (use-package ox-pandoc)
 (use-package auto-org-md)
+(use-package ox-gfm)
+
+(defun org-gfm-export-to-markdown-with-mdoc ()
+  "Save and Export current buffer to a GitHub Flavored Markdown file with mdoc for Scala."
+  (interactive)
+
+  (let* ((single-window (one-window-p))
+         (name (file-name-sans-extension (file-name-nondirectory buffer-file-name)))
+         (new-name (concat "./docs/" name ".md")))
+    (save-buffer)
+    (require 'ox-gfm)
+    (org-gfm-export-as-markdown)
+    (goto-char (point-min))
+    (while (search-forward "```scala" nil t)
+      (replace-match "```scala mdoc"))
+    (goto-char (point-min))
+    (while (search-forward "```scala mdoc\n//silent" nil t)
+      (replace-match "```scala mdoc:silent"))
+    (goto-char (point-min))
+    (while (search-forward "```scalnope" nil t)
+      (replace-match "```scala"))
+    (goto-char (point-min))
+    (while (search-forward "```emacs-lisp" nil t)
+      (replace-match "```lisp"))
+    (write-file new-name)
+    (switch-to-prev-buffer)
+    (when single-window
+      (delete-window)
+      )))
+
+
+  ;;(save-buffer)
+  ;;(require 'ox-gfm)
+  ;;(org-gfm-export-as-markdown)
+  ;;(goto-char (point-min))
+  ;;(while (search-forward "```scala" nil t)
+  ;;  (replace-match "```scala mdoc"))
+  ;;(write-file "./docs/readme.md")
+  ;;(delete-window))
+
+(use-package org-download
+  :ensure t
+)
+
+(use-package org-modern
+  :hook
+  (org-mode . org-modern-mode)
+  :config
+  (global-org-modern-mode))
+
+(use-package org-ref
+  :config
+  (require 'org-ref-ivy)
+)
+
+(add-hook 'org-mode-hook 'flyspell-mode)
+
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory (file-truename "~/RoamNotes"))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today)
+         ("C-c n u" . org-roam-ui-open)
+         ("C-c n m" . org-roam-ui-mode))
+  :config
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode)
+  ;; For completeion everywhere
+  (setq org-roam-completion-everywhere t)
+  ;; If using org-roam-protocol
+  (require 'org-roam-protocol))
+
+(use-package org-roam-ui
+    :after org-roam
+    :ensure t
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
 
 (use-package no-littering)
 
-
-
-(use-package sublimity
-  :config (sublimity-mode))
+(use-package vterm
+  :ensure )
 
 (use-package sudo-edit)
 
@@ -550,7 +921,19 @@ one, an error is signaled."
         which-key-allow-imprecise-window-fit nil
         which-key-seperator "➢"))
 
-(setq org-agenda-file-menu-enabled t)
+(use-package yasnippet
+  :ensure t
+  :after org
+  :config
+  (setq yas-snippet-dirs '("~/.config/emacs/snippets"))
+  (yas-global-mode 1)
+  :hook
+  (org-mode . yas-minor-mode)
+)
 
-(setq org-agenda-files
-        '("~/MyProjects/Notes/APTS" "~/MyProjects/Notes/APTS/StatsComputation" "~/MyProjects/Notes/APTS/StatsInference" "~/orgfiles"))
+;;(add-hook 'org-mode-hook (lambda () (setq display-line-numbers 'relative)))
+
+;;(add-hook 'org-mode (lambda () (setq display-line-numbers 'relative)))
+
+;;(setq display-line-numbers-type 'relative)
+;;(global-display-line-numbers-mode)

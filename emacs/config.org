@@ -5,7 +5,7 @@
 * To-do for the config
 *** DONE add more verbose descriptions to all of these things         :org:
 *** DONE Rearrange some lines of code for better crash-handling and readability :org:
-*** DONE Reorganise Keybindings to use ~General~ and be somewhat more pneumonic :org:
+*** DONE Reorganise Keybindings to use ~General~ and be somewhat more mnemonic :org:
 *** DONE Work out Flycheck                                            :org:
 *** TODO Move everything to general for better verbose descriptions
 *** TODO 'Hydra' enables some of the keybinding stuff i wanted to try for something... but I can't remember what it was at the moment
@@ -143,8 +143,10 @@ Below is a modified setup from [[http://xahlee.info/emacs/emacs/emacs_menu_app_k
 #+begin_src emacs-lisp
 
   (define-key my-leader-key-map (kbd "RET") 'insert-new-line-below)
-  (define-key my-leader-key-map (kbd "<left>") 'previous-buffer)
-  (define-key my-leader-key-map (kbd "<right>") 'next-buffer)
+  (define-key my-leader-key-map (kbd "<left>") 'org-beginning-of-line)
+  (define-key my-leader-key-map (kbd "<right>") 'org-end-of-line)
+  (global-set-key (kbd "<next>") 'next-buffer)
+  (global-set-key (kbd "<prior>") 'previous-buffer)
   (define-key my-leader-key-map (kbd "<up>") 'beginning-of-buffer)
   (define-key my-leader-key-map (kbd "<down>") 'end-of-buffer)
 
@@ -235,7 +237,7 @@ Below is a modified setup from [[http://xahlee.info/emacs/emacs/emacs_menu_app_k
 
 #+begin_src emacs-lisp
 
-    (define-key my-leader-key-map (kbd "<menu>") 'set-mark-command)
+  ;;(define-key my-leader-key-map (kbd "<menu>") 'set-mark-command)
 
 #+end_src
 
@@ -744,7 +746,7 @@ Seems like this variable likes to change itself, don't be afraid to ~C-h v org-a
 
 #+begin_src emacs-lisp
   (setq org-agenda-files
-        '("google-drive://etatephughes@gmail.com/0AHvOgA12jWhUk9PVA/RoamNotes"))
+        '("~/RoamNotes"))
 #+end_src
 
 ** Custom agenda
@@ -1302,6 +1304,13 @@ Allow easy loading of images into org-mode.
 
 #+end_src
 
+** Enter links easily
+
+#+begin_src emacs-lisp
+
+  (setq org-return-follows-link t)
+
+#+end_src
 * Org-Roam around-a-round-a-round
 
 Blahblah some 'second brain' bullshit. Regardless, this stuff is really cool and is becoming the centre of my note-taking system.
@@ -1343,6 +1352,12 @@ A pretty web-ui visualiser for my org-roam.
             org-roam-ui-follow t
             org-roam-ui-update-on-save t
             org-roam-ui-open-on-start t))
+#+end_src
+
+** Stop opening windows
+
+#+begin_src emacs-lisp
+  (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file)
 #+end_src
 
 * No Littering >:|

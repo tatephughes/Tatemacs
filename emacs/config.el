@@ -99,8 +99,10 @@
 (define-prefix-command 'my-leader-key-map)
 
 (define-key my-leader-key-map (kbd "RET") 'insert-new-line-below)
-(define-key my-leader-key-map (kbd "<left>") 'previous-buffer)
-(define-key my-leader-key-map (kbd "<right>") 'next-buffer)
+(define-key my-leader-key-map (kbd "<left>") 'org-beginning-of-line)
+(define-key my-leader-key-map (kbd "<right>") 'org-end-of-line)
+(global-set-key (kbd "<next>") 'next-buffer)
+(global-set-key (kbd "<prior>") 'previous-buffer)
 (define-key my-leader-key-map (kbd "<up>") 'beginning-of-buffer)
 (define-key my-leader-key-map (kbd "<down>") 'end-of-buffer)
 
@@ -145,7 +147,7 @@
 (define-key my-leader-key-map (kbd "r b") 'org-babel-execute-buffer)
 (define-key my-leader-key-map (kbd "r l") 'org-latex-refresh)
 
-(define-key my-leader-key-map (kbd "<menu>") 'set-mark-command)
+;;(define-key my-leader-key-map (kbd "<menu>") 'set-mark-command)
 
 ;;selections ('m' is for mark, 's' is taken by 'save')
 (define-key my-leader-key-map (kbd "m l") 'select-current-line)
@@ -512,7 +514,7 @@ one, an error is signaled."
 (setq right-margin-width 3)
 
 (setq org-agenda-files
-      '("google-drive://etatephughes@gmail.com/0AHvOgA12jWhUk9PVA/RoamNotes"))
+      '("~/RoamNotes"))
 
 (setq org-agenda-custom-commands
       '(("v" "PhD Tasks"
@@ -866,6 +868,8 @@ one, an error is signaled."
 
 (add-hook 'org-mode-hook 'flyspell-mode)
 
+(setq org-return-follows-link t)
+
 (use-package org-roam
   :ensure t
   :custom
@@ -896,6 +900,8 @@ one, an error is signaled."
           org-roam-ui-follow t
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
+
+(setf (cdr (assoc 'file org-link-frame-setup)) 'find-file)
 
 (use-package no-littering)
 

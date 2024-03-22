@@ -1,0 +1,34 @@
+# -*- mode: snippet -*-
+# name: Boilerplate
+# key: <h
+# --
+
+:BOILERPLATE:
+#+BIBLIOGRAPHY: Bibliography.bib
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [letterpaper]
+#+OPTIONS: toc:nil
+#+LATEX_HEADER: \usepackage{amsmath,amsfonts,amsthm,amssymb,tikz,tkz-graph}
+#+LATEX_HEADER: \usetikzlibrary{arrows}
+#+LATEX_HEADER: \usetikzlibrary{bayesnet}
+#+LATEX_HEADER: \usetikzlibrary{matrix}
+#+LATEX_HEADER: \usepackage[margin=1in]{geometry}
+#+LATEX_HEADER: \usepackage[english]{babel}
+#+LATEX_HEADER: \newtheorem{theorem}{Theorem}[section]
+#+LATEX_HEADER: \newtheorem{corollary}[theorem]{Corollary}
+#+LATEX_HEADER: \newtheorem{lemma}[theorem]{Lemma}
+#+LATEX_HEADER: \newtheorem{definition}[theorem]{Definition}
+#+LATEX_HEADER: \newtheorem*{remark}{Remark}
+#+LATEX_HEADER: \newcommand{\balpha}{\boldsymbol{\alpha}}
+#+LATEX_HEADER: \newcommand{\bbeta}{\boldsymbol{\beta}}
+#+LATEX_HEADER: \newcommand{\bgamma}{\boldsymbol{\gamma}}
+#+LATEX_HEADER: \newcommand{\bdelta}{\boldsymbol{\delta}}
+#+LATEX_HEADER: \newcommand{\bepsilon}{\boldsymbol{\epsilon}}
+#+LATEX_HEADER: \newcommand{\bzeta}{\boldsymbol{\zeta}}
+#+LATEX_HEADER: \newcommand{\boldeta}{\boldsymbol{\eta}}
+#+LATEX_HEADER: \newcommand{\btheta}{\boldsymbol{\theta}}
+#+LATEX_HEADER: \newcommand{\blambda}{\boldsymbol{\lambda}}
+#+LATEX_HEADER: \newcommand{\bmu}{\boldsymbol{\mu}}
+#+LATEX_HEADER: \newcommand{\bnu}{\boldsymbol{\nu}}
+#+EXPORT_EXCLUDE_TAGS: noexport
+:END:

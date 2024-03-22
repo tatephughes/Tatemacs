@@ -2,89 +2,6 @@
 #+AUTHOR: Evan Tate Paterson Hughes
 #+DESCRIPTION: Mostly following DT's guide https://www.youtube.com/watch?v=d1fgypEiQkE, but I'm not quite as EVIL
 
-* To-do for the config
-*** DONE add more verbose descriptions to all of these things         :org:
-*** DONE Rearrange some lines of code for better crash-handling and readability :org:
-*** DONE Reorganise Keybindings to use ~General~ and be somewhat more mnemonic :org:
-*** DONE Work out Flycheck                                            :org:
-*** TODO Move everything to general for better verbose descriptions
-*** TODO 'Hydra' enables some of the keybinding stuff i wanted to try for something... but I can't remember what it was at the moment
-**** again though, general might be better in /general/
-*** TODO Flyspell still doesn't quite work right, it doesn't suggest corrections until i force it too, look into this
-
-
-
-* Elpaca
-
-Using the elpaca file manager. has some nice stuff like async. Since I'm very unlikely to touch this code (it's basically ripped from their github), I may move this block elsewhere.
-
-#+begin_src emacs-lisp
-  (defvar elpaca-installer-version 0.6)
-  (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-  (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-  (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-  (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                                :ref nil
-                                :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                                :build (:not elpaca--activate-package)))
-  (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-         (build (expand-file-name "elpaca/" elpaca-builds-directory))
-         (order (cdr elpaca-order))
-         (default-directory repo))
-    (add-to-list 'load-path (if (file-exists-p build) build repo))
-    (unless (file-exists-p repo)
-      (make-directory repo t)
-      (when (< emacs-major-version 28) (require 'subr-x))
-      (condition-case-unless-debug err
-          (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                   ((zerop (call-process "git" nil buffer t "clone"
-                                         (plist-get order :repo) repo)))
-                   ((zerop (call-process "git" nil buffer t "checkout"
-                                         (or (plist-get order :ref) "--"))))
-                   (emacs (concat invocation-directory invocation-name))
-                   ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                         "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                   ((require 'elpaca))
-                   ((elpaca-generate-autoloads "elpaca" repo)))
-              (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-            (error "%s" (with-current-buffer buffer (buffer-string))))
-        ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-    (unless (require 'elpaca-autoloads nil t)
-      (require 'elpaca)
-      (elpaca-generate-autoloads "elpaca" repo)
-      (load "./elpaca-autoloads")))
-  (add-hook 'after-init-hook #'elpaca-process-queues)
-  (elpaca `(,@elpaca-order))
-
-  ;; Install use-package support
-  (elpaca elpaca-use-package
-    ;; Enable :elpaca use-package keyword.
-    (elpaca-use-package-mode)
-    ;; Assume :elpaca t unless otherwise specified.
-    (setq elpaca-use-package-by-default t))
-
-  ;; Block until current queue processed.
-  (elpaca-wait)
-
-  ;;When installing a package which modifies a form used at the top-level
-  ;;(e.g. a package which adds a use-package key word),
-  ;;use `elpaca-wait' to block until that package has been installed/configured.
-  ;;For example:
-  (use-package general :demand t)
-  (elpaca-wait)
-
-
-  ;;Turns off elpaca-use-package-mode current declaration
-  ;;Note this will cause the declaration to be interpreted immediately (not deferred).
-  ;;Useful for configuring built-in emacs features.
-  (use-package emacs :elpaca nil :config (setq ring-bell-function #'ignore))
-
-  ;; Don't install anything. Defer execution of BODY
-  ;; (elpaca nil (message "deferred"))
-
-  (add-to-list 'load-path "~/.config/emacs/lisp/")
-#+end_src
-
 * My Keybindings
 
 *** Old Bindings
@@ -92,7 +9,6 @@ Using the elpaca file manager. has some nice stuff like async. Since I'm very un
 Custom keybinds. As the to-do list suggests, I should get into ~General~, setting a overall header to something unique like ~C-<space>~ then using a bunch of pneumonic commands, for a sort of 'vim-emacs' mashup. ~C-<space>~ is currently bound to some marking feature though.
 
 #+begin_src emacs-lisp
-
   ;; Quickly reload this file after making edits. Refers to a function defined under the tab 'neat-tricks'
   (global-set-key (kbd "C-c r") 'reload-init-file)
 
@@ -106,10 +22,10 @@ Custom keybinds. As the to-do list suggests, I should get into ~General~, settin
   (global-set-key (kbd "C-M-<right>") 'buf-move-right)
 
   ;; Move focus
-  (global-set-key (kbd "C-<up>") 'windmove-up)
-  (global-set-key (kbd "C-<down>") 'windmove-down)
-  (global-set-key (kbd "C-<left>") 'windmove-left)
-  (global-set-key (kbd "C-<right>") 'windmove-right)
+  (global-set-key (kbd "C-M-<up>") 'windmove-up)
+  (global-set-key (kbd "C-M-<down>") 'windmove-down)
+  (global-set-key (kbd "C-M-<left>") 'windmove-left)
+  (global-set-key (kbd "C-M-<right>") 'windmove-right)
 
   ;; Todo
   (global-set-key (kbd "C-c t") 'org-toggle-item)
@@ -120,8 +36,10 @@ Custom keybinds. As the to-do list suggests, I should get into ~General~, settin
 
   ;; Org-Agenda Shortcut
   (global-set-key (kbd "C-c o") 'org-agenda)
-
 #+end_src
+
+#+RESULTS:
+: org-agenda
 
 *** Leader key definitions
 
@@ -159,14 +77,12 @@ Below is a modified setup from [[http://xahlee.info/emacs/emacs/emacs_menu_app_k
 
 *** Window Manipulation
 
-
-#+begin_src emacs-lisp
-
-  (define-key my-leader-key-map (kbd "0") 'delete-window)
-  (define-key my-leader-key-map (kbd "1") 'delete-other-windows)
-  (define-key my-leader-key-map (kbd "2") 'split-window-below)
-  (define-key my-leader-key-map (kbd "3") 'split-window-right)
-
+#+begin_src emacs-lisp :results none
+(define-key my-leader-key-map (kbd "0") 'delete-window)
+(define-key my-leader-key-map (kbd "1") 'delete-other-windows)
+(define-key my-leader-key-map (kbd "2") 'split-window-below)
+(define-key my-leader-key-map (kbd "3") 'split-window-right)
+(define-key my-leader-key-map (kbd "DEL") 'kill-current-buffer-and-window)
 #+end_src
 
 *** Insert
@@ -344,6 +260,20 @@ Swiper is a search replacement from the *ivy* package. Has a nicer little interf
   (define-key my-leader-key-map (kbd "#") 'flyspell-correct-word-before-point)
 
 #+end_src
+*** Poppers
+
+**** vterm
+
+#+begin_src emacs-lisp :results none
+(define-key my-leader-key-map (kbd "/") 'vterm)
+#+end_src
+
+**** chatGPT shell
+
+#+begin_src emacs-lisp :results none
+(define-key my-leader-key-map (kbd "?") 'chatgpt-shell)
+#+end_src
+
 * Some neat tricks
 
 Here we actually define the functions references in the above keybindings. I've moved this up towards the top of the doc for better stability.
@@ -520,28 +450,11 @@ Quick commands to select and kill things
 *** Motions
 
 #+begin_src emacs-lisp
-
   (defun insert-new-line-below ()
     "Insert a new line below the current line and move the cursor to that line."
     (interactive)
     (end-of-line)
     (newline-and-indent))
-
-  (defun jump-lines ()
-    "Prompt for a number and move down by that many lines."
-    (interactive)
-    (display-line-numbers-mode 1)
-    (let ((num (read-number "Number of lines to jump: ")))
-      (forward-line num))
-    (display-line-numbers-mode 0))
-
-  (defun jump-lines-back ()
-    "Prompt for a number and move up by that many lines."
-    (interactive)
-    (display-line-numbers-mode 1)
-    (let ((num (read-number "Number of lines to jump: ")))
-      (forward-line (- num)))
-    (display-line-numbers-mode 0))
 #+end_src
 
 *** Enclose in YASnippet
@@ -559,7 +472,7 @@ Quick commands to select and kill things
 
 *** Refresh Latex Snippets
 
-#+begin_src emacs-lisp
+#+begin_src emacs-nope
 
   (defun org-latex-refresh ()
     "Delete the ./.ltximg directory and regenerate all the LaTeX fragments in the current org buffer."
@@ -601,35 +514,32 @@ Adds the contents of the clipboard to the bibliography for roam.
         (insert "\n")
         (append-to-file (point-min) (point-max) filename))))
 #+end_src
-*** Org-Numbering updates
 
-Thanks to these [[https://stackoverflow.com/questions/26090651/emacs-org-mode-increment-equation-numbers-with-latex-preview][legends]]
-
-#+begin_src emacs-lisp
-
-  (defun update-tag ()
-    (interactive)
-    (save-excursion
-      (goto-char (point-min))
-      (let ((count 1))
-        (while (re-search-forward "\\tag{\\([0-9]+\\)}" nil t)
-          (replace-match (format "%d" count) nil nil nil 1)
-          (setq count (1+ count)))))
-    )
-#+end_src
 *** Org-insert-image
 
 #+begin_src emacs-lisp
-
   (defun org-insert-image ()
     (interactive)
-    (let* ((path (read-file-name "Enter image path: "))
-           (caption (read-string "Enter caption: "))
-           (name (read-string "Enter name: ")))
-      (insert (format "#+CAPTION: %s\n#+NAME: fig:%s\n[[file:%s]]" caption name path))))
+      (let* ((path (read-file-name "Enter image path: "))
+             (caption (read-string "Enter caption: "))
+             (name (read-string "Enter name: ")))
+        (insert (format "#+CAPTION: %s\n#+NAME: fig:%s\n[[file:%s]]" caption name path))))
 #+end_src
-* A Tale of Themes and Fonts
+*** Buffer murder
 
+#+begin_src emacs-lisp :results none
+(defun kill-current-buffer-and-window ()
+  "Kill the current buffer and close the window it is displayed in."
+  (interactive)
+  (let ((current-buffer (current-buffer))
+        (current-window (selected-window)))
+    (kill-buffer current-buffer)
+    ;; If there's more than one window, delete the current window.
+    (when (> (length (window-list)) 1)
+      (delete-window current-window))))
+#+end_src
+
+* A Tale of Themes and Fonts
 ** Setting the font face
 
 Self-explanatory. Plan to mess around with new fonts periodically. Go [[https://github.com/ryanoasis/nerd-fonts][here]] to download the nerd fonts (which play nicely with org-bullets and stuff)
@@ -652,53 +562,61 @@ Self-explanatory. Plan to mess around with new fonts periodically. Go [[https://
 
   ;; Actually set the fonts
   (set-face-attribute 'default nil
-                      :font "ProggyCleanSZNerdFont"
-                      :height 165
-                      :weight 'medium)
+		      :font "VictorMonoNerdFont"
+		      :height 165
+		      :weight 'medium)
 
   (set-face-attribute 'variable-pitch nil
-                      :font "Ubuntu"
-                      :height 180
-                      :weight 'medium)
+		      :font "Ubuntu"
+		      :height 180
+		      :weight 'medium)
+  
   (set-face-attribute 'fixed-pitch nil
-                       :font "JetBrains Mono"
-                       :height 165
-                       :weight 'medium)
+		       :font "JetBrains Mono"
+		       :height 165
+		       :weight 'medium)
 
-  ;; For a bit of added spice (seems broken with ProggyClean)
   (set-face-attribute 'font-lock-comment-face nil
-                      :slant 'italic)
+		      :slant 'italic)
   (set-face-attribute 'font-lock-keyword-face nil
-                        :slant 'italic)
+			:slant 'italic)
 
   ;; and to make sure client windows open with these fonts
-  (add-to-list 'default-frame-alist '(font . "ProggyCleanSZNerdFont"))
+  (add-to-list 'default-frame-alist '(font . "VictorMonoNerdFont"))
 
 #+end_src
 
-** Themes... of DOOOMMMMMM
+#+RESULTS:
+: ((font . VictorMonoNerdFont) (alpha-background . 90) (undecorated . t))
+
+** Themes
 
 The package [[https://github.com/doomemacs/themes][doom-themes]] provides some nice themes, including the dracula theme I've been loving.
 
 #+begin_src emacs-lisp
-  (use-package doom-themes
-    :ensure t
-    :config
-    ;; Global settings (defaults)
-    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-          doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    (load-theme 'doom-dracula t)
+    (use-package doom-themes
+      :straight t
+      :config
+      ;; Global settings (defaults)
+      (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+            doom-themes-enable-italic t) ; if nil, italics is universally disabled
+      (load-theme 'doom-dracula t)
 
-    ;; Enable flashing mode-line on errors
-    (doom-themes-visual-bell-config)
-    ;; Enable custom neotree theme (all-the-icons must be installed!)
-    (doom-themes-neotree-config)
-    ;; or for treemacs users
-    (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-    (doom-themes-treemacs-config)
-    ;; Corrects (and improves) org-mode's native fontification.
-    (doom-themes-org-config))
+      ;; Enable flashing mode-line on errors
+      (doom-themes-visual-bell-config)
+      ;; Enable custom neotree theme (all-the-icons must be installed!)
+      ;;(doom-themes-neotree-config)
+      ;; or for treemacs users
+      (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+      (doom-themes-treemacs-config)
+      ;; Corrects (and improves) org-mode's native fontification.
+      (doom-themes-org-config))
+
+  (use-package ef-themes
+    :straight t)
 #+end_src
+
+#+RESULTS:
 
 ** Other Aesthetic Changes
 
@@ -715,7 +633,7 @@ Miscellaneous aesthetic changes
   (setq default-frame-alist '((undecorated . t)))
 
   ;; Some nice transparency
-  (add-to-list 'default-frame-alist '(alpha-background . 90))
+  (add-to-list 'default-frame-alist '(alpha-background . 100))
 
   ;; Make the modeline pretty
   ;;(use-package solaire-mode
@@ -723,7 +641,7 @@ Miscellaneous aesthetic changes
 
   ;; or use doom-modeline
   (use-package doom-modeline
-    :ensure t
+    :straight t
     :config
     (doom-modeline-mode))
 
@@ -736,6 +654,9 @@ Miscellaneous aesthetic changes
 
 #+end_src
 
+#+RESULTS:
+: 3
+
 * Agenda
 
 get your life organised, nerd
@@ -745,8 +666,8 @@ get your life organised, nerd
 Seems like this variable likes to change itself, don't be afraid to ~C-h v org-agenda-files~ to check it and delete everything if need be, the below code will add in the necessary files.
 
 #+begin_src emacs-lisp
-  (setq org-agenda-files
-        '("~/RoamNotes"))
+(setq org-agenda-files
+      '("~/RoamNotes"))
 #+end_src
 
 ** Custom agenda
@@ -793,47 +714,118 @@ I'm vaguely aware that it is possible to make parentheses a lot smarter in some 
 #+end_src
 
 ** Skip "Active Processes Exist" prompt
-
 Use with caution, obviously, but right now there are no 'active processes' that i care about
 
 #+begin_src emacs-lisp
-
-  (setq confirm-kill-processes nil)
-
+(setq confirm-kill-processes nil)
 #+end_src
+
+** Better tab behavious in org-mode
+
+#+begin_src emacs-lisp :results none
+(defun my/org-tab-behavior ()
+  "Custom TAB behavior for Org mode:
+- Use `cdlatex` behavior in LaTeX fragments.
+- Do not interfere with source block indentation.
+- Cycle visibility for headings and drawers outside LaTeX fragments.
+- Expand yasnippet at point if possible and not in a LaTeX fragment.
+- Otherwise, move forward to the next word but only if not at a heading, and not in a LaTeX fragment."
+  (interactive)
+  (cond
+   ;; If inside a LaTeX fragment, defer to cdlatex
+   ((and (derived-mode-p 'org-mode) (org-inside-LaTeX-fragment-p))
+    (cdlatex-tab))
+   
+   ;; If inside a source block, use the major mode's default TAB behavior
+   ((org-in-src-block-p)
+    (call-interactively (key-binding (kbd "TAB"))))
+   
+   ;; Check if we can expand a yasnippet; if yes, do it and prevent further action
+   ((yas-expand)
+    nil)
+   
+   ;; If at a heading or at a drawable structure, cycle visibility and prevent further action
+   ((or (org-at-heading-p) (org-at-drawer-p))
+    (org-cycle))
+
+   ;; Default action: move forward to the next word
+   (t (forward-to-word 1))))
+
+  (with-eval-after-load 'org
+    ;; Bind the custom function to TAB in Org mode.
+    ;; Make sure this doesn't conflict with other keybindings you might have.
+    (define-key org-mode-map (kbd "TAB") #'my/org-tab-behavior))
+#+end_src
+
+* ChatGPT
+
+#+begin_src emacs-lisp :results none
+(use-package shell-maker
+  :straight (:host github :repo "xenodium/chatgpt-shell" :files ("shell-maker.el")))
+
+(use-package chatgpt-shell
+  :requires shell-maker
+  :straight (:host github :repo "xenodium/chatgpt-shell" :files ("chatgpt-shell.el")))
+
+(setq chatgpt-shell-openai-key "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")
+#+end_src
+
+* Smart Parentheses
+
+#+begin_src emacs-lisp :results none
+(use-package smartparens-mode
+  :straight smartparens  ;; install the package
+  :hook (prog-mode text-mode markdown-mode org-mode) ;; add `smartparens-mode` to these hooks
+  :config
+  ;; load default config
+  (require 'smartparens-config))
+#+end_src
+
+** and rainbow delimiters
+
+#+begin_src emacs-lisp :results none
+  (use-package rainbow-delimiters
+    :straight t
+    :hook
+    (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
 * Dashboard
 
 The nice dashboard. wait whats that fluffy white thing
 
 #+begin_src emacs-lisp
-  (use-package nerd-icons)
+    (use-package nerd-icons
+      :straight t)
 
-  (use-package dashboard
-      :ensure t 
-      :elpaca t
-      :init
-      (setq initial-buffer-choice 'dashboard-open)
-      (setq dashboard-set-heading-icons t)
-      (setq dashboard-set-file-icons t)
-      (setq dashboard-banner-logo-title "woah what how did he get here")
-      ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-      (setq dashboard-startup-banner "/home/tate/Tatemacs/wohhowdidhegethere/toby.png")  ;; use custom image as banner
-      (setq dashboard-center-content nil) ;; set to 't' for centered content
-      (setq dashboard-items '((recents . 20)
-                              (bookmarks . 10)))
-      :custom
-      (dashboard-modify-heading-icons '((recents . "file-text")
-                                        ))
-      :config
-      (dashboard-setup-startup-hook)
-      )
+    (use-package dashboard
+	:straight t
+	:init
+	(setq initial-buffer-choice 'dashboard-open)
+	(setq dashboard-set-heading-icons t)
+	(setq dashboard-set-file-icons t)
+	(setq dashboard-banner-logo-title "woah what how did he get here")
+	;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+	(setq dashboard-startup-banner "/home/tate/.config/emacs/wohhowdidhegethere/toby.png")  ;; use custom image as banner
+	(setq dashboard-center-content nil) ;; set to 't' for centered content
+	(setq dashboard-items '((recents . 20)
+				(bookmarks . 10)))
+	:custom
+	(dashboard-modify-heading-icons '((recents . "file-text")
+					  ))
+	:config
+	(dashboard-setup-startup-hook)
+	)
 
-  (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
-  (setq dashboard-display-icons-p t) ;; display icons on both GUI and terminal
-  (setq dashboard-center-content t)
+    (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
+    (setq dashboard-display-icons-p t) ;; display icons on both GUI and terminal
+    (setq dashboard-center-content t)
 
-  (setq dashboard-icon-type 'nerd-icons) ;; use `nerd-icons' package
+    (setq dashboard-icon-type 'nerd-icons) ;; use `nerd-icons' package
 #+end_src
+
+#+RESULTS:
+: nerd-icons
 
 * GUI tweaks
 ** Beacon
@@ -842,7 +834,7 @@ Make the cursor glowwww
 
 #+begin_src emacs-lisp
     (use-package beacon
-      :ensure t
+      :straight t
       :config (beacon-mode))
 #+end_src
 
@@ -851,10 +843,8 @@ Make the cursor glowwww
 Makes displaying line numbers the deafult. Toggle this with ~C-c l~ as defined under 'Keybindings'.
 
 #+begin_src emacs-lisp
-
-  ;;(setq display-line-numbers 'relative)
-  ;;(global-display-line-numbers-mode)
-
+;;(setq display-line-numbers 'relative)
+;;(global-display-line-numbers-mode)
 #+end_src
 
 *** DONE Make this a hook to only enable in programming modes and not org-mode :org:
@@ -863,17 +853,12 @@ Makes displaying line numbers the deafult. Toggle this with ~C-c l~ as defined u
 
 A nice file navigator for bigger projects
 
-#+begin_src emacs-lisp
-  (use-package neotree)
-  (global-set-key [f8] 'neotree-toggle)
-  (setq neo-window-width 50)
-
-  (use-package all-the-icons
-    :ensure t
-    :if (display-graphic-p))
-
-  (use-package all-the-icons-dired
-    :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
+#+begin_src emacs-lisp :reesults none
+(use-package all-the-icons
+  :straight t
+  :if (display-graphic-p))
+(use-package all-the-icons-dired
+  :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 #+end_src
 
 ** Mode-line
@@ -881,14 +866,9 @@ A nice file navigator for bigger projects
 That line at the bottom of the screen with key onfo (current buffer, file paths, modes, zoom etc etc). I'm not completely happy with it aesthetically, but it'll do for now.
 
 #+begin_src emacs-lisp
-    ;; clean up the mode-line
-    (use-package diminish)
-
-    ;;(use-package smart-mode-line
-      ;;:config (sml/setup))
-
-    ;;(use-package mode-icons
-      ;;:config (mode-icons-mode))
+      ;; clean up the mode-line
+      (use-package diminish
+	:straight t)
 #+end_src
 
 * Helpful
@@ -897,7 +877,7 @@ Helpful is a package that replaces some of the default help commands with improv
 
 Gonna decide on how /helpful/ it really is soon, although it seems good so far. Got a few errors initially booting it up though, so we'll see.
 
-#+begin_src emacs-lisp
+#+begin_nope emacs-lisp
 
   (use-package helpful)
 
@@ -919,11 +899,13 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
 
 #+begin_src emacs-lisp
   (use-package counsel
+    :straight t
     :after ivy
     :diminish
     :config (counsel-mode))
 
   (use-package ivy
+    :straight t
     :custom
     (setq ivy-use-virtual-buffers t)
     (setq ivy-count-format "(%d/%d) ")
@@ -933,12 +915,12 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
     (ivy-mode))
 
   ;;(use-package all-the-icons-ivy-rich
-    ;;:ensure t
+    ;;:straight t
     ;;:init (all-the-icons-ivy-rich-mode 1))
 
   (use-package ivy-rich
+    :straight t
     :after ivy
-    :ensure t
     :init (ivy-rich-mode 1)
     :custom
     (ivy-virtual-abbreviate 'full
@@ -946,15 +928,44 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
      ivy-rich-path-style 'abbrev)
     :config
     (ivy-set-display-transformer 'ivy-switch-buffer
-                                 'ivy-rich-switch-buffer-transformer))
+				 'ivy-rich-switch-buffer-transformer))
 
 
   (setq ivy-initial-inputs-alist
-        '((counsel-M-x . "")
-          ;; other commands can be added here
-         ))
+	'((counsel-M-x . "")
+	  ;; other commands can be added here
+	 ))
 
 #+end_src
+* Perfect-Margin mode
+
+#+begin_src emacs-lisp :results none
+(use-package perfect-margin
+  :straight t
+  :hook
+  (org-mode . perfect-margin-mode))
+#+end_src
+* Popper
+
+Popper buffers to appear as small windows
+
+#+begin_src emacs-lisp :results none
+(use-package popper
+  :straight t
+  :bind (("C-`"   . popper-toggle)
+         ("M-`"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          help-mode
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))                ; For echo area hints
+#+end_src
+
 * Languages, tools, etc
 
 ** Quarto
@@ -965,6 +976,7 @@ On Darren's recommendation, although I've pretty dramatically switched to using 
 
 #+begin_src emacs-lisp
   (use-package quarto-mode
+    :straight t
     :mode (("\\.Rmd" . poly-quarto-mode))
     )
   (setq markdown-enable-math t)
@@ -977,7 +989,7 @@ Lazier than I am (and i'm so lazy I stole this joke from doom emacs)
 #+begin_src emacs-lisp
 
   (use-package haskell-mode
-    :ensure t)
+    :straight t)
 
 #+end_src
 
@@ -988,7 +1000,7 @@ Ahhh my glorious LaTeX. You are incredible. If a bit of a mess in emacs.
 #+begin_src emacs-lisp
   (use-package auctex
     :defer t
-    :ensure t)
+    :straight t)
   (setq org-highlight-latex-and-related '(native))
 
   (use-package cdlatex)
@@ -1007,7 +1019,8 @@ Does emacs really speak statistics? I don't think emacs can speak.
 (tbf this is a really good package that plays so nicely with org babel, I love this, even if I don't love R)
 
 #+begin_src emacs-lisp
-  (use-package ess)
+    (use-package ess
+      :straight t)
 #+end_src
 
 ** Scala
@@ -1017,32 +1030,14 @@ Scala needs no introduction. Also, wow that is a lot of code to set up one progr
 This code is taken from somewhere and has a bunch of redundancy; clean this up!
 
 #+begin_src emacs-lisp
-  (require 'package)
-
-  ;; Add melpa to your packages repositories
-  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-
-  (package-initialize)
-
-  ;; Install use-package if not already installed
-  (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package))
-
-  ;; Enable defer and ensure by default for use-package Keep
-  ;; auto-save/backup files separate from source code:
-  ;; https://github.com/scalameta/metals/issues/1027
-  (setq use-package-always-defer t
-        use-package-always-ensure t
-        backup-directory-alist `((".*" . ,temporary-file-directory))
-        auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
-
   ;; Enable scala-mode for highlighting, indentation and motion commands
   (use-package scala-mode
+    :straight t
     :interpreter ("scala" . scala-mode))
 
   ;; Enable sbt mode for executing sbt commands
   (use-package sbt-mode
+    :straight t
     :commands sbt-start sbt-command
     :config
     ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
@@ -1056,15 +1051,17 @@ This code is taken from somewhere and has a bunch of redundancy; clean this up!
 
   ;; Enable nice rendering of diagnostics like compile errors.
   (use-package flycheck
+    :straight t
     :diminish
     :init (global-flycheck-mode))
 
   (use-package lsp-mode
+    :straight t
     :diminish
     ;; Optional - enable lsp-mode automatically in scala files
     ;; You could also swap out lsp for lsp-deffered in order to defer loading
     :hook  (scala-mode . lsp)
-           (lsp-mode . lsp-lens-mode)
+	   (lsp-mode . lsp-lens-mode)
     :config
     ;; Uncomment following section if you would like to tune lsp-mode performance according to
     ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
@@ -1079,14 +1076,16 @@ This code is taken from somewhere and has a bunch of redundancy; clean this up!
     (setq lsp-keep-workspace-alive nil))
 
   ;; Add metals backend for lsp-mode
-  (use-package lsp-metals)
+  (use-package lsp-metals
+    :straight t)
 
   ;; Enable nice rendering of documentation on hover
   ;;   Warning: on some systems this package can reduce your emacs responsiveness significally.
   ;;   (See: https://emacs-lsp.github.io/lsp-mode/page/performance/)
   ;;   In that case you have to not only disable this but also remove from the packages since
   ;;   lsp-mode can activate it automatically.
-  (use-package lsp-ui)
+  (use-package lsp-ui
+    :straight t)
 
   ;; lsp-mode supports snippets, but in order for them to work you need to use yasnippet
   ;; If you don't want to use snippets set lsp-enable-snippet to nil in your lsp-mode settings
@@ -1098,19 +1097,22 @@ This code is taken from somewhere and has a bunch of redundancy; clean this up!
   ;;   Company-lsp is no longer maintained and has been removed from MELPA.
   ;;   Please migrate to company-capf.
   (use-package company
+    :straight t
     :diminish
     :hook (prog-mode . company-mode)
-          (prog-mode . (lambda () (setq display-line-numbers 'absolute)))
-          (prog-mode . display-line-numbers-mode)
-          (org-mode . company-mode)
+	  (prog-mode . (lambda () (setq display-line-numbers 'absolute)))
+	  (prog-mode . display-line-numbers-mode)
+	  (org-mode . company-mode)
     :config
     (setq lsp-completion-provider :capf))
 
   ;; Posframe is a pop-up tool that must be manually installed for dap-mode
-  (use-package posframe)
+  (use-package posframe
+    :straight t)
 
   ;; Use the Debug Adapter Protocol for running tests and debugging
   (use-package dap-mode
+    :straight t
     :hook
     (lsp-mode . dap-mode)
     (lsp-mode . dap-ui-mode))
@@ -1120,8 +1122,8 @@ This code is taken from somewhere and has a bunch of redundancy; clean this up!
 *** TODO Clean this scala-installer up, seperate out the stuff that should be elsewhere, like ~company mode~, and remove the redundant bits :org:
 ** Company Mode
 
-#+begin_src emacs-lisp
- #+end_src
+
+
 ** Org-Babel
 
 This allows for on-the-fly evaluation of code for specific languages within org files. It is very cool, but also limited; I can't get Scala 3, in particular, to function properly. The task shouldn't actually be too difficult though, and it could be beneficial to learn a bit of elisp and create my own ~scala.ob~.
@@ -1134,14 +1136,16 @@ This allows for on-the-fly evaluation of code for specific languages within org 
       (R . t)
       (latex . t)
       (haskell . t)
+      (python . t)
      )
   )
 
   ;; disable the confirmation message
   (setq org-confirm-babel-evaluate nil)
 #+end_src
+
 * Make org-mode good, actually
-*** TODO Organise this please :org:
+
 ** Table of contents
 
 Generates that nice toc at the top of the config file (or in theory are org document).
@@ -1149,9 +1153,10 @@ Generates that nice toc at the top of the config file (or in theory are org docu
 I am considering removing this as often a good old Shift-Tab can do the trick and effectively make the whole document it's own toc; thats kinda the magic of org-mode.
 
 #+begin_src emacs-lisp
-  (use-package toc-org
-    :commands toc-org-enable
-    :init (add-hook 'org-mode-hook 'toc-org-enable))
+  ;;(use-package toc-org
+  ;;  :straight t
+  ;;  :commands toc-org-enable
+  ;;  :init (add-hook 'org-mode-hook 'toc-org-enable))
 #+end_src
 
 ** Shootin' Bullets
@@ -1159,14 +1164,7 @@ I am considering removing this as often a good old Shift-Tab can do the trick an
 This is a package to add pretty bullet points to org mode. With the font I am currently using they do look out of place, so most of this is disabled (other than the indentation which I do tend to gravitate towards).
 
 #+begin_src emacs-lisp
-
-  ;; Make the different levels indented
   (add-hook 'org-mode-hook 'org-indent-mode)
-
-  ;; Use Bullets instead of Aterickses
-  ;;(use-package org-bullets)
-  ;;(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-
 #+end_src
 
 ** Disable that weird indentation
@@ -1177,14 +1175,6 @@ Code blocks have some strange indentation behaviour sometimes, and this seems to
   (electric-indent-mode -1)
 #+end_src
 
-** Make Writing Lisp blocks easier
-
-A lovely completion framework fo org-mode.
-
-#+begin_src emacs-lisp
-  (require 'org-tempo) ;; now we can write '<s' then press <TAB> for immediate src action!
-#+end_src
-
 ** Settings Tweaks
 
 Miscellaneous settings tweaks for org mode. I may move the latex scale thing elsewhere, or perhaps even better write a shortcut to quickly change it as I seem to change it quite frequently and org-mode offers no good options for auto sizing.
@@ -1192,75 +1182,38 @@ Miscellaneous settings tweaks for org mode. I may move the latex scale thing els
 #+begin_src emacs-lisp
   (setq org-image-actual-width 500) ;; Sets the width of image previewq in org-mode
 
-  ;; Sets the size of LaTeX previews 
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 0.6))
-
   (add-hook 'org-mode-hook 'visual-line-mode)
 
 #+end_src
 
-** Other LaTeX tweaks
+** Fast, Async LaTeX previews!
 
-A couple of tweaks relating to the org-mode latex previews.
-
-#+begin_src emacs-lisp
-  (use-package org-fragtog
-    :ensure t)
-  (add-hook 'org-mode-hook 'org-fragtog-mode)
-
-  (use-package math-preview
-    :load-path "/home/tate/.asdf/plugins/math-preview"
-    :custom (math-preview-command "/home/tate/.asdf/plugins/math-preview/math-preview.js"))
-
-  (setq org-preview-latex-image-directory ".ltximg/")
-#+end_src
-
-** Auto Export to md
-
-On some things I like to automatically export the org file to a markdown file, and the package ~auto-org-md~ provides a minor mode for this, hooking into the save command. I have slightly edited this to use use pandoc (this may break if auto org md updates), as it deals with code blockms much better than the default exporter does.
-
-#+begin_src emacs-lisp
-  (use-package ox-pandoc)
-  (use-package auto-org-md)
-  (use-package ox-gfm)
-
-  (defun org-gfm-export-to-markdown-with-mdoc ()
-    "Save and Export current buffer to a GitHub Flavored Markdown file with mdoc for Scala."
-    (interactive)
-
-    (let* ((single-window (one-window-p))
-           (name (file-name-sans-extension (file-name-nondirectory buffer-file-name)))
-           (new-name (concat "./docs/" name ".md")))
-      (save-buffer)
-      (require 'ox-gfm)
-      (org-gfm-export-as-markdown)
-      (goto-char (point-min))
-      (while (search-forward "```scala" nil t)
-        (replace-match "```scala mdoc"))
-      (goto-char (point-min))
-      (while (search-forward "```scala mdoc\n//silent" nil t)
-        (replace-match "```scala mdoc:silent"))
-      (goto-char (point-min))
-      (while (search-forward "```scalnope" nil t)
-        (replace-match "```scala"))
-      (goto-char (point-min))
-      (while (search-forward "```emacs-lisp" nil t)
-        (replace-match "```lisp"))
-      (write-file new-name)
-      (switch-to-prev-buffer)
-      (when single-window
-        (delete-window)
-        )))
-
-
-    ;;(save-buffer)
-    ;;(require 'ox-gfm)
-    ;;(org-gfm-export-as-markdown)
-    ;;(goto-char (point-min))
-    ;;(while (search-forward "```scala" nil t)
-    ;;  (replace-match "```scala mdoc"))
-    ;;(write-file "./docs/readme.md")
-    ;;(delete-window))
+#+begin_src emacs-lisp :results none
+;;(use-package org
+;;  :straight `(org
+;;              :fork (:host nil
+;;                     :repo "https://git.tecosaur.net/tec/org-mode.git"
+;;                     :branch "dev"
+;;                     :remote "tecosaur")
+;;              :files (:defaults "etc")
+;;              :build t
+;;              :pre-build
+;;              (with-temp-file "org-version.el"
+;;               (require 'lisp-mnt)
+;;               (let ((version
+;;                      (with-temp-buffer
+;;                        (insert-file-contents "lisp/org.el")
+;;                        (lm-header "version")))
+;;                     (git-version
+;;                      (string-trim
+;;                       (with-temp-buffer
+;;                         (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
+;;                         (buffer-string)))))
+;;                (insert
+;;                 (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
+;;                 (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
+;;                 "(provide 'org-version)\n")))
+;;              :pin nil))
 #+end_src
 
 ** Org-Download
@@ -1268,56 +1221,49 @@ On some things I like to automatically export the org file to a markdown file, a
 Allow easy loading of images into org-mode.
 
 #+begin_src emacs-lisp
-
-  (use-package org-download
-    :ensure t
-  )
-
+(use-package org-download
+  :straight t
+)
 #+end_src
 
 ** Org-Modern
 
 #+begin_src emacs-lisp
-
   (use-package org-modern
+    :straight t
     :hook
     (org-mode . org-modern-mode)
     :config
     (global-org-modern-mode))
-
 #+end_src
+
 ** Org-Ref
-#+begin_src emacs-lisp
 
-  (use-package org-ref
-    :config
-    (require 'org-ref-ivy)
-  )
-
-
+#+begin_src emacs-nope
+(use-package org-ref
+  :straight t
+  :config
+  (require 'org-ref-ivy))
 #+end_src
 ** Enable fly-spell in org-mode
 
 #+begin_src emacs-lisp
-
-(add-hook 'org-mode-hook 'flyspell-mode)
-
+;;(add-hook 'org-mode-hook 'flyspell-mode)
 #+end_src
 
 ** Enter links easily
 
 #+begin_src emacs-lisp
-
-  (setq org-return-follows-link t)
-
+;;(setq org-return-follows-link t)
 #+end_src
+
 * Org-Roam around-a-round-a-round
 
 Blahblah some 'second brain' bullshit. Regardless, this stuff is really cool and is becoming the centre of my note-taking system.
 
 #+begin_src emacs-lisp
   (use-package org-roam
-    :ensure t
+    :straight t
     :custom
     (org-roam-directory (file-truename "~/RoamNotes"))
     :bind (("C-c n l" . org-roam-buffer-toggle)
@@ -1339,19 +1285,20 @@ Blahblah some 'second brain' bullshit. Regardless, this stuff is really cool and
     (require 'org-roam-protocol))
 
 #+end_src
+
 ** Org-roam UI
 
 A pretty web-ui visualiser for my org-roam.
 
 #+begin_src emacs-lisp
   (use-package org-roam-ui
-      :after org-roam
-      :ensure t
-      :config
-      (setq org-roam-ui-sync-theme t
-            org-roam-ui-follow t
-            org-roam-ui-update-on-save t
-            org-roam-ui-open-on-start t))
+    :after org-roam
+    :straight t
+    :config
+    (setq org-roam-ui-sync-theme t
+	  org-roam-ui-follow t
+	  org-roam-ui-update-on-save t
+	  org-roam-ui-open-on-start t))
 #+end_src
 
 ** Stop opening windows
@@ -1360,14 +1307,19 @@ A pretty web-ui visualiser for my org-roam.
   (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file)
 #+end_src
 
-* No Littering >:|
-
+* No Littering
 Emacs litters. a lot. This attempts to reduce that, and does a reasonably good job as long as I remember to save things.
 
 #+begin_src emacs-lisp
-
 (use-package no-littering)
+#+end_src
 
+* Multiple Cursors
+
+#+begin_src emacs-lisp :results none
+(use-package multiple-cursors
+  :straight t)
+(global-set-key (kbd "<menu> <menu>") 'mc/edit-lines)
 #+end_src
 
 * Projectile
@@ -1387,10 +1339,8 @@ Projectile is a project organisation system (which emacs-dashboard has support f
 Honestly, Kitty is a perfectly fine terminal, and I have no strong desire to move to an emacs-based terminal, but I'll leave this here in case that changes ever.
 
 #+begin_src emacs-lisp
-
-  (use-package vterm
-    :ensure )
-
+(use-package vterm
+  :straight t)
 #+end_src
 
 * Sudo-Edit; Do you know who I am?
@@ -1408,58 +1358,40 @@ I think this is the thing that gives some nice hints when you partially enter a 
 #+begin_src emacs-lisp
 
   (use-package which-key
+    :straight t
     :init
     (which-key-mode 1)
     :diminish
     :config
     (setq which-key-side-window-location 'bottom
-          which-key-sort-order #'which-key-key-order-alpha
-          which-key-add-column-padding 1
-          which-key-max-display-columns nil
-          which-key-min-display-lines 56
-          which-key-side-window-slot -10
-          which-key-side-window-max-height 0.25
-          which-key-idle-delay 0.8
-          which-key-max-description-lenght 25
-          which-key-allow-imprecise-window-fit nil
-          which-key-seperator "➢"))
+	  which-key-sort-order #'which-key-key-order-alpha
+	  which-key-add-column-padding 1
+	  which-key-max-display-columns nil
+	  which-key-min-display-lines 56
+	  which-key-side-window-slot -10
+	  which-key-side-window-max-height 0.25
+	  which-key-idle-delay 0.8
+	  which-key-max-description-lenght 25
+	  which-key-allow-imprecise-window-fit nil
+	  which-key-seperator "➢"))
 
 #+end_src
+
+#+RESULTS:
+: t
 
 * YASnippet
 
-YASSnippet is the defacto snippet organiser for emacs and org. this may be breaking things...
+YASSnippet is the defacto snippet organiser for emacs and org.
 
-#+begin_src emacs-lisp
-
-  (use-package yasnippet
-    :ensure t
-    :after org
-    :config
-    (setq yas-snippet-dirs '("~/.config/emacs/snippets"))
-    (yas-global-mode 1)
-    :hook
-    (org-mode . yas-minor-mode)
-  )
+#+begin_src emacs-lisp :results none
+(use-package yasnippet
+  :straight t
+  :config
+  (setq yas-snippet-dirs '("~/.config/emacs/snippets"))
+  (yas-global-mode 1)
+  :hook
+  (org-mode . yas-minor-mode)
+)
 #+end_src
 
-* Display line numbers again
-
-I'm not sure why i need this
-
-#+begin_src emacs-lisp
-
-  ;;(add-hook 'org-mode-hook (lambda () (setq display-line-numbers 'relative)))
-
-  ;;(add-hook 'org-mode (lambda () (setq display-line-numbers 'relative)))
-
-  ;;(setq display-line-numbers-type 'relative)
-  ;;(global-display-line-numbers-mode)
-#+end_src
-
-* Ivy keymap
-#+begin_src emacs-nope
-
-  (define-key ivy-minibuffer-map (kbd "C-j") 'ivy-immediate-done) 
-
-#+end_src

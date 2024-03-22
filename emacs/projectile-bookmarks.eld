@@ -1,1 +1,0 @@
-("~/MyProjects/mcmcinscala/" "~/MyProjects/Notes/")

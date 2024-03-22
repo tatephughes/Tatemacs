@@ -1,68 +1,3 @@
-(defvar elpaca-installer-version 0.6)
-(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil
-                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-       (build (expand-file-name "elpaca/" elpaca-builds-directory))
-       (order (cdr elpaca-order))
-       (default-directory repo))
-  (add-to-list 'load-path (if (file-exists-p build) build repo))
-  (unless (file-exists-p repo)
-    (make-directory repo t)
-    (when (< emacs-major-version 28) (require 'subr-x))
-    (condition-case-unless-debug err
-        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (call-process "git" nil buffer t "clone"
-                                       (plist-get order :repo) repo)))
-                 ((zerop (call-process "git" nil buffer t "checkout"
-                                       (or (plist-get order :ref) "--"))))
-                 (emacs (concat invocation-directory invocation-name))
-                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                 ((require 'elpaca))
-                 ((elpaca-generate-autoloads "elpaca" repo)))
-            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-          (error "%s" (with-current-buffer buffer (buffer-string))))
-      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-  (unless (require 'elpaca-autoloads nil t)
-    (require 'elpaca)
-    (elpaca-generate-autoloads "elpaca" repo)
-    (load "./elpaca-autoloads")))
-(add-hook 'after-init-hook #'elpaca-process-queues)
-(elpaca `(,@elpaca-order))
-
-;; Install use-package support
-(elpaca elpaca-use-package
-  ;; Enable :elpaca use-package keyword.
-  (elpaca-use-package-mode)
-  ;; Assume :elpaca t unless otherwise specified.
-  (setq elpaca-use-package-by-default t))
-
-;; Block until current queue processed.
-(elpaca-wait)
-
-;;When installing a package which modifies a form used at the top-level
-;;(e.g. a package which adds a use-package key word),
-;;use `elpaca-wait' to block until that package has been installed/configured.
-;;For example:
-(use-package general :demand t)
-(elpaca-wait)
-
-
-;;Turns off elpaca-use-package-mode current declaration
-;;Note this will cause the declaration to be interpreted immediately (not deferred).
-;;Useful for configuring built-in emacs features.
-(use-package emacs :elpaca nil :config (setq ring-bell-function #'ignore))
-
-;; Don't install anything. Defer execution of BODY
-;; (elpaca nil (message "deferred"))
-
-(add-to-list 'load-path "~/.config/emacs/lisp/")
-
 ;; Quickly reload this file after making edits. Refers to a function defined under the tab 'neat-tricks'
 (global-set-key (kbd "C-c r") 'reload-init-file)
 
@@ -76,10 +11,10 @@
 (global-set-key (kbd "C-M-<right>") 'buf-move-right)
 
 ;; Move focus
-(global-set-key (kbd "C-<up>") 'windmove-up)
-(global-set-key (kbd "C-<down>") 'windmove-down)
-(global-set-key (kbd "C-<left>") 'windmove-left)
-(global-set-key (kbd "C-<right>") 'windmove-right)
+(global-set-key (kbd "C-M-<up>") 'windmove-up)
+(global-set-key (kbd "C-M-<down>") 'windmove-down)
+(global-set-key (kbd "C-M-<left>") 'windmove-left)
+(global-set-key (kbd "C-M-<right>") 'windmove-right)
 
 ;; Todo
 (global-set-key (kbd "C-c t") 'org-toggle-item)
@@ -115,6 +50,7 @@
 (define-key my-leader-key-map (kbd "1") 'delete-other-windows)
 (define-key my-leader-key-map (kbd "2") 'split-window-below)
 (define-key my-leader-key-map (kbd "3") 'split-window-right)
+(define-key my-leader-key-map (kbd "DEL") 'kill-current-buffer-and-window)
 
 (define-key my-leader-key-map (kbd "i l") 'org-insert-link)
 (define-key my-leader-key-map (kbd "i c") 'org-cite-insert)
@@ -195,6 +131,10 @@
 (define-key my-leader-key-map (kbd "C-f") 'swiper-backward)
 
 (define-key my-leader-key-map (kbd "#") 'flyspell-correct-word-before-point)
+
+(define-key my-leader-key-map (kbd "/") 'vterm)
+
+(define-key my-leader-key-map (kbd "?") 'chatgpt-shell)
 
 (defun reload-init-file ()
   (interactive) ;; (interactive allows you to call the function with M-x
@@ -356,51 +296,12 @@ one, an error is signaled."
   (end-of-line)
   (newline-and-indent))
 
-(defun jump-lines ()
-  "Prompt for a number and move down by that many lines."
-  (interactive)
-  (display-line-numbers-mode 1)
-  (let ((num (read-number "Number of lines to jump: ")))
-    (forward-line num))
-  (display-line-numbers-mode 0))
-
-(defun jump-lines-back ()
-  "Prompt for a number and move up by that many lines."
-  (interactive)
-  (display-line-numbers-mode 1)
-  (let ((num (read-number "Number of lines to jump: ")))
-    (forward-line (- num)))
-  (display-line-numbers-mode 0))
-
 (defun enclose-in-yas-snippet (start end)
   "Enclose the selected region within a YASnippet."
   (interactive "r")
   (let ((region (buffer-substring start end)))
     (delete-region start end)
     (insert (concat "${1:" region "}$0"))))
-
-(defun org-latex-refresh ()
-  "Delete the ./.ltximg directory and regenerate all the LaTeX fragments in the current org buffer."
-  (interactive)
-  ;; Delete the ./.ltximg directory if it exists
-  (let ((ltximg-dir (expand-file-name ".ltximg" default-directory)))
-    (when (file-exists-p ltximg-dir)
-      (delete-directory ltximg-dir t)))
-  ;; Regenerate all the LaTeX fragments in the buffer
-  (org-toggle-latex-fragment '(64))
-  (org-toggle-latex-fragment '(16))
-)
-
-(defun set-org-latex-scale ()
-  "Prompt the user to input a scale factor and set it for org-format-latex-options."
-  (interactive)
-  ;; Prompt the user to input a number
-  (let ((scale (read-number "Enter the scale factor: ")))
-    ;; Set the scale property of org-format-latex-options
-    (setq org-format-latex-options (plist-put org-format-latex-options :scale scale))
-    ;; Display a message to confirm the change
-    (message "The scale factor is now set to %s." scale))
-  (org-latex-refresh))
 
 (defun org-roam-add-citation ()
   (interactive)
@@ -412,22 +313,22 @@ one, an error is signaled."
       (insert "\n")
       (append-to-file (point-min) (point-max) filename))))
 
-(defun update-tag ()
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (let ((count 1))
-      (while (re-search-forward "\\tag{\\([0-9]+\\)}" nil t)
-        (replace-match (format "%d" count) nil nil nil 1)
-        (setq count (1+ count)))))
-  )
-
 (defun org-insert-image ()
   (interactive)
-  (let* ((path (read-file-name "Enter image path: "))
-         (caption (read-string "Enter caption: "))
-         (name (read-string "Enter name: ")))
-    (insert (format "#+CAPTION: %s\n#+NAME: fig:%s\n[[file:%s]]" caption name path))))
+    (let* ((path (read-file-name "Enter image path: "))
+           (caption (read-string "Enter caption: "))
+           (name (read-string "Enter name: ")))
+      (insert (format "#+CAPTION: %s\n#+NAME: fig:%s\n[[file:%s]]" caption name path))))
+
+(defun kill-current-buffer-and-window ()
+  "Kill the current buffer and close the window it is displayed in."
+  (interactive)
+  (let ((current-buffer (current-buffer))
+        (current-window (selected-window)))
+    (kill-buffer current-buffer)
+    ;; If there's more than one window, delete the current window.
+    (when (> (length (window-list)) 1)
+      (delete-window current-window))))
 
 ;; Make sure everything is utf-8
 
@@ -445,45 +346,48 @@ one, an error is signaled."
 
 ;; Actually set the fonts
 (set-face-attribute 'default nil
-                    :font "ProggyCleanSZNerdFont"
-                    :height 165
-                    :weight 'medium)
+		      :font "VictorMonoNerdFont"
+		      :height 165
+		      :weight 'medium)
 
 (set-face-attribute 'variable-pitch nil
-                    :font "Ubuntu"
-                    :height 180
-                    :weight 'medium)
-(set-face-attribute 'fixed-pitch nil
-                     :font "JetBrains Mono"
-                     :height 165
-                     :weight 'medium)
+		      :font "Ubuntu"
+		      :height 180
+		      :weight 'medium)
 
-;; For a bit of added spice (seems broken with ProggyClean)
+(set-face-attribute 'fixed-pitch nil
+		       :font "JetBrains Mono"
+		       :height 165
+		       :weight 'medium)
+
 (set-face-attribute 'font-lock-comment-face nil
-                    :slant 'italic)
+		      :slant 'italic)
 (set-face-attribute 'font-lock-keyword-face nil
-                      :slant 'italic)
+			:slant 'italic)
 
 ;; and to make sure client windows open with these fonts
-(add-to-list 'default-frame-alist '(font . "ProggyCleanSZNerdFont"))
+(add-to-list 'default-frame-alist '(font . "VictorMonoNerdFont"))
 
 (use-package doom-themes
-  :ensure t
-  :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-dracula t)
+    :straight t
+    :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+          doom-themes-enable-italic t) ; if nil, italics is universally disabled
+    (load-theme 'doom-dracula t)
 
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  (doom-themes-neotree-config)
-  ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  (doom-themes-treemacs-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+    ;; Enable custom neotree theme (all-the-icons must be installed!)
+    ;;(doom-themes-neotree-config)
+    ;; or for treemacs users
+    (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+    (doom-themes-treemacs-config)
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))
+
+(use-package ef-themes
+  :straight t)
 
 ;; In this house, we use shortcuts damnit!!!'
 
@@ -494,7 +398,7 @@ one, an error is signaled."
 (setq default-frame-alist '((undecorated . t)))
 
 ;; Some nice transparency
-(add-to-list 'default-frame-alist '(alpha-background . 90))
+(add-to-list 'default-frame-alist '(alpha-background . 100))
 
 ;; Make the modeline pretty
 ;;(use-package solaire-mode
@@ -502,7 +406,7 @@ one, an error is signaled."
 
 ;; or use doom-modeline
 (use-package doom-modeline
-  :ensure t
+  :straight t
   :config
   (doom-modeline-mode))
 
@@ -540,27 +444,81 @@ one, an error is signaled."
 
 (setq confirm-kill-processes nil)
 
-(use-package nerd-icons)
+(defun my/org-tab-behavior ()
+  "Custom TAB behavior for Org mode:
+- Use `cdlatex` behavior in LaTeX fragments.
+- Do not interfere with source block indentation.
+- Cycle visibility for headings and drawers outside LaTeX fragments.
+- Expand yasnippet at point if possible and not in a LaTeX fragment.
+- Otherwise, move forward to the next word but only if not at a heading, and not in a LaTeX fragment."
+  (interactive)
+  (cond
+   ;; If inside a LaTeX fragment, defer to cdlatex
+   ((and (derived-mode-p 'org-mode) (org-inside-LaTeX-fragment-p))
+    (cdlatex-tab))
+   
+   ;; If inside a source block, use the major mode's default TAB behavior
+   ((org-in-src-block-p)
+    (call-interactively (key-binding (kbd "TAB"))))
+   
+   ;; Check if we can expand a yasnippet; if yes, do it and prevent further action
+   ((yas-expand)
+    nil)
+   
+   ;; If at a heading or at a drawable structure, cycle visibility and prevent further action
+   ((or (org-at-heading-p) (org-at-drawer-p))
+    (org-cycle))
+
+   ;; Default action: move forward to the next word
+   (t (forward-to-word 1))))
+
+  (with-eval-after-load 'org
+    ;; Bind the custom function to TAB in Org mode.
+    ;; Make sure this doesn't conflict with other keybindings you might have.
+    (define-key org-mode-map (kbd "TAB") #'my/org-tab-behavior))
+
+(use-package shell-maker
+  :straight (:host github :repo "xenodium/chatgpt-shell" :files ("shell-maker.el")))
+
+(use-package chatgpt-shell
+  :requires shell-maker
+  :straight (:host github :repo "xenodium/chatgpt-shell" :files ("chatgpt-shell.el")))
+
+(setq chatgpt-shell-openai-key "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")
+
+(use-package smartparens-mode
+  :straight smartparens  ;; install the package
+  :hook (prog-mode text-mode markdown-mode org-mode) ;; add `smartparens-mode` to these hooks
+  :config
+  ;; load default config
+  (require 'smartparens-config))
+
+(use-package rainbow-delimiters
+  :straight t
+  :hook
+  (prog-mode . rainbow-delimiters-mode))
+
+(use-package nerd-icons
+  :straight t)
 
 (use-package dashboard
-    :ensure t 
-    :elpaca t
-    :init
-    (setq initial-buffer-choice 'dashboard-open)
-    (setq dashboard-set-heading-icons t)
-    (setq dashboard-set-file-icons t)
-    (setq dashboard-banner-logo-title "woah what how did he get here")
-    ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-    (setq dashboard-startup-banner "/home/tate/Tatemacs/wohhowdidhegethere/toby.png")  ;; use custom image as banner
-    (setq dashboard-center-content nil) ;; set to 't' for centered content
-    (setq dashboard-items '((recents . 20)
-                            (bookmarks . 10)))
-    :custom
-    (dashboard-modify-heading-icons '((recents . "file-text")
-                                      ))
-    :config
-    (dashboard-setup-startup-hook)
-    )
+	:straight t
+	:init
+	(setq initial-buffer-choice 'dashboard-open)
+	(setq dashboard-set-heading-icons t)
+	(setq dashboard-set-file-icons t)
+	(setq dashboard-banner-logo-title "woah what how did he get here")
+	;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+	(setq dashboard-startup-banner "/home/tate/.config/emacs/wohhowdidhegethere/toby.png")  ;; use custom image as banner
+	(setq dashboard-center-content nil) ;; set to 't' for centered content
+	(setq dashboard-items '((recents . 20)
+				(bookmarks . 10)))
+	:custom
+	(dashboard-modify-heading-icons '((recents . "file-text")
+					  ))
+	:config
+	(dashboard-setup-startup-hook)
+	)
 
 (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
 (setq dashboard-display-icons-p t) ;; display icons on both GUI and terminal
@@ -569,49 +527,30 @@ one, an error is signaled."
 (setq dashboard-icon-type 'nerd-icons) ;; use `nerd-icons' package
 
 (use-package beacon
-  :ensure t
+  :straight t
   :config (beacon-mode))
 
 ;;(setq display-line-numbers 'relative)
 ;;(global-display-line-numbers-mode)
 
-(use-package neotree)
-(global-set-key [f8] 'neotree-toggle)
-(setq neo-window-width 50)
-
 (use-package all-the-icons
-  :ensure t
+  :straight t
   :if (display-graphic-p))
-
 (use-package all-the-icons-dired
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 
 ;; clean up the mode-line
-(use-package diminish)
-
-;;(use-package smart-mode-line
-  ;;:config (sml/setup))
-
-;;(use-package mode-icons
-  ;;:config (mode-icons-mode))
-
-(use-package helpful)
-
-;; Note that the built-in `describe-function' includes both functions
-;; and macros. `helpful-function' is functions only, so we provide
-;; `helpful-callable' as a drop-in replacement.
-(global-set-key (kbd "C-h f") #'helpful-callable)
-
-(global-set-key (kbd "C-h v") #'helpful-variable)
-(global-set-key (kbd "C-h k") #'helpful-key)
-(global-set-key (kbd "C-h x") #'helpful-command)
+(use-package diminish
+	:straight t)
 
 (use-package counsel
+  :straight t
   :after ivy
   :diminish
   :config (counsel-mode))
 
 (use-package ivy
+  :straight t
   :custom
   (setq ivy-use-virtual-buffers t)
   (setq ivy-count-format "(%d/%d) ")
@@ -621,12 +560,12 @@ one, an error is signaled."
   (ivy-mode))
 
 ;;(use-package all-the-icons-ivy-rich
-  ;;:ensure t
+  ;;:straight t
   ;;:init (all-the-icons-ivy-rich-mode 1))
 
 (use-package ivy-rich
+  :straight t
   :after ivy
-  :ensure t
   :init (ivy-rich-mode 1)
   :custom
   (ivy-virtual-abbreviate 'full
@@ -634,25 +573,46 @@ one, an error is signaled."
    ivy-rich-path-style 'abbrev)
   :config
   (ivy-set-display-transformer 'ivy-switch-buffer
-                               'ivy-rich-switch-buffer-transformer))
+				 'ivy-rich-switch-buffer-transformer))
 
 
 (setq ivy-initial-inputs-alist
-      '((counsel-M-x . "")
-        ;; other commands can be added here
-       ))
+	'((counsel-M-x . "")
+	  ;; other commands can be added here
+	 ))
+
+(use-package perfect-margin
+  :straight t
+  :hook
+  (org-mode . perfect-margin-mode))
+
+(use-package popper
+  :straight t
+  :bind (("C-`"   . popper-toggle)
+         ("M-`"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          help-mode
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))                ; For echo area hints
 
 (use-package quarto-mode
+  :straight t
   :mode (("\\.Rmd" . poly-quarto-mode))
   )
 (setq markdown-enable-math t)
 
 (use-package haskell-mode
-  :ensure t)
+  :straight t)
 
 (use-package auctex
   :defer t
-  :ensure t)
+  :straight t)
 (setq org-highlight-latex-and-related '(native))
 
 (use-package cdlatex)
@@ -663,34 +623,17 @@ one, an error is signaled."
 ;; Line below currently breaks things
 ;; (add-hook 'after-save-hook #'org-latex-export-to-pdf)
 
-(use-package ess)
-
-(require 'package)
-
-;; Add melpa to your packages repositories
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-
-(package-initialize)
-
-;; Install use-package if not already installed
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-;; Enable defer and ensure by default for use-package Keep
-;; auto-save/backup files separate from source code:
-;; https://github.com/scalameta/metals/issues/1027
-(setq use-package-always-defer t
-      use-package-always-ensure t
-      backup-directory-alist `((".*" . ,temporary-file-directory))
-      auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+(use-package ess
+  :straight t)
 
 ;; Enable scala-mode for highlighting, indentation and motion commands
 (use-package scala-mode
+  :straight t
   :interpreter ("scala" . scala-mode))
 
 ;; Enable sbt mode for executing sbt commands
 (use-package sbt-mode
+  :straight t
   :commands sbt-start sbt-command
   :config
   ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
@@ -704,15 +647,17 @@ one, an error is signaled."
 
 ;; Enable nice rendering of diagnostics like compile errors.
 (use-package flycheck
+  :straight t
   :diminish
   :init (global-flycheck-mode))
 
 (use-package lsp-mode
+  :straight t
   :diminish
   ;; Optional - enable lsp-mode automatically in scala files
   ;; You could also swap out lsp for lsp-deffered in order to defer loading
   :hook  (scala-mode . lsp)
-         (lsp-mode . lsp-lens-mode)
+	   (lsp-mode . lsp-lens-mode)
   :config
   ;; Uncomment following section if you would like to tune lsp-mode performance according to
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
@@ -727,14 +672,16 @@ one, an error is signaled."
   (setq lsp-keep-workspace-alive nil))
 
 ;; Add metals backend for lsp-mode
-(use-package lsp-metals)
+(use-package lsp-metals
+  :straight t)
 
 ;; Enable nice rendering of documentation on hover
 ;;   Warning: on some systems this package can reduce your emacs responsiveness significally.
 ;;   (See: https://emacs-lsp.github.io/lsp-mode/page/performance/)
 ;;   In that case you have to not only disable this but also remove from the packages since
 ;;   lsp-mode can activate it automatically.
-(use-package lsp-ui)
+(use-package lsp-ui
+  :straight t)
 
 ;; lsp-mode supports snippets, but in order for them to work you need to use yasnippet
 ;; If you don't want to use snippets set lsp-enable-snippet to nil in your lsp-mode settings
@@ -746,24 +693,25 @@ one, an error is signaled."
 ;;   Company-lsp is no longer maintained and has been removed from MELPA.
 ;;   Please migrate to company-capf.
 (use-package company
+  :straight t
   :diminish
   :hook (prog-mode . company-mode)
-        (prog-mode . (lambda () (setq display-line-numbers 'absolute)))
-        (prog-mode . display-line-numbers-mode)
-        (org-mode . company-mode)
+	  (prog-mode . (lambda () (setq display-line-numbers 'absolute)))
+	  (prog-mode . display-line-numbers-mode)
+	  (org-mode . company-mode)
   :config
   (setq lsp-completion-provider :capf))
 
 ;; Posframe is a pop-up tool that must be manually installed for dap-mode
-(use-package posframe)
+(use-package posframe
+  :straight t)
 
 ;; Use the Debug Adapter Protocol for running tests and debugging
 (use-package dap-mode
+  :straight t
   :hook
   (lsp-mode . dap-mode)
   (lsp-mode . dap-ui-mode))
-
-
 
 (org-babel-do-load-languages
   'org-babel-load-languages
@@ -771,107 +719,69 @@ one, an error is signaled."
     (R . t)
     (latex . t)
     (haskell . t)
+    (python . t)
    )
 )
 
 ;; disable the confirmation message
 (setq org-confirm-babel-evaluate nil)
 
-(use-package toc-org
-  :commands toc-org-enable
-  :init (add-hook 'org-mode-hook 'toc-org-enable))
+;;(use-package toc-org
+;;  :straight t
+;;  :commands toc-org-enable
+;;  :init (add-hook 'org-mode-hook 'toc-org-enable))
 
-;; Make the different levels indented
 (add-hook 'org-mode-hook 'org-indent-mode)
-
-;; Use Bullets instead of Aterickses
-;;(use-package org-bullets)
-;;(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
 (electric-indent-mode -1)
 
-(require 'org-tempo) ;; now we can write '<s' then press <TAB> for immediate src action!
-
 (setq org-image-actual-width 500) ;; Sets the width of image previewq in org-mode
-
-;; Sets the size of LaTeX previews 
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 0.6))
 
 (add-hook 'org-mode-hook 'visual-line-mode)
 
-(use-package org-fragtog
-  :ensure t)
-(add-hook 'org-mode-hook 'org-fragtog-mode)
-
-(use-package math-preview
-  :load-path "/home/tate/.asdf/plugins/math-preview"
-  :custom (math-preview-command "/home/tate/.asdf/plugins/math-preview/math-preview.js"))
-
-(setq org-preview-latex-image-directory ".ltximg/")
-
-(use-package ox-pandoc)
-(use-package auto-org-md)
-(use-package ox-gfm)
-
-(defun org-gfm-export-to-markdown-with-mdoc ()
-  "Save and Export current buffer to a GitHub Flavored Markdown file with mdoc for Scala."
-  (interactive)
-
-  (let* ((single-window (one-window-p))
-         (name (file-name-sans-extension (file-name-nondirectory buffer-file-name)))
-         (new-name (concat "./docs/" name ".md")))
-    (save-buffer)
-    (require 'ox-gfm)
-    (org-gfm-export-as-markdown)
-    (goto-char (point-min))
-    (while (search-forward "```scala" nil t)
-      (replace-match "```scala mdoc"))
-    (goto-char (point-min))
-    (while (search-forward "```scala mdoc\n//silent" nil t)
-      (replace-match "```scala mdoc:silent"))
-    (goto-char (point-min))
-    (while (search-forward "```scalnope" nil t)
-      (replace-match "```scala"))
-    (goto-char (point-min))
-    (while (search-forward "```emacs-lisp" nil t)
-      (replace-match "```lisp"))
-    (write-file new-name)
-    (switch-to-prev-buffer)
-    (when single-window
-      (delete-window)
-      )))
-
-
-  ;;(save-buffer)
-  ;;(require 'ox-gfm)
-  ;;(org-gfm-export-as-markdown)
-  ;;(goto-char (point-min))
-  ;;(while (search-forward "```scala" nil t)
-  ;;  (replace-match "```scala mdoc"))
-  ;;(write-file "./docs/readme.md")
-  ;;(delete-window))
+;;(use-package org
+;;  :straight `(org
+;;              :fork (:host nil
+;;                     :repo "https://git.tecosaur.net/tec/org-mode.git"
+;;                     :branch "dev"
+;;                     :remote "tecosaur")
+;;              :files (:defaults "etc")
+;;              :build t
+;;              :pre-build
+;;              (with-temp-file "org-version.el"
+;;               (require 'lisp-mnt)
+;;               (let ((version
+;;                      (with-temp-buffer
+;;                        (insert-file-contents "lisp/org.el")
+;;                        (lm-header "version")))
+;;                     (git-version
+;;                      (string-trim
+;;                       (with-temp-buffer
+;;                         (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
+;;                         (buffer-string)))))
+;;                (insert
+;;                 (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
+;;                 (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
+;;                 "(provide 'org-version)\n")))
+;;              :pin nil))
 
 (use-package org-download
-  :ensure t
+  :straight t
 )
 
 (use-package org-modern
+  :straight t
   :hook
   (org-mode . org-modern-mode)
   :config
   (global-org-modern-mode))
 
-(use-package org-ref
-  :config
-  (require 'org-ref-ivy)
-)
+;;(add-hook 'org-mode-hook 'flyspell-mode)
 
-(add-hook 'org-mode-hook 'flyspell-mode)
-
-(setq org-return-follows-link t)
+;;(setq org-return-follows-link t)
 
 (use-package org-roam
-  :ensure t
+  :straight t
   :custom
   (org-roam-directory (file-truename "~/RoamNotes"))
   :bind (("C-c n l" . org-roam-buffer-toggle)
@@ -893,53 +803,50 @@ one, an error is signaled."
   (require 'org-roam-protocol))
 
 (use-package org-roam-ui
-    :after org-roam
-    :ensure t
-    :config
-    (setq org-roam-ui-sync-theme t
-          org-roam-ui-follow t
-          org-roam-ui-update-on-save t
-          org-roam-ui-open-on-start t))
+  :after org-roam
+  :straight t
+  :config
+  (setq org-roam-ui-sync-theme t
+	  org-roam-ui-follow t
+	  org-roam-ui-update-on-save t
+	  org-roam-ui-open-on-start t))
 
 (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file)
 
 (use-package no-littering)
 
+(use-package multiple-cursors
+  :straight t)
+(global-set-key (kbd "<menu> <menu>") 'mc/edit-lines)
+
 (use-package vterm
-  :ensure )
+  :straight t)
 
 (use-package sudo-edit)
 
 (use-package which-key
+  :straight t
   :init
   (which-key-mode 1)
   :diminish
   :config
   (setq which-key-side-window-location 'bottom
-        which-key-sort-order #'which-key-key-order-alpha
-        which-key-add-column-padding 1
-        which-key-max-display-columns nil
-        which-key-min-display-lines 56
-        which-key-side-window-slot -10
-        which-key-side-window-max-height 0.25
-        which-key-idle-delay 0.8
-        which-key-max-description-lenght 25
-        which-key-allow-imprecise-window-fit nil
-        which-key-seperator "➢"))
+	  which-key-sort-order #'which-key-key-order-alpha
+	  which-key-add-column-padding 1
+	  which-key-max-display-columns nil
+	  which-key-min-display-lines 56
+	  which-key-side-window-slot -10
+	  which-key-side-window-max-height 0.25
+	  which-key-idle-delay 0.8
+	  which-key-max-description-lenght 25
+	  which-key-allow-imprecise-window-fit nil
+	  which-key-seperator "➢"))
 
 (use-package yasnippet
-  :ensure t
-  :after org
+  :straight t
   :config
   (setq yas-snippet-dirs '("~/.config/emacs/snippets"))
   (yas-global-mode 1)
   :hook
   (org-mode . yas-minor-mode)
 )
-
-;;(add-hook 'org-mode-hook (lambda () (setq display-line-numbers 'relative)))
-
-;;(add-hook 'org-mode (lambda () (setq display-line-numbers 'relative)))
-
-;;(setq display-line-numbers-type 'relative)
-;;(global-display-line-numbers-mode)

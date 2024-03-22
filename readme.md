@@ -19,12 +19,11 @@ I believe that is all for it to work.
 
 # Installation
 
-Just drop the `./emacs` file into \~~.config/~. Straight should
-bootstrap itself and install all the packages.
+Just drop the ./emacs file into ./config. Straight should bootstrap
+itself and install all the packages.
 
 <figure id="fig:toby">
-<img
-src="file:///home/tate/gitclones/Tatemacs/emacs/wohhowdidhegethere/toby.gif" />
+<img src="./emacs/wohhowdidhegethere/toby.gif" />
 <figcaption>why do you keep him around? he's not even paying
 rent…</figcaption>
 </figure>

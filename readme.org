@@ -1,5 +1,7 @@
 #+TITLE: Tatemacs
 
+LAST UPDATE: 2024/04/02
+
 This is my emacs config, backed up to github for easy deployment to any new machines.
 
 * Requirements
@@ -16,3 +18,4 @@ Just drop the ./emacs file into ./config. Straight should bootstrap itself and i
 #+CAPTION: why do you keep him around? he's not even paying rent...
 #+NAME: fig:toby
 [[file:./emacs/wohhowdidhegethere/toby.gif]]
+

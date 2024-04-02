@@ -2,7 +2,7 @@
 
 This is my emacs config, backed up to github for easy deployment to any new machines.
 
-* Requirments
+* Requirements
 - [[https://archlinux.org/packages/extra/x86_64/texlive-bin/][texlive]] and [[https://archlinux.org/packages/extra/any/texlive-latexextra/][texlive-latexextra]] or your environment's equivalent
 - [[https://github.com/ryanoasis/nerd-fonts][nerd fonts]], specifically 'Victor Mono'
 - [[https://archlinux.org/packages/extra/x86_64/cmake/][cmake]]

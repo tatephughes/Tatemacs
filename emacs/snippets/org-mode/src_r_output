@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: R with output
+# key: <r
+# --
+
+#+begin_src R :session example :results output :exports both
+$0
+#+end_src

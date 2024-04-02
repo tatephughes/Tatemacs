@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Alinged Environment
+# key: <a
+# --
+
+$$\begin{aligned}
+$0
+\end{aligned}$$

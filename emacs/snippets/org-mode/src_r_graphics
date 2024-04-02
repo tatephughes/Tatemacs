@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: R with graphics output
+# key: <rg
+# --
+
+
+#+begin_src R :session example :results graphics file :file Figures/$0 :height 600 :width 600 :exports both
+
+#+end_src

@@ -52,6 +52,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ccm-recenter-at-end-of-file t)
  '(custom-safe-themes
    '("95e934b092694a2624adb653043d1dc016a6712fa27b788f9ff4dffb8ee08290" "b5fd9c7429d52190235f2383e47d340d7ff769f141cd8f9e7a4629a81abc6b19" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default))
  '(doc-view-continuous t)
@@ -62,10 +63,22 @@
      (search . " %i")))
  '(org-babel-js-cmd "node")
  '(org-export-backends '(html latex md gfm))
- '(org-highlight-latex-and-related nil)
+ '(org-hide-emphasis-markers t)
+ '(org-highlight-latex-and-related '(native latex script entities))
+ '(org-image-align 'center)
  '(org-latex-hyperref-template nil)
  '(org-modern-hide-stars "")
+ '(org-roam-capture-templates
+   '(("d" "default" plain "%?" :target
+      (file+head "${slug}.org" "#+title: ${title}\12")
+      :unnarrowed t)))
+ '(org-roam-dailies-capture-templates
+   '(("d" "default" entry "* %?" :target
+      (file+head ".org" "#+title: %<%Y-%m-%d>\12"))))
  '(org-src-preserve-indentation t)
+ '(org-startup-with-latex-preview t)
+ '(org-trello-current-prefix-keybinding "C-c o" nil (org-trello))
+ '(org-trello-files '("~/orgfiles/phd_tasks.org") nil (org-trello))
  '(package-selected-packages '(edit-indirect)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -73,3 +86,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(smartparens-global-mode)
+(sp-pair "$" "$")

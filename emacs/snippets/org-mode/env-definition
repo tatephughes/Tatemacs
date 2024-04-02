@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: Definition
+# key: <def
+# --
+
+#+ATTR_LATEX: :options [$0]
+#+begin_definition
+
+#+end_defintion

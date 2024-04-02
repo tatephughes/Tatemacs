@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Align Environment
+# key: <aa
+# --
+
+\begin{align}
+$0
+\end{align}

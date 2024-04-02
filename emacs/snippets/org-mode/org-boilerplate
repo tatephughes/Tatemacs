@@ -1,14 +1,14 @@
 # -*- mode: snippet -*-
 # name: Boilerplate
 # key: <h
-# --
+# -
 
 :BOILERPLATE:
 #+BIBLIOGRAPHY: Bibliography.bib
 #+LATEX_CLASS: article
 #+LATEX_CLASS_OPTIONS: [letterpaper]
 #+OPTIONS: toc:nil
-#+LATEX_HEADER: \usepackage{amsmath,amsfonts,amsthm,amssymb,tikz,tkz-graph}
+#+LATEX_HEADER: \usepackage{amsmath,amsfonts,amsthm,amssymb,bm,tikz,tkz-graph}
 #+LATEX_HEADER: \usetikzlibrary{arrows}
 #+LATEX_HEADER: \usetikzlibrary{bayesnet}
 #+LATEX_HEADER: \usetikzlibrary{matrix}
@@ -27,8 +27,24 @@
 #+LATEX_HEADER: \newcommand{\bzeta}{\boldsymbol{\zeta}}
 #+LATEX_HEADER: \newcommand{\boldeta}{\boldsymbol{\eta}}
 #+LATEX_HEADER: \newcommand{\btheta}{\boldsymbol{\theta}}
+#+LATEX_HEADER: \newcommand{\biota}{\boldsymbol{iota}}
+#+LATEX_HEADER: \newcommand{\bkappa}{\boldsymbol{\kappa}}
 #+LATEX_HEADER: \newcommand{\blambda}{\boldsymbol{\lambda}}
 #+LATEX_HEADER: \newcommand{\bmu}{\boldsymbol{\mu}}
 #+LATEX_HEADER: \newcommand{\bnu}{\boldsymbol{\nu}}
+#+LATEX_HEADER: \newcommand{\bzi}{\boldsymbol{\zi}}
+#+LATEX_HEADER: \newcommand{\bomicron}{\boldsymbol{\omicron}}
+#+LATEX_HEADER: \newcommand{\bpi}{\boldsymbol{\pi}}
+#+LATEX_HEADER: \newcommand{\brho}{\boldsymbol{\rho}}
+#+LATEX_HEADER: \newcommand{\bsigma}{\boldsymbol{\sigma}}
+#+LATEX_HEADER: \newcommand{\btau}{\boldsymbol{\tau}}
+#+LATEX_HEADER: \newcommand{\bupsilon}{\boldsymbol{\upsilon}}
+#+LATEX_HEADER: \newcommand{\bphi}{\boldsymbol{\phi}}
+#+LATEX_HEADER: \newcommand{\bchi}{\boldsymbol{\chi}}
+#+LATEX_HEADER: \newcommand{\bpsi}{\boldsymbol{\psi}}
+#+LATEX_HEADER: \newcommand{\bomega}{\boldsymbol{\omega}}
+#+LATEX_HEADER: \newcommand{\bs}{\boldsymbol}
+#+LATEX_HEADER: \newcommand*{\mat}[1]{\bm{#1}}
+#+LATEX_HEADER: \renewcommand*{\vec}[1]{\boldsymbol{\mathbf{#1}}}
 #+EXPORT_EXCLUDE_TAGS: noexport
 :END:

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: Matrix Environment
+# key: <mat
+# --
+
+\begin{bmatrix} $0 \end{bmatrix}

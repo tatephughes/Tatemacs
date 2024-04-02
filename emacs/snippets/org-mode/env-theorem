@@ -3,6 +3,7 @@
 # key: <thm
 # --
 
+#+ATTR_LATEX: :options [$0]
 #+begin_theorem
-$0
+
 #+end_theorem

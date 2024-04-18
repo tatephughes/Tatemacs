@@ -3,7 +3,6 @@
 # key: <rg
 # --
 
-
-#+begin_src R :session example :results graphics file :file Figures/$0 :height 600 :width 600 :exports both
-
+#+begin_src R :session example :results graphics file :file ~/RoamNotes/Figures/.png :height 600 :width 600 :exports both
+$0
 #+end_src

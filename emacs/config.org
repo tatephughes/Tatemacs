@@ -6,40 +6,34 @@
 
 *** Old Bindings
 
-Custom keybinds. As the to-do list suggests, I should get into ~General~, setting a overall header to something unique like ~C-<space>~ then using a bunch of pneumonic commands, for a sort of 'vim-emacs' mashup. ~C-<space>~ is currently bound to some marking feature though.
+Custom keybinds, set before i moved everything to be pneumonic after <menu>.
 
 #+begin_src emacs-lisp
-  ;; Quickly reload this file after making edits. Refers to a function defined under the tab 'neat-tricks'
-  (global-set-key (kbd "C-c r") 'reload-init-file)
+;; Quickly reload this file after making edits. Refers to a function defined under the tab 'neat-tricks'
+(global-set-key (kbd "C-c r") 'reload-init-file)
 
-  ;; Quickly get to this file
-  (global-set-key (kbd "C-c C-<return>") 'go-to-config)
+;; Quickly get to this file
+(global-set-key (kbd "C-c C-<return>") 'go-to-config)
 
-  ;; Rearrange the buffers
-  (global-set-key (kbd "C-M-<up>") 'buf-move-up)
-  (global-set-key (kbd "C-M-<down>") 'buf-move-down)
-  (global-set-key (kbd "C-M-<left>") 'buf-move-left)
-  (global-set-key (kbd "C-M-<right>") 'buf-move-right)
+;; Rearrange the buffers
+(global-set-key (kbd "C-M-<up>") 'buf-move-up)
+(global-set-key (kbd "C-M-<down>") 'buf-move-down)
+(global-set-key (kbd "C-M-<left>") 'buf-move-left)
+(global-set-key (kbd "C-M-<right>") 'buf-move-right)
 
-  ;; Move focus
-  (global-set-key (kbd "C-M-<up>") 'windmove-up)
-  (global-set-key (kbd "C-M-<down>") 'windmove-down)
-  (global-set-key (kbd "C-M-<left>") 'windmove-left)
-  (global-set-key (kbd "C-M-<right>") 'windmove-right)
+;; Move focus
+(global-set-key (kbd "C-M-<up>") 'windmove-up)
+(global-set-key (kbd "C-M-<down>") 'windmove-down)
+(global-set-key (kbd "C-M-<left>") 'windmove-left)
+(global-set-key (kbd "C-M-<right>") 'windmove-right)
 
-  ;; Todo
-  (global-set-key (kbd "C-c t") 'org-toggle-item)
-  (global-set-key (kbd "C-c d") 'org-todo)
+;; Todo
+(global-set-key (kbd "C-c t") 'org-toggle-item)
+(global-set-key (kbd "C-c d") 'org-todo)
 
-  ;; Return to dashboard
-  (global-set-key (kbd "C-c <return>") 'dashboard-open)
-
-  ;; Org-Agenda Shortcut
-  (global-set-key (kbd "C-c o") 'org-agenda)
+;; Return to dashboard
+(global-set-key (kbd "C-c <return>") 'dashboard-open)
 #+end_src
-
-#+RESULTS:
-: org-agenda
 
 *** Leader key definitions
 
@@ -121,11 +115,13 @@ Below is a modified setup from [[http://xahlee.info/emacs/emacs/emacs_menu_app_k
 *** Navigation
 Any 'go to' style commands
 
-#+begin_src emacs-lisp
-  (define-key my-leader-key-map (kbd "g c") 'go-to-config)
-  (define-key my-leader-key-map (kbd "g d") 'dashboard-open)
-  (define-key my-leader-key-map (kbd "g a") 'org-agenda)
-  (define-key my-leader-key-map (kbd "x f") 'find-file)
+#+begin_src emacs-lisp :results none
+(define-key my-leader-key-map (kbd "g c") (lambda () (interactive) (find-file "~/.config/emacs/config.org")))
+(define-key my-leader-key-map (kbd "g t") (lambda () (interactive) (find-file "~/orgfiles/Tasks.org")))
+(define-key my-leader-key-map (kbd "g s") (lambda () (interactive) (dired "~/.config/emacs/snippets/org-mode")))
+(define-key my-leader-key-map (kbd "g d") 'dashboard-open)
+(define-key my-leader-key-map (kbd "g a") 'org-agenda-execute)
+(define-key my-leader-key-map (kbd "x f") 'find-file)
 #+end_src
 
 *** Code execution
@@ -166,6 +162,7 @@ Keybinds relating to running code.
 (define-key my-leader-key-map (kbd "d f") 'delete-line-forward)
 (define-key my-leader-key-map (kbd "d b") 'delete-line-backward)
 (define-key my-leader-key-map (kbd "d p") 'delete-paragraph)
+(define-key my-leader-key-map (kbd "d w") 'delete-word)
 #+end_src
 
 #+begin_src emacs-lisp :results none
@@ -187,10 +184,13 @@ Keybinds relating to running code.
 (define-key my-leader-key-map (kbd "s a") 'org-save-all-org-buffers)
 (define-key my-leader-key-map (kbd "s s") 'save-buffer)
 #+end_src
+
 *** Toggles
+
 #+begin_src emacs-lisp
 (define-key my-leader-key-map (kbd "t l") 'global-display-line-numbers-mode)
 #+end_src
+
 *** Swiper
 Swiper is a search replacement from the *ivy* package. Has a nicer little interface. I've kept the original 'C-s' binding to normal isearch for muscle memory though.
 
@@ -200,11 +200,14 @@ Swiper is a search replacement from the *ivy* package. Has a nicer little interf
   (define-key my-leader-key-map (kbd "C-f") 'swiper-backward)
 
 #+end_src
+
 *** Flyspell
 
-#+begin_src emacs-lisp
-(define-key my-leader-key-map (kbd "#") 'flyspell-correct-word-before-point)
+#+begin_src emacs-lisp :results none
+(define-key my-leader-key-map (kbd "a w") 'flyspell-correct-word-before-point)
+(define-key my-leader-key-map (kbd "a a") 'flyspell-auto-correct-word)
 #+end_src
+
 *** Poppers
 
 **** vterm
@@ -226,12 +229,13 @@ Swiper is a search replacement from the *ivy* package. Has a nicer little interf
 (define-key my-leader-key-map (kbd "t r") 'rand-theme)
 #+end_src
 
-*** Ac un ams lwc
+*** Ac un am lwc
 
 #+begin_src emacs-lisp
 ;; make the menu key as leader key
 (global-set-key (kbd "<menu>") 'my-leader-key-map)
 #+end_src
+
 * Some neat tricks
 
 Here we actually define the functions references in the above keybindings. I've moved this up towards the top of the doc for better stability.
@@ -245,12 +249,6 @@ Here we actually define the functions references in the above keybindings. I've 
     (previous-buffer))
 #+end_src
 
-*** Go to config
-#+begin_src emacs-lisp
-  (defun go-to-config ()
-    (interactive)
-    (find-file "~/.config/emacs/config.org"))
-#+end_src
 *** Buffer-Move
 Can't actually remember where i got this code oops
 
@@ -411,7 +409,15 @@ Quick commands to select and kill things
   (let ((begin (point))
         (end (line-beginning-position)))
     (delete-region begin end)))
+
+(defun delete-word ()
+  "Delete the whole word under the point."
+  (interactive)
+  (let ((start (progn (backward-word) (point)))
+        (end (progn (forward-word) (point))))
+    (delete-region start end)))
 #+end_src
+
 *** Motions
 
 #+begin_src emacs-lisp
@@ -462,6 +468,7 @@ Quick commands to select and kill things
       (message "The scale factor is now set to %s." scale))
     (org-latex-refresh))
 
+
 #+end_src
 
 *** Add to Roam Bibliography
@@ -490,6 +497,7 @@ Adds the contents of the clipboard to the bibliography for roam.
              (name (read-string "Enter name: ")))
         (insert (format "#+CAPTION: %s\n#+NAME: fig:%s\n[[file:%s]]" caption name path))))
 #+end_src
+
 *** Buffer murder
 
 #+begin_src emacs-lisp :results none
@@ -635,42 +643,143 @@ Miscellaneous aesthetic changes
 
 get your life organised, nerd
 
+** Tweaks
+
+#+begin_src emacs-lisp :results none
+(setq org-agenda-hide-tags-regexp ".*")
+(setq org-agenda-prefix-format '(
+				 (agenda . "%?i %?-12t %s")
+				 (todo . " ")
+				 (tags . "%s %?t - ")
+				 (search . " ")))
+(setq org-agenda-window-setup 'current-window)
+(setq org-agenda-skip-timestamp-if-done t)
+#+end_src
+
+*** Todo Keywords
+
+#+begin_src emacs-lisp :results none
+(setq org-todo-keywords
+      '((sequence "TODO" "DEADLINED" "IN PROGRESS" "|" "DONE" "ON HOLD")))
+#+end_src
+
 ** Agenda Files
 
 Seems like this variable likes to change itself, don't be afraid to ~C-h v org-agenda-files~ to check it and delete everything if need be, the below code will add in the necessary files.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results none
 (setq org-agenda-files
-      '("~/RoamNotes"))
+      '("~/RoamNotes"
+	"~/.config/emacs/config.org"
+	"~/orgfiles/Supervisor_meetings"
+	"~/orgfiles/Tasks.org"))
 #+end_src
 
 ** Custom agenda
 
 Custom agenda view; so far it's just one for all my PhD tasks. This is very much getting out of hand though, and I'd also like to know how to make this view a bit cleaner.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results none
   (setq org-agenda-custom-commands
         '(("v" "PhD Tasks"
-           ((tags "general"
+	   ((agenda "" ((org-agenda-span 7)))
+	    (todo "DEADLINED"
+		  ((org-agenda-overriding-header "Deadlined Assignments")))
+	    (todo "IN PROGRESS"
+		  ((org-agenda-overriding-header "Actively being worked on")))
+	    (tags "events"
+                  ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                   (org-agenda-overriding-header "Upcoming Events")))
+	    (tags "projects"
+                  ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                   (org-agenda-overriding-header "Project Tasks")))
+            (tags "general"
                   ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                    (org-agenda-overriding-header "General Statistics Tasks")))
             (tags "org"
                   ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                   (org-agenda-overriding-header "Tasks relating to org and the config file")))
+                   (org-agenda-overriding-header "Organisational Tasks")))
             (tags "reading"
                   ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                   (org-agenda-overriding-header "Tasks relating to the reading list")))
+                   (org-agenda-overriding-header "Reading")))
+	    (todo "ON HOLD"
+		  ((org-agenda-overriding-header "Put on hold")))
             ))))
 #+end_src
 
-* Centered Cursor mode
+** Super agenda
+
+#+begin_src emacs-nope :results none
+(use-package org-super-agenda
+  :straight t)
+
+(let ((org-super-agenda-groups
+       '(;; Each group has an implicit boolean OR operator between its selectors.
+         (:name "Today"  ; Optionally specify section name
+                :time-grid t  ; Items that appear on the time grid
+                :todo "TODAY")  ; Items that have this TODO keyword
+         (:name "Important"
+                ;; Single arguments given alone
+                :tag "bills"
+                :priority "A")
+         ;; Set order of multiple groups at once
+         (:order-multi (2 (:name "Shopping in town"
+                                 ;; Boolean AND group matches items that match all subgroups
+                                 :and (:tag "shopping" :tag "@town"))
+                          (:name "Food-related"
+                                 ;; Multiple args given in list with implicit OR
+                                 :tag ("food" "dinner"))
+                          (:name "Personal"
+                                 :habit t
+                                 :tag "personal")
+                          (:name "Space-related (non-moon-or-planet-related)"
+                                 ;; Regexps match case-insensitively on the entire entry
+                                 :and (:regexp ("space" "NASA")
+                                               ;; Boolean NOT also has implicit OR between selectors
+                                               :not (:regexp "moon" :tag "planet")))))
+         ;; Groups supply their own section names when none are given
+         (:todo "WAITING" :order 8)  ; Set order of this section
+         (:todo ("SOMEDAY" "TO-READ" "CHECK" "TO-WATCH" "WATCHING")
+                ;; Show this group at the end of the agenda (since it has the
+                ;; highest number). If you specified this group last, items
+                ;; with these todo keywords that e.g. have priority A would be
+                ;; displayed in that group instead, because items are grouped
+                ;; out in the order the groups are listed.
+                :order 9)
+         (:priority<= "B"
+                      ;; Show this section after "Today" and "Important", because
+                      ;; their order is unspecified, defaulting to 0. Sections
+                      ;; are displayed lowest-number-first.
+                      :order 1)
+         ;; After the last group, the agenda will display items that didn't
+         ;; match any of these groups, with the default order position of 99
+         )))
+  (org-agenda nil "a"))
+#+end_src
+
+* Centred Cursor mode
 
 #+begin_src emacs-lisp :results none
 (use-package centered-cursor-mode
-  :straight t)
+  :straight t
+  :config
+  ;; Remap scroll wheel behavior in centered cursor mode
+  (define-key ccm-map [S-wheel-up]  'previous-line)
+  (define-key ccm-map [S-wheel-down]  'next-line)
+  (define-key ccm-map [C-wheel-up]  'previous-line)
+  (define-key ccm-map [C-wheel-down]  'next-line)
+  (define-key ccm-map [wheel-up]  'previous-line)
+  (define-key ccm-map [wheel-down]  'next-line)
+  (define-key ccm-map [S-mouse-4]  'previous-line)
+  (define-key ccm-map [S-mouse-5]  'next-line)
+  (define-key ccm-map [C-mouse-4]  'previous-line)
+  (define-key ccm-map [C-mouse-5]  'next-line)
+  (define-key ccm-map [mouse-4]  'previous-line)
+  (define-key ccm-map [mouse-5]  'next-line)
+  )
 #+end_src
 
-Centered cursor, without centered cursor mode. An unusual way of doing it, but i think this makes the most sense.
+Centred cursor, without centered cursor mode. An unusual way of doing it, but i think this makes the most sense.
 
 #+begin_src emacs-lisp :results none
 ;;(defun previous-line-and-recenter ()
@@ -713,6 +822,13 @@ Centered cursor, without centered cursor mode. An unusual way of doing it, but i
 ;;    (global-set-key (kbd "C-p") 'previous-line)
 ;;    (global-set-key (kbd "<down>") 'next-line)
 ;;    (global-set-key (kbd "<up>") 'previous-line)))
+
+(global-set-key (kbd "<mouse-4>") 'next-line)
+(global-set-key (kbd "<mouse-5>") 'previous-line)
+;;(global-set-key (kbd "<wheel-down>") 'next-line)
+;;(global-set-key (kbd "<wheel-up>") 'previous-line)
+;;(global-set-key (kbd "<triple-wheel-down>") 'next-line)
+;;(global-set-key (kbd "<triple-wheel-up>") 'previous-line)
 #+end_src
 
 * Conveniences
@@ -815,7 +931,8 @@ Use with caution, obviously, but right now there are no 'active processes' that 
 (with-eval-after-load 'org
   ;; Bind the custom function to TAB in Org mode.
   ;; Make sure this doesn't conflict with other keybindings you might have.
-  (define-key org-mode-map (kbd "TAB") #'my/org-tab-behavior))
+  (define-key org-mode-map (kbd "TAB") #'my/org-tab-behavior)
+  (define-key org-mode-map (kbd "C-<tab>") 'backward-word))
 #+end_src
 
 * ChatGPT
@@ -849,8 +966,8 @@ The nice dashboard. wait whats that fluffy white thing
 	;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
 	(setq dashboard-startup-banner "~/.config/emacs/wohhowdidhegethere/toby.png")  ;; use custom image as banner
 	(setq dashboard-center-content nil) ;; set to 't' for centered content
-	(setq dashboard-items '((recents . 20)
-				(bookmarks . 10)))
+	(setq dashboard-items '((bookmarks . 10)
+				(recents . 10)))
 	:custom
 	(dashboard-modify-heading-icons '((recents . "file-text")
 					  ))
@@ -879,6 +996,7 @@ Make the cursor glowwww
   ;;:config (beacon-mode)
   )
 #+end_src
+
 ** Cursor Settings
 
 Make the cursor into a line, rather than a barely
@@ -915,30 +1033,20 @@ A nice file navigator for bigger projects
 That line at the bottom of the screen with key onfo (current buffer, file paths, modes, zoom etc etc). I'm not completely happy with it aesthetically, but it'll do for now.
 
 #+begin_src emacs-lisp
-      ;; clean up the mode-line
-      (use-package diminish
-	:straight t)
+;; clean up the mode-line
+(use-package diminish
+  :straight t)
 #+end_src
 
-* Helpful
+** Olivetti mode
 
-Helpful is a package that replaces some of the default help commands with improved versions.
-
-Gonna decide on how /helpful/ it really is soon, although it seems good so far. Got a few errors initially booting it up though, so we'll see.
-
-#+begin_nope emacs-lisp
-
-  (use-package helpful)
-
-  ;; Note that the built-in `describe-function' includes both functions
-  ;; and macros. `helpful-function' is functions only, so we provide
-  ;; `helpful-callable' as a drop-in replacement.
-  (global-set-key (kbd "C-h f") #'helpful-callable)
-
-  (global-set-key (kbd "C-h v") #'helpful-variable)
-  (global-set-key (kbd "C-h k") #'helpful-key)
-  (global-set-key (kbd "C-h x") #'helpful-command)
-
+#+begin_src emacs-lisp :results none
+(use-package olivetti
+  :straight t
+  :config
+  (setq olivetti-body-width 150)
+  :hook
+  (org-agenda-mode . olivetti-mode))
 #+end_src
 
 * HTMLize
@@ -1023,9 +1131,12 @@ Does emacs really speak statistics? I don't think emacs can speak.
 
 (tbf this is a really good package that plays so nicely with org babel, I love this, even if I don't love R)
 
-#+begin_src emacs-lisp
-    (use-package ess
-      :straight t)
+#+begin_src emacs-lisp :results none
+(use-package ess
+  :straight t)
+
+(setq ess-ask-for-ess-directory nil)
+(setq ess-startup-directory nil)
 #+end_src
 
 ** Scala
@@ -1124,7 +1235,7 @@ This code is taken from somewhere and has a bunch of redundancy; clean this up!
 
 #+end_src
 
-*** TODO Clean this scala-installer up, seperate out the stuff that should be elsewhere, like ~company mode~, and remove the redundant bits :org:
+*** TODO [#C] Clean this scala-installer up, seperate out the stuff that should be elsewhere, like ~company mode~, and remove the redundant bits :org:
 ** Company Mode
 
 
@@ -1172,17 +1283,10 @@ Emacs litters. a lot. This attempts to reduce that, and does a reasonably good j
 #+end_src
 
 * Org-Mode, but great
-** Shootin' Bullets
-
-This is a package to add pretty bullet points to org mode. With the font I am currently using they do look out of place, so most of this is disabled (other than the indentation which I do tend to gravitate towards).
-
-#+begin_src emacs-lisp
-  (add-hook 'org-mode-hook 'org-indent-mode)
+** Add indents to headings
+#+begin_src emacs-lisp :results none
+(add-hook 'org-mode-hook 'org-indent-mode)
 #+end_src
-
-** Disable that weird indentation
-
-Code blocks have some strange indentation behaviour sometimes, and this seems to at least improve it.
 
 ** Settings Tweaks
 
@@ -1192,9 +1296,13 @@ Miscellaneous settings tweaks for org mode. I may move the latex scale thing els
 ;;(setq org-image-actual-width t) ;; Sets the width of image previewq in org-mode
 (add-hook 'org-mode-hook 'visual-line-mode)
 (add-hook 'org-mode-hook 'abbrev-mode)
+
+;;(global-visual-line-mode)
 #+end_src
 
 ** Fast, Async LaTeX previews!
+
+Moved to init.el to avoid issues
 
 #+begin_src emacs-lisp :results none
 ;;(use-package org
@@ -1222,6 +1330,17 @@ Miscellaneous settings tweaks for org mode. I may move the latex scale thing els
 ;;                 (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
 ;;                 "(provide 'org-version)\n")))
 ;;              :pin nil))
+
+;;(add-hook 'org-mode-hook 'org-latex-preview-auto-mode)
+(setq-local org-latex-preview-process-precompiled nil)
+#+end_src
+
+** Inline Tasks
+
+There is support for inline tasks, though it seems a bit brute force. A heading with >15 stars becomes an inline task. The default keybinding for inserting such a task is ~C-c C-x t~.
+
+#+begin_src emacs-lisp :results none
+(require 'org-inlinetask)
 #+end_src
 
 ** Org-Download
@@ -1231,18 +1350,37 @@ Allow easy loading of images into org-mode.
 #+begin_src emacs-lisp
 (use-package org-download
   :straight t
-)
+  )
 #+end_src
 
 ** Org-Modern
 
-#+begin_src emacs-lisp
-  (use-package org-modern
-    :straight t
-    :hook
-    (org-mode . org-modern-mode)
-    :config
-    (global-org-modern-mode))
+#+begin_src emacs-lisp :results none
+(use-package org-modern
+  :straight t
+  :config
+)
+
+;;(global-org-modern-mode)
+
+;; Makes code blocks much more easily distinguishable!
+(custom-set-faces
+ '(org-block-begin-line
+   ((t (:underline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF" :extend t))))
+ '(org-block
+   ((t (:background "#EFF0F1" :extend t))))
+ '(org-block-end-line
+   ((t (:overline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF" :extend t))))
+ )
+#+end_src
+
+** Org Superstar
+
+#+begin_src emacs-lisp :results none
+(use-package org-superstar
+  :straight t)
+
+(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
 #+end_src
 
 ** Org-Ref
@@ -1253,6 +1391,7 @@ Allow easy loading of images into org-mode.
   :config
   (require 'org-ref-ivy))
 #+end_src
+
 ** Org-trello
 
 #+begin_src emacs-lisp :results none
@@ -1304,7 +1443,12 @@ Blahblah some 'second brain' bullshit. Regardless, this stuff is really cool and
   (require 'org-roam-protocol))
 #+end_src
 
-#+RESULTS:
+** OrgNote
+
+#+begin_src emacs-lisp :results none
+(use-package orgnote
+  :straight t)
+#+end_src
 
 ** Org-roam UI
 
@@ -1372,6 +1516,7 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
 	 ))
 
 #+end_src
+
 * Pandoc Exports
 
 #+begin_src emacs-lisp :results none
@@ -1384,9 +1529,11 @@ Ivy-rich allows adding descriptions alongside the commands in M-x
 #+begin_src emacs-lisp :results none
 (use-package perfect-margin
   :straight t
-  :hook
-  (org-mode . perfect-margin-mode))
+)
+
+(add-hook 'org-mode-hook 'perfect-margin-mode)
 #+end_src
+
 * Popper
 
 Popper buffers to appear as small windows at the bottom of the screen.
@@ -1410,36 +1557,27 @@ Popper buffers to appear as small windows at the bottom of the screen.
                 "^\\*shell.*\\*$"  shell-mode  ;shell as a popup
                 "^\\*term.*\\*$"   term-mode   ;term as a popup
                 "^\\*vterm.*\\*$"  vterm-mode  ;vterm as a popup
-                "^\\*chatgpt*\\*$"  chatgpt-shell-mode  ;vterm as a popup
-                "example"  ess-r-mode  ;vterm as a popup
+                "^\\*chatgpt*\\*$"  chatgpt-shell-mode  ;chatgpt as a popup
+                "example"  ess-r-mode  ;R as a popup
+		"\\*R*\\*"  ess-r-mode  ;R as a popup
                 )))
   (popper-mode +1)
   (popper-echo-mode +1))                ; For echo area hints
 #+end_src
+
 * Prettify Symbols
 
 #+begin_src emacs-lisp :results none
 (setq prettify-symbols-alist
       '(
-        ("lambda" . 955) ; λ
+        ;;("lambda" . 955) ; λ
         ("->" . 8594)    ; →
         ("=>" . 8658)    ; ⇒
         ("map" . 8614)    ; ↦
-        ))
+       )
+)
 
 (global-prettify-symbols-mode 1)
-#+end_src
-
-* Projectile
-
-Projectile is a project organisation system (which emacs-dashboard has support for) which could, hypothetically, streamline working on multiple projects at once. This is not currently the case, but this will be worth looking into.
-
-** TODO Look into projectile and learn about projects in this sense :org:
-
-#+begin_src emacs-lispx
-  (use-package projectile
-    :config
-    (projectile-mode 1))
 #+end_src
 
 * Shells and terminals
@@ -1454,26 +1592,29 @@ Honestly, Kitty is a perfectly fine terminal, and I have no strong desire to mov
 * Smart Parentheses
 
 #+begin_src emacs-lisp :results none
-  (use-package smartparens-mode
-    :straight smartparens  ;; install the package
-    :hook (prog-mode text-mode markdown-mode org-mode inferior-ess-mode) ;; add `smartparens-mode` to these hooks
-    :config
-    ;; load default config
-    (require 'smartparens-config)
-    (sp-pair "$" "$")
+(use-package smartparens-mode
+  :straight smartparens  ;; install the package
+  :hook (prog-mode text-mode markdown-mode org-mode inferior-ess-mode) ;; add `smartparens-mode` to these hooks
+  :config
+  ;; load default config
+  (require 'smartparens-config)
+  (sp-pair "$" "$")
   )
+
+(smartparens-global-mode)
+(sp-pair "$" "$")
 #+end_src
 
 ** and rainbow delimiters
 
 #+begin_src emacs-lisp :results none
-  (use-package rainbow-delimiters
-    :straight t
-    :hook
-    (prog-mode . rainbow-delimiters-mode)
-    (elisp-mode . rainbow-delimiters-mode)
-    (latex-mode . rainbow-delimiters-mode)
-)
+(use-package rainbow-delimiters
+  :straight t
+  :hook
+  (prog-mode . rainbow-delimiters-mode)
+  (elisp-mode . rainbow-delimiters-mode)
+  (latex-mode . rainbow-delimiters-mode)
+  )
 #+end_src
 
 * Smooth Scrolling
@@ -1492,7 +1633,7 @@ Honestly, Kitty is a perfectly fine terminal, and I have no strong desire to mov
 Enables editing sudo-protected files with emacs (please make sure you know what you're doing with this, you've broken or nearly broken things too many times...)
 
 #+begin_src emacs-lisp
-  (use-package sudo-edit)
+(use-package sudo-edit)
 #+end_src
 
 * Which-Key? Oh, that key
@@ -1500,25 +1641,23 @@ Enables editing sudo-protected files with emacs (please make sure you know what 
 I think this is the thing that gives some nice hints when you partially enter a macro.
 
 #+begin_src emacs-lisp
-
-  (use-package which-key
-    :straight t
-    :init
-    (which-key-mode 1)
-    :diminish
-    :config
-    (setq which-key-side-window-location 'bottom
-	  which-key-sort-order #'which-key-key-order-alpha
-	  which-key-add-column-padding 1
-	  which-key-max-display-columns nil
-	  which-key-min-display-lines 56
-	  which-key-side-window-slot -10
-	  which-key-side-window-max-height 0.25
-	  which-key-idle-delay 0.8
-	  which-key-max-description-lenght 25
-	  which-key-allow-imprecise-window-fit nil
-	  which-key-seperator "➢"))
-
+(use-package which-key
+  :straight t
+  :init
+  (which-key-mode 1)
+  :diminish
+  :config
+  (setq which-key-side-window-location 'bottom
+	which-key-sort-order #'which-key-key-order-alpha
+	which-key-add-column-padding 1
+	which-key-max-display-columns nil
+	which-key-min-display-lines 56
+	which-key-side-window-slot -10
+	which-key-side-window-max-height 0.25
+	which-key-idle-delay 0.8
+	which-key-max-description-lenght 25
+	which-key-allow-imprecise-window-fit nil
+	which-key-seperator "➢"))
 #+end_src
 
 #+RESULTS:
@@ -1529,15 +1668,14 @@ I think this is the thing that gives some nice hints when you partially enter a 
 YASSnippet is the defacto snippet organiser for emacs and org.
 
 #+begin_src emacs-lisp :results none
-  (use-package yasnippet
-    :straight t
-    :config
-    (setq yas-snippet-dirs '("~/.config/emacs/snippets"))
-    (yas-global-mode 1)
-    :hook
-    (org-mode . yas-minor-mode)
+(use-package yasnippet
+  :straight t
+  :config
+  (setq yas-snippet-dirs '("~/.config/emacs/snippets"))
+  (yas-global-mode 1)
+;; :hook
+;;  (org-mode . yas-minor-mode)
   )
-  
 #+end_src
 
 ** Automatically close drawers
@@ -1550,7 +1688,6 @@ YASSnippet is the defacto snippet organiser for emacs and org.
       (org-cycle)))) ;; Fold the drawer.
 
 (add-hook 'yas-after-exit-snippet-hook #'my-yas-org-fold-drawer-after-insert)
-(add-hook 'org-mode-hook 'org-fold-hide-drawer-all)
-
+;;(add-hook 'org-mode-hook 'org-fold-hide-drawer-all)
 #+end_src
 

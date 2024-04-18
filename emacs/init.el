@@ -43,6 +43,8 @@
                  "(provide 'org-version)\n")))
               :pin nil))
 
+(setq org-latex-preview-process-precompiled nil)
+
 (org-babel-load-file
  (expand-file-name
   "config.org"
@@ -56,18 +58,12 @@
  '(custom-safe-themes
    '("95e934b092694a2624adb653043d1dc016a6712fa27b788f9ff4dffb8ee08290" "b5fd9c7429d52190235f2383e47d340d7ff769f141cd8f9e7a4629a81abc6b19" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default))
  '(doc-view-continuous t)
- '(org-agenda-prefix-format
-   '((agenda . " %i")
-     (todo . " %i")
-     (tags . " %i")
-     (search . " %i")))
  '(org-babel-js-cmd "node")
  '(org-export-backends '(html latex md gfm))
  '(org-hide-emphasis-markers t)
- '(org-highlight-latex-and-related '(native latex script entities))
+ '(org-highlight-latex-and-related '(native latex script))
  '(org-image-align 'center)
  '(org-latex-hyperref-template nil)
- '(org-modern-hide-stars "")
  '(org-roam-capture-templates
    '(("d" "default" plain "%?" :target
       (file+head "${slug}.org" "#+title: ${title}\12")
@@ -76,6 +72,7 @@
    '(("d" "default" entry "* %?" :target
       (file+head ".org" "#+title: %<%Y-%m-%d>\12"))))
  '(org-src-preserve-indentation t)
+ '(org-startup-indented t)
  '(org-startup-with-latex-preview t)
  '(org-trello-current-prefix-keybinding "C-c o" nil (org-trello))
  '(org-trello-files '("~/orgfiles/phd_tasks.org") nil (org-trello))
@@ -87,5 +84,8 @@
  ;; If there is more than one, they won't work right.
  )
 
-(smartparens-global-mode)
-(sp-pair "$" "$")
+;;(smartparens-global-mode)
+;;(sp-pair "$" "$")
+
+(add-hook 'org-mode-hook 'visual-line-mode)
+(add-hook 'org-mode-hook 'abbrev-mode)

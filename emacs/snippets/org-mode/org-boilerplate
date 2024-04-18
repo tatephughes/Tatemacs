@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
 # name: Boilerplate
-# key: <h
-# -
+# key: <b
+# --
 
 :BOILERPLATE:
 #+BIBLIOGRAPHY: Bibliography.bib
@@ -19,31 +19,10 @@
 #+LATEX_HEADER: \newtheorem{lemma}[theorem]{Lemma}
 #+LATEX_HEADER: \newtheorem{definition}[theorem]{Definition}
 #+LATEX_HEADER: \newtheorem*{remark}{Remark}
-#+LATEX_HEADER: \newcommand{\balpha}{\boldsymbol{\alpha}}
-#+LATEX_HEADER: \newcommand{\bbeta}{\boldsymbol{\beta}}
-#+LATEX_HEADER: \newcommand{\bgamma}{\boldsymbol{\gamma}}
-#+LATEX_HEADER: \newcommand{\bdelta}{\boldsymbol{\delta}}
-#+LATEX_HEADER: \newcommand{\bepsilon}{\boldsymbol{\epsilon}}
-#+LATEX_HEADER: \newcommand{\bzeta}{\boldsymbol{\zeta}}
-#+LATEX_HEADER: \newcommand{\boldeta}{\boldsymbol{\eta}}
-#+LATEX_HEADER: \newcommand{\btheta}{\boldsymbol{\theta}}
-#+LATEX_HEADER: \newcommand{\biota}{\boldsymbol{iota}}
-#+LATEX_HEADER: \newcommand{\bkappa}{\boldsymbol{\kappa}}
-#+LATEX_HEADER: \newcommand{\blambda}{\boldsymbol{\lambda}}
-#+LATEX_HEADER: \newcommand{\bmu}{\boldsymbol{\mu}}
-#+LATEX_HEADER: \newcommand{\bnu}{\boldsymbol{\nu}}
-#+LATEX_HEADER: \newcommand{\bzi}{\boldsymbol{\zi}}
-#+LATEX_HEADER: \newcommand{\bomicron}{\boldsymbol{\omicron}}
-#+LATEX_HEADER: \newcommand{\bpi}{\boldsymbol{\pi}}
-#+LATEX_HEADER: \newcommand{\brho}{\boldsymbol{\rho}}
-#+LATEX_HEADER: \newcommand{\bsigma}{\boldsymbol{\sigma}}
-#+LATEX_HEADER: \newcommand{\btau}{\boldsymbol{\tau}}
-#+LATEX_HEADER: \newcommand{\bupsilon}{\boldsymbol{\upsilon}}
-#+LATEX_HEADER: \newcommand{\bphi}{\boldsymbol{\phi}}
-#+LATEX_HEADER: \newcommand{\bchi}{\boldsymbol{\chi}}
-#+LATEX_HEADER: \newcommand{\bpsi}{\boldsymbol{\psi}}
-#+LATEX_HEADER: \newcommand{\bomega}{\boldsymbol{\omega}}
-#+LATEX_HEADER: \newcommand{\bs}{\boldsymbol}
+#+LATEX_HEADER: \DeclareMathOperator{\E}{\mathbb E}}
+#+LATEX_HEADER: \DeclareMathOperator{\var}{\mathbb V\mathrm{ar}}
+#+LATEX_HEADER: \DeclareMathOperator{\cov}{\mathbb C\mathrm{ov}}
+#+LATEX_HEADER: \DeclareMathOperator{\cor}{\mathbb C\mathrm{or}}
 #+LATEX_HEADER: \newcommand*{\mat}[1]{\bm{#1}}
 #+LATEX_HEADER: \renewcommand*{\vec}[1]{\boldsymbol{\mathbf{#1}}}
 #+EXPORT_EXCLUDE_TAGS: noexport

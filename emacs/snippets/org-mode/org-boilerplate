@@ -8,7 +8,7 @@
 #+LATEX_CLASS: article
 #+LATEX_CLASS_OPTIONS: [letterpaper]
 #+OPTIONS: toc:nil
-#+LATEX_HEADER: \usepackage{amsmath,amsfonts,amsthm,amssymb,bm,tikz,tkz-graph}
+#+LATEX_HEADER: \usepackage{amsmath,amsfonts,amsthm,amssymb,bm,bbm,tikz,tkz-graph, graphicx, subcaption, mathtools, algpseudocode}
 #+LATEX_HEADER: \usetikzlibrary{arrows}
 #+LATEX_HEADER: \usetikzlibrary{bayesnet}
 #+LATEX_HEADER: \usetikzlibrary{matrix}
@@ -20,10 +20,14 @@
 #+LATEX_HEADER: \newtheorem{definition}[theorem]{Definition}
 #+LATEX_HEADER: \newtheorem*{remark}{Remark}
 #+LATEX_HEADER: \DeclareMathOperator{\E}{\mathbb E}}
+#+LATEX_HEADER: \DeclareMathOperator{\prob}{\mathbb P}
 #+LATEX_HEADER: \DeclareMathOperator{\var}{\mathbb V\mathrm{ar}}
 #+LATEX_HEADER: \DeclareMathOperator{\cov}{\mathbb C\mathrm{ov}}
 #+LATEX_HEADER: \DeclareMathOperator{\cor}{\mathbb C\mathrm{or}}
+#+LATEX_HEADER: \DeclareMathOperator{\normal}{\mathcal N}
+#+LATEX_HEADER: \DeclareMathOperator{\invgam}{\mathcal{IG}}
 #+LATEX_HEADER: \newcommand*{\mat}[1]{\bm{#1}}
+#+LATEX_HEADER: \newcommand{\norm}[1]{\left\Vert #1 \right\Vert}
 #+LATEX_HEADER: \renewcommand*{\vec}[1]{\boldsymbol{\mathbf{#1}}}
 #+EXPORT_EXCLUDE_TAGS: noexport
 :END:

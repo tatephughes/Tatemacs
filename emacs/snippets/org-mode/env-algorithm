@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: Algorithm
+# key: <al
+# --
+
+
+#+ATTR_LATEX: :options [$0]
+#+begin_algorithmic
+
+#+end_algorithmic

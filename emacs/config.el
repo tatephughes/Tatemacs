@@ -23,10 +23,11 @@
 ;; Return to dashboard
 (global-set-key (kbd "C-c <return>") 'dashboard-open)
 
-(define-key key-translation-map (kbd "<apps>") (kbd "<menu>"))
+;;(define-key key-translation-map (kbd "<apps>") (kbd "<menu>"))
 
 ;; make the menu key as leader key
-(global-set-key (kbd "<menu>") 'my-leader-key-map)(define-key key-translation-map (kbd "<apps>") (kbd "<menu>"))
+(global-set-key (kbd "<menu>") 'my-leader-key-map)
+;;(define-key key-translation-map (kbd "<apps>") (kbd "<menu>"))
 
 (define-prefix-command 'my-leader-key-map)
 
@@ -42,6 +43,19 @@
 (define-key my-leader-key-map (kbd "-") 'jump-lines-back)
 
 (define-key my-leader-key-map (kbd "b") 'ibuffer-list-buffers)
+
+;; Vim-like motions
+(define-key global-map (kbd "C-h") 'backward-char)
+(define-key global-map (kbd "C-j") 'next-line)
+(define-key org-mode-map (kbd "C-j") 'next-line) ; org-mode can be a pain
+(define-key global-map (kbd "C-k") 'previous-line)
+(define-key global-map (kbd "C-l") 'forward-char)
+
+;; recenter
+(define-key my-leader-key-map (kbd "l") 'recenter)
+
+;; Quicker backspace
+(define-key global-map (kbd "C-b") 'delete-backward-char)
 
 (define-key my-leader-key-map (kbd "0") 'delete-window)
 (define-key my-leader-key-map (kbd "1") 'delete-other-windows)
@@ -59,6 +73,10 @@
 (define-key my-leader-key-map (kbd "o l") 'org-open-at-point)
 (define-key my-leader-key-map (kbd "o s") 'set-org-latex-scale)
 (define-key my-leader-key-map (kbd "c '") 'org-edit-special)
+
+;; Backup org-cycle
+(define-key my-leader-key-map (kbd "TAB") 'org-cycle)
+
 (define-key org-src-mode-map (kbd "C-c '") nil) ; unbind the original key
 (define-key org-src-mode-map (kbd "C-c C-c") 'org-edit-src-exit) ; bind to your key
 
@@ -81,6 +99,8 @@
 (define-key my-leader-key-map (kbd "r b") 'org-babel-execute-buffer)
 (define-key my-leader-key-map (kbd "r l") 'org-latex-refresh)
 
+(define-key my-leader-key-map (kbd "h") 'help)
+
 ;;selections ('m' is for mark, 's' is taken by 'save')
 (define-key my-leader-key-map (kbd "m l") 'select-current-line)
 (define-key my-leader-key-map (kbd "m a") 'select-buffer)
@@ -88,6 +108,8 @@
 (define-key my-leader-key-map (kbd "m w") 'select-word)
 (define-key my-leader-key-map (kbd "m m w") 'mc/mark-all-words-like-this)
 (define-key my-leader-key-map (kbd "m m a") 'mc/mark-all-like-this)
+(define-key my-leader-key-map (kbd "m f") 'select-line-forward)
+(define-key my-leader-key-map (kbd "m b") 'select-line-backward)
 
 ;;murder
 (define-key my-leader-key-map (kbd "k l") 'kill-whole-line)
@@ -95,6 +117,7 @@
 (define-key my-leader-key-map (kbd "k b") 'kill-to-start-of-line)
 (define-key my-leader-key-map (kbd "k r") 'kill-region)
 (define-key my-leader-key-map (kbd "k p") 'kill-whole-paragraph)
+
 (define-key my-leader-key-map (kbd "k RET") 'save-buffers-kill-terminal)
 
 ;;irrevocably murder
@@ -109,6 +132,9 @@
 (define-key my-leader-key-map (kbd "c r") 'kill-ring-save)
 (define-key my-leader-key-map (kbd "c l") 'copy-line)
 (define-key my-leader-key-map (kbd "c p") 'copy-paragraph)
+(define-key my-leader-key-map (kbd "c f") 'copy-line-forward)
+(define-key my-leader-key-map (kbd "c b") 'copy-line-backward)
+(define-key my-leader-key-map (kbd "c w") 'copy-word)
 
 ;;yank
 (define-key my-leader-key-map (kbd "y") 'yank)
@@ -210,6 +236,26 @@ one, an error is signaled."
       (set-window-buffer other-win buf-this-buf)
       (select-window other-win))))
 
+(defun git-commit ()
+  "Prompt for a commit message, add all then commit"
+  (interactive)
+  (let ((commit-msg (read-string "Enter commit message: ")))
+    (shell-command (format "git add . && git commit -m \"%s\"" commit-msg))))
+
+(defun git-status ()
+  "Check Git Status"
+  (interactive)
+  (shell-command "git status"))
+
+(defun git-push ()
+  "Check Git Status"
+  (interactive)
+  (shell-command "git push -u origin"))
+
+(define-key my-leader-key-map (kbd "g h c") 'git-commit)
+(define-key my-leader-key-map (kbd "g h s") 'git-status)
+(define-key my-leader-key-map (kbd "g h p") 'git-push)
+
 (defun select-current-line ()
   "Select the current line."
   (interactive)
@@ -227,16 +273,27 @@ one, an error is signaled."
 (defun select-paragraph ()
   "Select the whole paragraph."
   (interactive)
-  (backward-paragraph) ; move to the beginning of the buffer
+  (backward-paragraph) ; move to the beginning of the paragraph
   (set-mark-command nil) ; set the mark here
-  (forward-paragraph)) ; move to the end of the buffer
-
+  (forward-paragraph)) ; move to the end of the paragraph
 (defun select-word ()
   "Select the whole word under the point."
   (interactive)
-  (backward-word) ; move to the beginning of the buffer
+  (backward-word) ; move to the beginning of the word
   (set-mark-command nil) ; set the mark here
-  (forward-word)) ; move to the end of the buffer
+  (forward-word)) ; move to the end of the word
+
+(defun select-line-backward ()
+  "Select everything on the line before the point"
+  (interactive)
+  (set-mark-command nil) ; set the mark here
+  (move-beginning-of-line nil)) ; move to the end of the line
+
+(defun select-line-forward ()
+  "Select everything on the line after the point"
+  (interactive)
+  (set-mark-command nil) ; set the mark here
+  (end-of-line)) ; move to the end of the line
 
 (defun kill-to-start-of-line ()
   "Kill from the current position to the start of the line."
@@ -255,6 +312,27 @@ one, an error is signaled."
   (interactive)
   (let ((start (progn (backward-paragraph) (point)))
         (end (progn (forward-paragraph) (point))))
+    (kill-ring-save start end)))
+
+(defun copy-line-forward ()
+  "Copy the line from the point backward."
+  (interactive)
+  (let ((begin (point))
+        (end (line-end-position)))
+    (kill-ring-save begin end)))
+
+(defun copy-line-backward ()
+  "Copy the line from the point onward"
+  (interactive)
+  (let ((begin (point))
+        (end (line-beginning-position)))
+    (kill-ring-save begin end)))
+
+(defun copy-word ()
+  "Copies the word under the point."
+  (interactive)
+  (let ((start (progn (backward-word) (point)))
+        (end (progn (forward-word) (point))))
     (kill-ring-save start end)))
 
 (defun kill-whole-paragraph ()
@@ -387,8 +465,8 @@ one, an error is signaled."
   (doom-themes-visual-bell-config)
   ;; Enable custom neotree theme (all-the-icons must be installed!)
   ;;(doom-themes-neotree-config)
-  ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  ;; or for treemacs| users
+  (setq doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
   (doom-themes-treemacs-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
@@ -446,19 +524,22 @@ one, an error is signaled."
       '("~/RoamNotes"
 	"~/.config/emacs/config.org"
 	"~/orgfiles/Supervisor_meetings"
-	"~/orgfiles/Tasks.org"))
+	"~/orgfiles/Tasks.org"
+	"~/MyProjects/Adaptive-MCMC-in-Scala-and-JAX"
+	"~/MyProjects/First-Year-Report"))
 
 (setq org-agenda-custom-commands
       '(("v" "PhD Tasks"
-	   ((agenda "" ((org-agenda-span 7)))
-	    (todo "DEADLINED"
-		  ((org-agenda-overriding-header "Deadlined Assignments")))
-	    (todo "IN PROGRESS"
-		  ((org-agenda-overriding-header "Actively being worked on")))
-	    (tags "events"
-                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                 (org-agenda-overriding-header "Upcoming Events")))
-	    (tags "projects"
+	 ((agenda "" ((org-agenda-span 7)))
+	  (todo "DEADLINED"
+		((org-agenda-overriding-header "Deadlined Assignments")))
+	  (todo "IN PROGRESS"
+		((org-agenda-overriding-header "Actively being worked on")))
+	  ;;(tags "events"
+          ;;      ((org-agenda-span 'week)
+	  ;;   (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+          ;;   (org-agenda-overriding-header "Upcoming Events")))
+	  (tags "projects"
                 ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                  (org-agenda-overriding-header "Project Tasks")))
           (tags "general"
@@ -470,9 +551,11 @@ one, an error is signaled."
           (tags "reading"
                 ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
                  (org-agenda-overriding-header "Reading")))
-	    (todo "ON HOLD"
-		  ((org-agenda-overriding-header "Put on hold")))
+	  (todo "ON HOLD"
+		((org-agenda-overriding-header "Put on hold")))
           ))))
+
+(setq org-hierarchical-todo-statistics nil)
 
 (use-package centered-cursor-mode
   :straight t
@@ -490,6 +573,8 @@ one, an error is signaled."
   (define-key ccm-map [C-mouse-5]  'next-line)
   (define-key ccm-map [mouse-4]  'previous-line)
   (define-key ccm-map [mouse-5]  'next-line)
+  ;;(global-centered-cursor-mode)
+  (global-hl-line-mode)
   )
 
 ;;(defun previous-line-and-recenter ()
@@ -591,6 +676,13 @@ one, an error is signaled."
       ;; If indentation did not change, move forward by one word
       (smart-forward))))
 
+
+(defun my/org-in-table-p ()
+  "Check if point is inside an Org table."
+  (when (eq major-mode 'org-mode)
+    (let ((element (org-element-at-point)))
+      (eq (org-element-type element) 'table))))
+
 (defun my/org-tab-behavior ()
   "Custom TAB behavior for Org mode:
 - Use `cdlatex` behavior in LaTeX fragments.
@@ -613,7 +705,7 @@ one, an error is signaled."
     nil)
    
    ;; If at a heading or at a drawable structure, cycle visibility and prevent further action
-   ((or (org-at-heading-p) (org-at-drawer-p))
+   ((or (org-at-heading-p) (org-at-drawer-p) (my/org-in-table-p))
     (org-cycle))
 
    ;; Default action: move forward to the next word
@@ -623,6 +715,7 @@ one, an error is signaled."
   ;; Bind the custom function to TAB in Org mode.
   ;; Make sure this doesn't conflict with other keybindings you might have.
   (define-key org-mode-map (kbd "TAB") #'my/org-tab-behavior)
+
   (define-key org-mode-map (kbd "C-<tab>") 'backward-word))
 
 (use-package shell-maker
@@ -667,10 +760,102 @@ one, an error is signaled."
   ;;:config (beacon-mode)
   )
 
-(setq-default cursor-type 'bar)
+(setq-default cursor-type 'box)
 
 ;;(setq display-line-numbers 'relative)
 ;;(global-display-line-numbers-mode)
+
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (global-set-key (kbd "<f8>") 'treemacs)
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
+          treemacs-deferred-git-apply-delay        0.5
+          treemacs-directory-name-transformer      #'identity
+          treemacs-display-in-side-window          t
+          treemacs-eldoc-display                   'simple
+          treemacs-file-event-delay                2000
+          treemacs-file-extension-regex            treemacs-last-period-regex-value
+          treemacs-file-follow-delay               0.2
+          treemacs-file-name-transformer           #'identity
+          treemacs-follow-after-init               t
+          treemacs-expand-after-init               t
+          treemacs-find-workspace-method           'find-for-file-or-pick-first
+          treemacs-git-command-pipe                ""
+          treemacs-goto-tag-strategy               'refetch-index
+          treemacs-header-scroll-indicators        '(nil . "^^^^^^")
+          treemacs-hide-dot-git-directory          t
+          treemacs-indentation                     2
+          treemacs-indentation-string              " "
+          treemacs-is-never-other-window           nil
+          treemacs-max-git-entries                 5000
+          treemacs-missing-project-action          'ask
+          treemacs-move-forward-on-expand          nil
+          treemacs-no-png-images                   nil
+          treemacs-no-delete-other-windows         t
+          treemacs-project-follow-cleanup          nil
+          treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-position                        'left
+          treemacs-read-string-input               'from-child-frame
+          treemacs-recenter-distance               0.1
+          treemacs-recenter-after-file-follow      nil
+          treemacs-recenter-after-tag-follow       nil
+          treemacs-recenter-after-project-jump     'always
+          treemacs-recenter-after-project-expand   'on-distance
+          treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
+          treemacs-project-follow-into-home        nil
+          treemacs-show-cursor                     nil
+          treemacs-show-hidden-files               t
+          treemacs-silent-filewatch                nil
+          treemacs-silent-refresh                  nil
+          treemacs-sorting                         'alphabetic-asc
+          treemacs-select-when-already-in-treemacs 'move-back
+          treemacs-space-between-root-nodes        t
+          treemacs-tag-follow-cleanup              t
+          treemacs-tag-follow-delay                1.5
+          treemacs-text-scale                      nil
+          treemacs-user-mode-line-format           nil
+          treemacs-user-header-line-format         nil
+          treemacs-wide-toggle-width               70
+          treemacs-width                           35
+          treemacs-width-increment                 1
+          treemacs-width-is-initially-locked       t
+          treemacs-workspace-switch-cleanup        nil)
+
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode 'always)
+    (when treemacs-python-executable
+      (treemacs-git-commit-diff-mode t))
+
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
+
+    (treemacs-hide-gitignored-files-mode nil))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t d"   . treemacs-select-directory)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once)
+  :ensure t)
 
 (use-package all-the-icons
   :straight t
@@ -826,18 +1011,40 @@ one, an error is signaled."
   (lsp-mode . dap-mode)
   (lsp-mode . dap-ui-mode))
 
+(use-package csv-mode
+  :straight t)
+
+(defun csv-highlight (&optional separator)
+  (interactive (list (when current-prefix-arg (read-char "Separator: "))))
+  (font-lock-mode 1)
+  (let* ((separator (or separator ?\,))
+         (n (count-matches (string separator) (pos-bol) (pos-eol)))
+         (colors (cl-loop for i from 0 to 1.0 by (/ 2.0 n)
+                          collect (apply #'color-rgb-to-hex 
+                                         (color-hsl-to-rgb i 0.3 0.5)))))
+    (cl-loop for i from 2 to n by 2 
+             for c in colors
+             for r = (format "^\\([^%c\n]+%c\\)\\{%d\\}" separator separator i)
+             do (font-lock-add-keywords nil `((,r (1 '(face (:foreground ,c)))))))))
+
+(add-hook 'csv-mode-hook 'csv-highlight)
+(add-hook 'csv-mode-hook 'csv-align-mode)
+(add-hook 'csv-mode-hook '(lambda () (interactive) (toggle-truncate-lines nil)))
+
 (org-babel-do-load-languages
-  'org-babel-load-languages
-  '(
-    (R . t)
-    (latex . t)
-    (haskell . t)
-    (python . t)
+ 'org-babel-load-languages
+ '(
+   (R . t)
+   (latex . t)
+   (haskell . t)
+   (python . t)
+   (shell . t)
    )
-)
+ )
 
 ;; disable the confirmation message
 (setq org-confirm-babel-evaluate nil)
+(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
 
 (use-package multiple-cursors
   :straight t)
@@ -853,6 +1060,8 @@ one, an error is signaled."
 (use-package no-littering)
 
 (add-hook 'org-mode-hook 'org-indent-mode)
+
+(setq org-archive-location "~/orgfiles/archive.org::")
 
 ;;(setq org-image-actual-width t) ;; Sets the width of image previewq in org-mode
 (add-hook 'org-mode-hook 'visual-line-mode)
@@ -897,25 +1106,26 @@ one, an error is signaled."
 
 (use-package org-modern
   :straight t
-  :config
 )
 
 ;;(global-org-modern-mode)
 
+(setq org-modern-priority
+    (quote ((?A . "🔴")
+            (?B . "🟡")
+            (?C . "🟢"))))
+
 ;; Makes code blocks much more easily distinguishable!
 (custom-set-faces
  '(org-block-begin-line
-   ((t (:underline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF" :extend t))))
- '(org-block
-   ((t (:background "#EFF0F1" :extend t))))
+   ((t (:foreground "#073642" :background "#93a1a1" :extend t))))
+;; '(org-block
+;;   ((t (:background "#002b36" :extend t))))
  '(org-block-end-line
-   ((t (:overline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF" :extend t))))
+   ((t (:foreground "#073642" :background "#93a1a1" :extend t))))
  )
 
-(use-package org-superstar
-  :straight t)
-
-(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+(setq org-latex-pdf-process (list "latexmk -shell-escape -bibtex -f -pdf %f"))
 
 (use-package org-trello
   :straight t)
@@ -976,7 +1186,7 @@ one, an error is signaled."
   (setq enable-recursive-minibuffers t)
   :diminish
   :config
-  (ivy-mode))
+  (ivy-mode)) ; ivy-mode can be a pain)
 
 ;;(use-package all-the-icons-ivy-rich
   ;;:straight t
@@ -1001,6 +1211,9 @@ one, an error is signaled."
 	 ))
 
 (use-package ox-pandoc
+  :straight t)
+
+(use-package ox-gfm
   :straight t)
 
 (use-package perfect-margin

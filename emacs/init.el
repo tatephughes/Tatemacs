@@ -65,6 +65,7 @@
  '(org-babel-js-cmd "node")
  '(org-babel-python-command-session "/home/tate/CPUJAX/bin/python")
  '(org-export-backends '(html latex md gfm))
+ '(org-export-show-temporary-export-buffer nil)
  '(org-export-use-babel nil)
  '(org-hide-emphasis-markers t)
  '(org-highlight-latex-and-related '(native latex script))
@@ -103,3 +104,4 @@
 (define-key global-map (kbd "C-j") 'next-line) ; this keybinding likes to be taken over by various modes...
 (define-key treemacs-mode-map (kbd "C-j") 'next-line) ; treemacs can be a pain
 (define-key ivy-mode-map (kbd "C-j") 'next-line) ; ivy can be a pain
+(put 'upcase-region 'disabled nil)

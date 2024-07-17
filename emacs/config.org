@@ -617,6 +617,23 @@ Adds the contents of the clipboard to the bibliography for roam.
       (delete-window current-window))))
 #+end_src
 
+* Quick Export to Latex
+
+#+begin_src emacs-lisp :results none
+(setq org-latex-precompile-command "%l --shell-escape -output-directory %o -ini -jobname=%b \"&%L\" mylatexformat.ltx %f") ;; Need this for minted
+
+(define-minor-mode org-auto-export-pdf-mode
+  "Automatically export Org files to PDF on save."
+  :lighter " OrgPDF"
+  :global nil
+  (if org-auto-export-pdf-mode
+      (add-hook 'after-save-hook #'org-latex-export-to-pdf nil 'local)
+    (remove-hook 'after-save-hook #'org-latex-export-to-pdf 'local)))
+
+;; Bind a key to toggle the mode (e.g., C-c C-x p)
+(global-set-key (kbd "<XF86Launch6>") 'org-auto-export-pdf-mode)
+#+end_src
+
 * A Tale of Themes and Fonts
 ** Setting the font face
 
@@ -719,7 +736,7 @@ Miscellaneous aesthetic changes
 ;;(setq default-frame-alist '((undecorated . t)))
 
 ;; Some nice transparency
-(add-to-list 'default-frame-alist '(alpha-background . 100))
+(add-to-list 'default-frame-alist '(alpha-background . 95))
 
 ;; Make the modeline pretty
 ;;(use-package solaire-mode
@@ -1531,6 +1548,7 @@ Miscellaneous settings tweaks for org mode. I may move the latex scale thing els
 ;;(setq org-image-actual-width t) ;; Sets the width of image previewq in org-mode
 (add-hook 'org-mode-hook 'visual-line-mode)
 (add-hook 'org-mode-hook 'abbrev-mode)
+(global-auto-revert-mode)
 
 ;;(global-visual-line-mode)
 #+end_src
@@ -1634,6 +1652,8 @@ Allow easy loading of images into org-mode.
 
 #+begin_src emacs-lisp :results none
 (setq org-latex-pdf-process (list "latexmk -shell-escape -bibtex -f -pdf %f"))
+
+;;(setq org-latex-pdf-process (list "latexmk -pdflatex='lualatex -shell-escape -interaction nonstopmode' -pdf -f  %f"))
 #+end_src
 
 ** Org-trello

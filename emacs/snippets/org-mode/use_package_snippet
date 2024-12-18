@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: Use-Package Straight
+# key: <up
+# --
+
+(use-package $0
+	:straight t
+	:config
+)

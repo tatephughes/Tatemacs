@@ -9,6 +9,7 @@
 #+LATEX_CLASS_OPTIONS: [letterpaper]
 #+OPTIONS: toc:nil
 #+LATEX_HEADER: \usepackage{amsmath,amsfonts,amsthm,amssymb,bm,bbm,tikz,tkz-graph, graphicx, subcaption, mathtools, algpseudocode}
+#+LATEX_HEADER: \usepackage[cache=false]{minted}
 #+LATEX_HEADER: \usetikzlibrary{arrows}
 #+LATEX_HEADER: \usetikzlibrary{bayesnet}
 #+LATEX_HEADER: \usetikzlibrary{matrix}
@@ -19,7 +20,7 @@
 #+LATEX_HEADER: \newtheorem{lemma}[theorem]{Lemma}
 #+LATEX_HEADER: \newtheorem{definition}[theorem]{Definition}
 #+LATEX_HEADER: \newtheorem*{remark}{Remark}
-#+LATEX_HEADER: \DeclareMathOperator{\E}{\mathbb E}}
+#+LATEX_HEADER: \DeclareMathOperator{\E}{\mathbb E}
 #+LATEX_HEADER: \DeclareMathOperator{\prob}{\mathbb P}
 #+LATEX_HEADER: \DeclareMathOperator{\var}{\mathbb V\mathrm{ar}}
 #+LATEX_HEADER: \DeclareMathOperator{\cov}{\mathbb C\mathrm{ov}}

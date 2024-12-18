@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Scala source block
+# key: <sc
+# --
+
+#+begin_src scala :results none :exports none
+$0
+#+end_src

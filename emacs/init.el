@@ -43,11 +43,6 @@
                  "(provide 'org-version)\n")))
               :pin nil))
 
-(add-hook 'LaTeX-mode-hook
-          (lambda ()
-            (prettify-symbols-mode -1)))
-(setq org-latex-preview-process-precompiled nil)
-
 (org-babel-load-file
  (expand-file-name
   "config.org"
@@ -57,13 +52,17 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ccm-recenter-at-end-of-file t)
  '(custom-safe-themes
    '("95e934b092694a2624adb653043d1dc016a6712fa27b788f9ff4dffb8ee08290" "b5fd9c7429d52190235f2383e47d340d7ff769f141cd8f9e7a4629a81abc6b19" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default))
- '(doc-view-continuous t)
- '(olivetti-body-width 150)
- '(org-babel-js-cmd "node")
- '(org-babel-python-command-session "/home/tate/CPUJAX/bin/python")
+ '(highlight-indent-guides-method 'character)
+ '(httpd-root "~/www")
+ '(markdown-command "/usr/local/bin/pandoc --mathjax")
+ '(markdown-display-remote-images t)
+ '(markdown-enable-math t)
+ '(markdown-header-scaling t)
+ '(markdown-header-scaling-values '(2.0 1.7 1.4 1.1 1.0 1.0))
+ '(markdown-marginalize-headers t)
+ '(org-babel-python-command-session "ipython")
  '(org-export-backends '(html latex md gfm))
  '(org-export-show-temporary-export-buffer nil)
  '(org-export-use-babel nil)
@@ -84,12 +83,7 @@
  '(org-src-preserve-indentation t)
  '(org-startup-indented t)
  '(org-startup-with-latex-preview t)
- '(org-trello-current-prefix-keybinding "C-c o" nil (org-trello))
- '(org-trello-files '("~/orgfiles/phd_tasks.org") nil (org-trello))
  '(package-selected-packages '(edit-indirect)))
-
-;;(smartparens-global-mode)
-;;(sp-pair "$" "$")
 
 (add-hook 'org-mode-hook 'visual-line-mode)
 (add-hook 'org-mode-hook 'abbrev-mode)
@@ -102,6 +96,16 @@
  '(org-block-end-line ((t (:foreground "#073642" :background "#93a1a1" :extend t)))))
 
 (define-key global-map (kbd "C-j") 'next-line) ; this keybinding likes to be taken over by various modes...
-(define-key treemacs-mode-map (kbd "C-j") 'next-line) ; treemacs can be a pain
+;; (define-key treemacs-mode-map (kbd "C-j") 'next-line) ; treemacs can be a pain
 (define-key ivy-mode-map (kbd "C-j") 'next-line) ; ivy can be a pain
 (put 'upcase-region 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
+
+
+;; make sure this works
+;; Associate .py files with python-ts-mode
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
+
+;; Add hooks for eglot and company-mode
+(add-hook 'python-ts-mode-hook 'eglot-ensure)
+(add-hook 'python-ts-mode-hook 'company-mode)

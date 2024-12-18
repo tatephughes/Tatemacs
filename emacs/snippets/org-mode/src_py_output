@@ -3,6 +3,6 @@
 # key: <py
 # --
 
-#+begin_src python :session example :results output
+#+begin_src python :session example :results none
 $0
 #+end_src

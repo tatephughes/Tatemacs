@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: Quarto align label
+# key: <aa
+# --
+
+$$\begin{split}
+$0
+\end{split}
+$$ {#eq-}

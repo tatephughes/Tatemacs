@@ -20,14 +20,8 @@
 (global-set-key (kbd "C-c t") 'org-toggle-item)
 (global-set-key (kbd "C-c d") 'org-todo)
 
-;; Return to dashboard
-(global-set-key (kbd "C-c <return>") 'dashboard-open)
-
-;;(define-key key-translation-map (kbd "<apps>") (kbd "<menu>"))
-
-;; make the menu key as leader key
-(global-set-key (kbd "<menu>") 'my-leader-key-map)
-;;(define-key key-translation-map (kbd "<apps>") (kbd "<menu>"))
+;; make the esc key as leader key
+(global-set-key (kbd "<escape>") 'my-leader-key-map)
 
 (define-prefix-command 'my-leader-key-map)
 
@@ -39,8 +33,10 @@
 (define-key my-leader-key-map (kbd "<up>") 'beginning-of-buffer)
 (define-key my-leader-key-map (kbd "<down>") 'end-of-buffer)
 
+;; currently broken
 (define-key my-leader-key-map (kbd "=") 'jump-lines)
 (define-key my-leader-key-map (kbd "-") 'jump-lines-back)
+(define-key my-leader-key-map (kbd "g l") 'goto-line)
 
 (define-key my-leader-key-map (kbd "b") 'ibuffer-list-buffers)
 
@@ -94,6 +90,7 @@
 (define-key my-leader-key-map (kbd "g d") 'dashboard-open)
 (define-key my-leader-key-map (kbd "g a") 'org-agenda-execute)
 (define-key my-leader-key-map (kbd "x f") 'find-file)
+(define-key my-leader-key-map (kbd "p f") 'projectile-find-file)
 
 (define-key my-leader-key-map (kbd "r c") 'reload-init-file)
 (define-key my-leader-key-map (kbd "r b") 'org-babel-execute-buffer)
@@ -153,13 +150,83 @@
 
 (define-key my-leader-key-map (kbd "/") 'vterm)
 
-(define-key my-leader-key-map (kbd "?") 'chatgpt-shell)
-
 (define-key my-leader-key-map (kbd "t t") 'counsel-load-theme)
 (define-key my-leader-key-map (kbd "t r") 'rand-theme)
 
+(defun move-region (start end n)
+  "Move the current region up or down by N lines."
+  (let ((region (buffer-substring start end)))
+    (delete-region start end)
+    (forward-line n)
+    (insert region)
+    (set-mark (point))
+    (forward-char (- (length region)))
+    (setq deactivate-mark nil)))
+
+(defun move-region-up (start end)
+  "Move the current region up by one line."
+  (interactive "r")
+  (move-region start end -1))
+
+(defun move-region-down (start end)
+  "Move the current region down by one line."
+  (interactive "r")
+  (move-region start end 1))
+
+(defun move-region-or-line (start end n)
+  "Move the current region or line up or down by N lines."
+  (if (use-region-p)
+      (move-region start end n)
+    (let ((line-start (line-beginning-position))
+          (line-end (line-end-position)))
+      (move-region line-start line-end n)
+      (goto-char line-start)
+      (set-mark (line-end-position))
+      (setq deactivate-mark nil))))
+
+(defun move-region-or-line-up (start end)
+  "Move the current region or line up by one line."
+  (interactive "r")
+  (move-region-or-line start end -1))
+
+(defun move-region-or-line-down (start end)
+  "Move the current region or line down by one line."
+  (interactive "r")
+  (move-region-or-line start end 1))
+
+(global-set-key (kbd "C-S-<up>") 'move-region-or-line-up)
+(global-set-key (kbd "C-S-<down>") 'move-region-or-line-down)
+(global-set-key (kbd "C-S-<up>") 'move-line-or-region-up)
+(global-set-key (kbd "C-S-<down>") 'move-line-or-region-down)
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-S-<up>") 'move-line-or-region-up)
+  (define-key org-mode-map (kbd "C-S-<down>") 'move-line-or-region-down))
+
+(define-key my-leader-key-map (kbd "r l") 'elpy-shell-send-statement)
+(define-key my-leader-key-map (kbd "r b") 'elpy-shell-send-buffer)
+(define-key my-leader-key-map (kbd "r r") 'elpy-shell-send-region-or-buffer)
+(define-key my-leader-key-map (kbd "r f") 'elpy-autopep8-fix-code)
+
+(define-key my-leader-key-map (kbd "r C-l") 'elpy-shell-send-statement-and-go)
+(define-key my-leader-key-map (kbd "r C-b") 'elpy-shell-send-buffer-and-go)
+(define-key my-leader-key-map (kbd "r C-r") 'elpy-shell-send-region-or-buffer-and-go)
+
+(define-key my-leader-key-map (kbd "p t") 'elpy-folding-toggle-docstrings)
+(define-key my-leader-key-map (kbd "p g") 'elpy-goto-definition)
+(define-key my-leader-key-map (kbd "p h") 'elpy-doc)
+(define-key my-leader-key-map (kbd "r t") 'pytest-run)
+
+(use-package python-mode
+  :straight t
+  :config
+  (define-key python-mode-map (kbd "C-c C-c") 'elpy-send-region-or-buffer-and-step)
+  (define-key python-mode-map (kbd "M-<left>") 'elpy-nav-indent-shift-left)
+  (define-key python-mode-map (kbd "M-<right>") 'elpy-nav-indent-shift-right)
+  (define-key python-mode-map (kbd "M-<down>") 'elpy-nav-move-line-or-region-down)
+  (define-key python-mode-map (kbd "M-<up>") 'elpy-nav-move-line-or-region-up))
+
 ;; make the menu key as leader key
-(global-set-key (kbd "<menu>") 'my-leader-key-map)
+(global-set-key (kbd "<escape>") 'my-leader-key-map)
 
 (defun reload-init-file ()
   (interactive) ;; (interactive allows you to call the function with M-x
@@ -383,13 +450,6 @@ one, an error is signaled."
   (end-of-line)
   (newline-and-indent))
 
-(defun enclose-in-yas-snippet (start end)
-  "Enclose the selected region within a YASnippet."
-  (interactive "r")
-  (let ((region (buffer-substring start end)))
-    (delete-region start end)
-    (insert (concat "${1:" region "}$0"))))
-
 (defun org-roam-add-citation ()
   (interactive)
   (let ((filename "~/RoamNotes/Bibliography.bib")
@@ -433,27 +493,27 @@ one, an error is signaled."
 
 ;; Actually set the fonts
 (set-face-attribute 'default nil
-		      :font "VictorMonoNerdFont"
-		      :height 165
-		      :weight 'medium)
+		    :font "JetBrains Mono"
+		    :height 165
+		    :weight 'medium)
 
 (set-face-attribute 'variable-pitch nil
-		      :font "Ubuntu"
-		      :height 180
-		      :weight 'medium)
+		    :font "JetBrains Mono"
+		    :height 180
+		    :weight 'medium)
 
 (set-face-attribute 'fixed-pitch nil
-		       :font "JetBrains Mono"
-		       :height 165
-		       :weight 'medium)
+		    :font "JetBrains Mono"
+		    :height 165
+		    :weight 'medium)
 
 (set-face-attribute 'font-lock-comment-face nil
-		      :slant 'italic)
+		    :slant 'italic)
 (set-face-attribute 'font-lock-keyword-face nil
-			:slant 'italic)
+		    :slant 'italic)
 
 ;; and to make sure client windows open with these fonts
-(add-to-list 'default-frame-alist '(font . "VictorMonoNerdFont"))
+(add-to-list 'default-frame-alist '(font . "JetBrains Mono"))
 
 (use-package doom-themes
   :straight t
@@ -474,13 +534,13 @@ one, an error is signaled."
 (use-package ef-themes
   :straight t)
 
-(load-theme 'modus-operandi t)
+(load-theme 'doom-solarized-dark t)
 
 (use-package rand-theme
   :straight t)
 (setq rand-theme-unwanted '(tango light-blue))
 
-;; In this house, we use shortcuts damnit!!!'
+;; In this house, we use shortcuts damnit!!!
 
 ;; Get rid of pesky GUI elements
 (menu-bar-mode -1)
@@ -489,11 +549,7 @@ one, an error is signaled."
 ;;(setq default-frame-alist '((undecorated . t)))
 
 ;; Some nice transparency
-(add-to-list 'default-frame-alist '(alpha-background . 100))
-
-;; Make the modeline pretty
-;;(use-package solaire-mode
-;;  :config (solaire-global-mode))
+(add-to-list 'default-frame-alist '(alpha-background . 95))
 
 ;; or use doom-modeline
 (use-package doom-modeline
@@ -557,74 +613,6 @@ one, an error is signaled."
 
 (setq org-hierarchical-todo-statistics nil)
 
-(use-package centered-cursor-mode
-  :straight t
-  :config
-  ;; Remap scroll wheel behavior in centered cursor mode
-  (define-key ccm-map [S-wheel-up]  'previous-line)
-  (define-key ccm-map [S-wheel-down]  'next-line)
-  (define-key ccm-map [C-wheel-up]  'previous-line)
-  (define-key ccm-map [C-wheel-down]  'next-line)
-  (define-key ccm-map [wheel-up]  'previous-line)
-  (define-key ccm-map [wheel-down]  'next-line)
-  (define-key ccm-map [S-mouse-4]  'previous-line)
-  (define-key ccm-map [S-mouse-5]  'next-line)
-  (define-key ccm-map [C-mouse-4]  'previous-line)
-  (define-key ccm-map [C-mouse-5]  'next-line)
-  (define-key ccm-map [mouse-4]  'previous-line)
-  (define-key ccm-map [mouse-5]  'next-line)
-  ;;(global-centered-cursor-mode)
-  (global-hl-line-mode)
-  )
-
-;;(defun previous-line-and-recenter ()
-;;  "move to the previous line and recenter"
-;;  (interactive)
-;;  (previous-line)
-;;  (recenter))
-;;
-;;(defun next-line-and-recenter ()
-;;  "move to the next line and recenter"
-;;  (interactive)
-;;  (next-line)
-;;  (recenter))
-;;
-;;(global-set-key [wheel-right] 'forward-char)
-;;(global-set-key [wheel-left] 'backward-char)
-;;
-;;(setq scroll-preserve-screen-postion 1)
-;;
-;;(define-minor-mode scroll-remap-mode
-;;  "Remap mouse scroll wheel to next-line and previous-line."
-;;  :local t
-;;  :lighter " Scroll-Remap"
-;;  (if scroll-remap-mode
-;;      (progn
-;;        (global-set-key (kbd "<mouse-4>") 'next-line-and-recenter)
-;;        (global-set-key (kbd "<mouse-5>") 'previous-line-and-recenter)
-;;        (global-set-key (kbd "<triple-wheel-down>") 'next-line-and-recenter)
-;;        (global-set-key (kbd "<triple-wheel-up>") 'previous-line-and-recenter)
-;;        (global-set-key (kbd "C-n") 'next-line-and-recenter)
-;;        (global-set-key (kbd "C-p") 'previous-line-and-recenter)
-;;        (global-set-key (kbd "<down>") 'next-line-and-recenter)
-;;        (global-set-key (kbd "<up>") 'previous-line-and-recenter))
-;;    ;; Reset to default scrolling behavior
-;;    (global-set-key (kbd "<mouse-4>") 'scroll-down-command)
-;;    (global-set-key (kbd "<mouse-5>") 'scroll-up-command)
-;;    (global-set-key (kbd "<triple-wheel-down>") 'scroll-down-command)
-;;    (global-set-key (kbd "<triple-wheel-up>") 'scroll-up-command)
-;;    (global-set-key (kbd "C-n") 'next-line)
-;;    (global-set-key (kbd "C-p") 'previous-line)
-;;    (global-set-key (kbd "<down>") 'next-line)
-;;    (global-set-key (kbd "<up>") 'previous-line)))
-
-(global-set-key (kbd "<mouse-4>") 'next-line)
-(global-set-key (kbd "<mouse-5>") 'previous-line)
-;;(global-set-key (kbd "<wheel-down>") 'next-line)
-;;(global-set-key (kbd "<wheel-up>") 'previous-line)
-;;(global-set-key (kbd "<triple-wheel-down>") 'next-line)
-;;(global-set-key (kbd "<triple-wheel-up>") 'previous-line)
-
 (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
    "Create parent directory if not exists while visiting file."
    (unless (file-exists-p filename)
@@ -644,9 +632,9 @@ one, an error is signaled."
   (let ((char (char-after)))
     (cond
      ;; Check if the character is an opening or closing bracket
-     ((or (eq char ?\() (eq char ?\)))
+     ((or (eq char ?\() (eq char ?\)) (eq char ?\]) (eq char ?\[) (eq char ?\}) (eq char ?\{))
       (forward-char))
-     (t
+     (t    
       (cond
        ;;check if we are at the end of a line
        ((= (point) (line-end-position))
@@ -683,13 +671,7 @@ one, an error is signaled."
     (let ((element (org-element-at-point)))
       (eq (org-element-type element) 'table))))
 
-(defun my/org-tab-behavior ()
-  "Custom TAB behavior for Org mode:
-- Use `cdlatex` behavior in LaTeX fragments.
-- Do not interfere with source block indentation.
-- Cycle visibility for headings and drawers outside LaTeX fragments.
-- Expand yasnippet at point if possible and not in a LaTeX fragment.
-- Otherwise, move forward to the next word but only if not at a heading, and not in a LaTeX fragment."
+(defun my/org-tab-behaviour ()
   (interactive)
   (cond
    ;; If inside a LaTeX fragment, defer to cdlatex
@@ -711,56 +693,71 @@ one, an error is signaled."
    ;; Default action: move forward to the next word
    (t (smart-forward))))
 
-(with-eval-after-load 'org
+(defun md-tab-behaviour ()
+  (interactive)
+  (cond
+
+   ;; Check if we can expand a yasnippet; if yes, do it and prevent further action
+   ((yas-expand)
+    nil)
+
+   ;; Default action: move forward to the next word
+   (t (smart-forward))))
+
+ (with-eval-after-load 'org
   ;; Bind the custom function to TAB in Org mode.
   ;; Make sure this doesn't conflict with other keybindings you might have.
-  (define-key org-mode-map (kbd "TAB") #'my/org-tab-behavior)
+  (define-key org-mode-map (kbd "TAB") #'my/org-tab-behaviour)
 
   (define-key org-mode-map (kbd "C-<tab>") 'backward-word))
 
-(use-package shell-maker
-  :straight (:host github :repo "xenodium/chatgpt-shell" :files ("shell-maker.el")))
+;;(define-key markdown-mode-map (kbd "TAB") 'smart-forward)
+;;(define-key poly-quarto-mode-map (kbd "TAB") 'smart-forward)
+;;(define-key markdown-mode-map (kbd "C-<tab>") 'backward-word)
+;;(define-key poly-quarto-mode-map (kbd "C-<tab>") 'backward-word)
 
-(use-package chatgpt-shell
-  :requires shell-maker
-  :straight (:host github :repo "xenodium/chatgpt-shell" :files ("chatgpt-shell.el")))
+(use-package centered-cursor-mode
+  :straight t
+  :hook
+  (prog-mode . centered-cursor-mode)
+  (python-ts-mode . centered-cursor-mode)
+  :config
+  (setq ccm-recenter-at-end-of-file t)
+  )
 
-(setq chatgpt-shell-openai-key "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")
+(global-hl-line-mode)
 
 (use-package nerd-icons
   :straight t)
 
 (use-package dashboard
-	:straight t
-	:init
-	(setq initial-buffer-choice 'dashboard-open)
-	(setq dashboard-set-heading-icons t)
-	(setq dashboard-set-file-icons t)
-	(setq dashboard-banner-logo-title "woah what how did he get here")
-	;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-	(setq dashboard-startup-banner "~/.config/emacs/wohhowdidhegethere/toby.png")  ;; use custom image as banner
-	(setq dashboard-center-content nil) ;; set to 't' for centered content
-	(setq dashboard-items '((bookmarks . 10)
-				(recents . 10)))
-	:custom
-	(dashboard-modify-heading-icons '((recents . "file-text")
-					  ))
-	:config
-	(dashboard-setup-startup-hook)
-	)
+  :straight t
+  :init
+  (setq initial-buffer-choice 'dashboard-open)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-banner-logo-title "woah what how did he get here")
+  ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+  (setq dashboard-startup-banner "~/.config/emacs/wohhowdidhegethere/toby.png")  ;; use custom image as banner
+  (setq dashboard-center-content nil) ;; set to 't' for centered content
+  (setq dashboard-items '((projects . 5)
+			  (bookmarks . 10)
+			  (recents . 10)))
+  :custom
+  (dashboard-modify-heading-icons '((recents . "file-text")
+				    ))
+  :config
+  (dashboard-setup-startup-hook)
+  )
 
 (setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
 (setq dashboard-display-icons-p t) ;; display icons on both GUI and terminal
 (setq dashboard-center-content t)
+(setq dashboard-projects-backend 'projectile)
 
 (setq dashboard-icon-type 'nerd-icons) ;; use `nerd-icons' package
 
-(use-package beacon
-  :straight t
-  ;;:config (beacon-mode)
-  )
-
-(setq-default cursor-type 'box)
+(setq-default cursor-type 'bar)
 
 ;;(setq display-line-numbers 'relative)
 ;;(global-display-line-numbers-mode)
@@ -798,7 +795,7 @@ one, an error is signaled."
           treemacs-no-delete-other-windows         t
           treemacs-project-follow-cleanup          nil
           treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-          treemacs-position                        'left
+          treemacs-position                        'right
           treemacs-read-string-input               'from-child-frame
           treemacs-recenter-distance               0.1
           treemacs-recenter-after-file-follow      nil
@@ -863,6 +860,15 @@ one, an error is signaled."
 (use-package all-the-icons-dired
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 
+(use-package neotree
+  :straight t
+  :config
+  ;;(global-set-key [f8] 'neotree-toggle)
+  (setq neo-window-position 'right)
+)
+
+;;(setq projectile-switch-project-action 'neotree-projectile-action)
+
 ;; clean up the mode-line
 (use-package diminish
   :straight t)
@@ -874,14 +880,117 @@ one, an error is signaled."
   :hook
   (org-agenda-mode . olivetti-mode))
 
+(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+(setq fill-column 79)
+(setq-default display-fill-column-indicator-column 79)
+;;(global-whitespace-mode)
+(setq whitespace-line-column 100)
+(setq whitespace-display-mappings
+      '((space-mark 32 [183] [46]) ; normal space, ·
+        (newline-mark 10 [10]) ; newline
+        (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
+        ))
+
+(setq whitespace-space-regexp "\\(\t+\\| +\\)[^#]")
+
+;;(add-hook 'prog-mode-hook 'whitespace-mode)
+;;(add-hook 'python-ts-mode-hook 'whitespace-mode)
+
+(use-package highlight-indent-guides
+  :straight t
+  :hook (prog-mode . highlight-indent-guides-mode)
+  :hook (python-ts-mode . highlight-indent-guides-mode)
+  :config
+  (setq highlight-indent-guide-method 'character)
+  (setq highlight-indent-guides-auto-odd-face-perc 50)
+  (setq highlight-indent-guides-auto-even-face-perc 75)
+  (setq highlight-indent-guides-auto-character-face-perc 50))
+
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+
 (use-package htmlize
   :straight t)
+
+(use-package simple-httpd
+  :straight t
+  :config
+  (setq httpd-port 7070))
+
+(defun markdown-filter (buffer)
+  (princ
+   (with-temp-buffer
+     (let ((tmp (buffer-name)))
+       (set-buffer buffer)
+       (set-buffer (markdown tmp))
+       (format "<!DOCTYPE html><html><title>Markdown preview</title>
+<body><article class=\"markdown-body\" style=\"box-sizing: border-box;min-width: 200px;max-width: 800px;margin: 0 auto;padding: 45px;\">%s</article></body><script src=\"/mathjax/es5/tex-chtml-full.js\"></script></html>" (buffer-string))))
+   (current-buffer)))
+
+(use-package impatient-mode
+  :straight t)
+
+(defun markdown-live-preview ()
+  "Preview markdown."
+  (interactive)
+  (unless (process-status "httpd")
+    (httpd-start))
+  (impatient-mode)
+  (imp-set-user-filter 'my-markdown-filter)
+  (imp-visit-buffer))
+
+(defun my-programming-mode-hook ()
+  "Custom configurations for programming modes."
+  (hs-minor-mode 1)
+  (local-set-key (kbd "C-<tab>") 'hs-toggle-hiding))
+
+(add-hook 'prog-mode-hook 'my-programming-mode-hook)
+
+(use-package company
+  :straight t
+  :config
+  (setq company-idle-delay 0.1
+	company-minimum-prefix-length 1))
+
+(use-package comint-mime
+  :straight t)
+
+(use-package pyenv
+  :straight t
+  :init
+  (setenv "PYENV_VERSION" "3.13.0")
+  :config
+  (global-pyenv-mode)
+  )
+
+(use-package elpy
+  :straight t
+  :init
+  (elpy-enable))
+
+(use-package pytest
+  :straight t
+  )
 
 (use-package quarto-mode
   :straight t
   :mode (("\\.Rmd" . poly-quarto-mode))
+  :config
+  (define-key poly-quarto-mode-map (kbd "TAB") 'md-tab-behaviour)
+  (define-key markdown-mode-map (kbd "C-<tab>") 'backward-word)
   )
-(setq markdown-enable-math t)
+
+
+(custom-set-variables
+ ;;
+ ;; Other custom values...
+ ;;
+ '(markdown-command "/usr/local/bin/pandoc --mathjax")
+ '(markdown-display-remote-images t)
+ '(markdown-enable-math t)
+ '(httpd-root "~/www")
+ ;;
+ ;; ...
+ )
 
 (use-package haskell-mode
   :straight t)
@@ -929,88 +1038,6 @@ one, an error is signaled."
   :straight t
   :interpreter ("scala" . scala-mode))
 
-;; Enable sbt mode for executing sbt commands
-(use-package sbt-mode
-  :straight t
-  :commands sbt-start sbt-command
-  :config
-  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
-  ;; allows using SPACE when in the minibuffer
-  (substitute-key-definition
-   'minibuffer-complete-word
-   'self-insert-command
-   minibuffer-local-completion-map)
-   ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
-   (setq sbt:program-options '("-Dsbt.supershell=false")))
-
-;; Enable nice rendering of diagnostics like compile errors.
-(use-package flycheck
-  :straight t
-  :diminish
-  :init (global-flycheck-mode))
-
-(use-package lsp-mode
-  :straight t
-  :diminish
-  ;; Optional - enable lsp-mode automatically in scala files
-  ;; You could also swap out lsp for lsp-deffered in order to defer loading
-  :hook  (scala-mode . lsp)
-	   (lsp-mode . lsp-lens-mode)
-  :config
-  ;; Uncomment following section if you would like to tune lsp-mode performance according to
-  ;; https://emacs-lsp.github.io/lsp-mode/page/performance/
-  ;; (setq gc-cons-threshold 100000000) ;; 100mb
-  ;; (setq read-process-output-max (* 1024 1024)) ;; 1mb
-  ;; (setq lsp-idle-delay 0.500)
-  ;; (setq lsp-log-io nil)
-  ;; (setq lsp-completion-provider :capf)
-  (setq lsp-prefer-flymake nil)
-  ;; Makes LSP shutdown the metals server when all buffers in the project are closed.
-  ;; https://emacs-lsp.github.io/lsp-mode/page/settings/mode/#lsp-keep-workspace-alive
-  (setq lsp-keep-workspace-alive nil))
-
-;; Add metals backend for lsp-mode
-(use-package lsp-metals
-  :straight t)
-
-;; Enable nice rendering of documentation on hover
-;;   Warning: on some systems this package can reduce your emacs responsiveness significally.
-;;   (See: https://emacs-lsp.github.io/lsp-mode/page/performance/)
-;;   In that case you have to not only disable this but also remove from the packages since
-;;   lsp-mode can activate it automatically.
-(use-package lsp-ui
-  :straight t)
-
-;; lsp-mode supports snippets, but in order for them to work you need to use yasnippet
-;; If you don't want to use snippets set lsp-enable-snippet to nil in your lsp-mode settings
-;; to avoid odd behavior with snippets and indentation
-
-;; Use company-capf as a completion provider.
-;;
-;; To Company-lsp users:
-;;   Company-lsp is no longer maintained and has been removed from MELPA.
-;;   Please migrate to company-capf.
-(use-package company
-  :straight t
-  :diminish
-  :hook (prog-mode . company-mode)
-	  (prog-mode . (lambda () (setq display-line-numbers 'absolute)))
-	  (prog-mode . display-line-numbers-mode)
-	  (org-mode . company-mode)
-  :config
-  (setq lsp-completion-provider :capf))
-
-;; Posframe is a pop-up tool that must be manually installed for dap-mode
-(use-package posframe
-  :straight t)
-
-;; Use the Debug Adapter Protocol for running tests and debugging
-(use-package dap-mode
-  :straight t
-  :hook
-  (lsp-mode . dap-mode)
-  (lsp-mode . dap-ui-mode))
-
 (use-package csv-mode
   :straight t)
 
@@ -1048,7 +1075,7 @@ one, an error is signaled."
 
 (use-package multiple-cursors
   :straight t)
-(global-set-key (kbd "<menu> <menu>") 'mc/edit-lines)
+(global-set-key (kbd "<escape> <escape>") 'mc/edit-lines)
 (global-unset-key (kbd "M-<down-mouse-1>"))
 (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click)
 (global-set-key (kbd "M-SPC") 'set-rectangular-region-anchor)
@@ -1066,37 +1093,9 @@ one, an error is signaled."
 ;;(setq org-image-actual-width t) ;; Sets the width of image previewq in org-mode
 (add-hook 'org-mode-hook 'visual-line-mode)
 (add-hook 'org-mode-hook 'abbrev-mode)
+(global-auto-revert-mode)
 
 ;;(global-visual-line-mode)
-
-;;(use-package org
-;;  :straight `(org
-;;              :fork (:host nil
-;;                     :repo "https://git.tecosaur.net/tec/org-mode.git"
-;;                     :branch "dev"
-;;                     :remote "tecosaur")
-;;              :files (:defaults "etc")
-;;              :build t
-;;              :pre-build
-;;              (with-temp-file "org-version.el"
-;;               (require 'lisp-mnt)
-;;               (let ((version
-;;                      (with-temp-buffer
-;;                        (insert-file-contents "lisp/org.el")
-;;                        (lm-header "version")))
-;;                     (git-version
-;;                      (string-trim
-;;                       (with-temp-buffer
-;;                         (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
-;;                         (buffer-string)))))
-;;                (insert
-;;                 (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
-;;                 (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
-;;                 "(provide 'org-version)\n")))
-;;              :pin nil))
-
-;;(add-hook 'org-mode-hook 'org-latex-preview-auto-mode)
-(setq-local org-latex-preview-process-precompiled nil)
 
 (require 'org-inlinetask)
 
@@ -1127,11 +1126,6 @@ one, an error is signaled."
 
 (setq org-latex-pdf-process (list "latexmk -shell-escape -bibtex -f -pdf %f"))
 
-(use-package org-trello
-  :straight t)
-
-(custom-set-variables '(org-trello-files '("~/orgfiles/phd_tasks.org")))
-
 (add-hook 'org-mode-hook 'flyspell-mode)
 
 (setq org-return-follows-link t)
@@ -1157,9 +1151,6 @@ one, an error is signaled."
   (setq org-roam-completion-everywhere t)
   ;; If using org-roam-protocol
   (require 'org-roam-protocol))
-
-(use-package orgnote
-  :straight t)
 
 (use-package org-roam-ui
   :after org-roam
@@ -1216,12 +1207,6 @@ one, an error is signaled."
 (use-package ox-gfm
   :straight t)
 
-(use-package perfect-margin
-  :straight t
-)
-
-(add-hook 'org-mode-hook 'perfect-margin-mode)
-
 (use-package popper
   :straight t
   :bind (("C-`"   . popper-toggle)
@@ -1258,8 +1243,13 @@ one, an error is signaled."
 
 (global-prettify-symbols-mode 1)
 
-(use-package vterm
-  :straight t)
+(use-package projectile
+  :straight t
+  :config
+  (projectile-mode +1)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+
+(setq projectile-project-test-cmd "~/CPUJAX/bin/pytest")
 
 (use-package smartparens-mode
   :straight smartparens  ;; install the package
@@ -1281,13 +1271,6 @@ one, an error is signaled."
   (latex-mode . rainbow-delimiters-mode)
   )
 
-(use-package smooth-scroll
-  :straight t
-  :config
-  (pixel-scroll-precision-mode)
-  (smooth-scroll-mode)
-)
-
 (use-package sudo-edit)
 
 (use-package which-key
@@ -1307,6 +1290,9 @@ one, an error is signaled."
 	which-key-max-description-lenght 25
 	which-key-allow-imprecise-window-fit nil
 	which-key-seperator "➢"))
+
+(use-package vterm
+  :straight t)
 
 (use-package yasnippet
   :straight t

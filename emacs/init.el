@@ -103,9 +103,9 @@
 
 
 ;; make sure this works
-;; Associate .py files with python-ts-mode
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
+;; Associate .py files with python-ts-#mode
+;;(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
 
 ;; Add hooks for eglot and company-mode
-(add-hook 'python-ts-mode-hook 'eglot-ensure)
-(add-hook 'python-ts-mode-hook 'company-mode)
+;;(add-hook 'python-ts-mode-hook 'eglot-ensure)
+;;(add-hook 'python-ts-mode-hook 'company-mode)

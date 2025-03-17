@@ -56,12 +56,6 @@
    '("95e934b092694a2624adb653043d1dc016a6712fa27b788f9ff4dffb8ee08290" "b5fd9c7429d52190235f2383e47d340d7ff769f141cd8f9e7a4629a81abc6b19" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default))
  '(highlight-indent-guides-method 'character)
  '(httpd-root "~/www")
- '(markdown-command "/usr/local/bin/pandoc --mathjax")
- '(markdown-display-remote-images t)
- '(markdown-enable-math t)
- '(markdown-header-scaling t)
- '(markdown-header-scaling-values '(2.0 1.7 1.4 1.1 1.0 1.0))
- '(markdown-marginalize-headers t)
  '(org-babel-python-command-session "ipython")
  '(org-export-backends '(html latex md gfm))
  '(org-export-show-temporary-export-buffer nil)
@@ -100,12 +94,3 @@
 (define-key ivy-mode-map (kbd "C-j") 'next-line) ; ivy can be a pain
 (put 'upcase-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)
-
-
-;; make sure this works
-;; Associate .py files with python-ts-#mode
-;;(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
-
-;; Add hooks for eglot and company-mode
-;;(add-hook 'python-ts-mode-hook 'eglot-ensure)
-;;(add-hook 'python-ts-mode-hook 'company-mode)

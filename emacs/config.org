@@ -1,452 +1,221 @@
-x#+TITLE: Tate's Emacs Configuration
+#+TITLE: Tate's New Emacs Configuration
 #+AUTHOR: Evan Tate Paterson Hughes
-#+DESCRIPTION: Mostly following DT's guide https://www.youtube.com/watch?v=d1fgypEiQkE, but I'm not quite as EVIL
+#+DESCRIPTION: Originally following DT's guide https://www.youtube.com/watch?v=d1fgypEiQkE, but I'm not quite as EVIL
 
-* My Keybindings
+* Keybinds
 
-*** Old Bindings
+** Leader key definition
 
-Custom keybinds, set before i moved everything to be pneumonic after <menu>.
+The leader key (which here is ESC, ideally additionally mapped to the CAPS LOCK key), will serve as a way to reach many commonly used commands.
 
 #+begin_src emacs-lisp
-;; Quickly reload this file after making edits. Refers to a function defined under the tab 'neat-tricks'
-(global-set-key (kbd "C-c r") 'reload-init-file)
+;; make the esc key as leader key
+(global-set-key (kbd "<escape>") 'leader)
+(define-prefix-command 'leader)
+#+end_src
 
-;; Quickly get to this file
+** General keybinds
+
+#+begin_src emacs-lisp :results none
 (global-set-key (kbd "C-c C-<return>") 'go-to-config)
+#+end_src
 
-;; Rearrange the buffers
-(global-set-key (kbd "C-M-<up>") 'buf-move-up)
-(global-set-key (kbd "C-M-<down>") 'buf-move-down)
-(global-set-key (kbd "C-M-<left>") 'buf-move-left)
-(global-set-key (kbd "C-M-<right>") 'buf-move-right)
+** Motions
 
+Commands relating to moving the point
+
+#+begin_src emacs-lisp :results none
 ;; Move focus
 (global-set-key (kbd "C-M-<up>") 'windmove-up)
 (global-set-key (kbd "C-M-<down>") 'windmove-down)
 (global-set-key (kbd "C-M-<left>") 'windmove-left)
 (global-set-key (kbd "C-M-<right>") 'windmove-right)
 
-;; Todo
-(global-set-key (kbd "C-c t") 'org-toggle-item)
-(global-set-key (kbd "C-c d") 'org-todo)
-#+end_src
+;; Make a new line below the current line
+(define-key leader (kbd "RET") 'insert-new-line-below)
 
-*** Leader key definitions
+;; Jump to the start or end of the buffer
+(define-key leader (kbd "<up>") 'beginning-of-buffer)
+(define-key leader (kbd "<down>") 'end-of-buffer)
 
-Below is a modified setup from [[http://xahlee.info/emacs/emacs/emacs_menu_app_keys.html][here]], adding the ~<menu>~ key (which I map CAPS LOCK to in gnome), as a start in defining my own set of personal keybindings.
+;; Jump to a specific line
+(define-key leader (kbd "g l") 'goto-line)
 
-#+begin_src emacs-lisp
-;; make the esc key as leader key
-(global-set-key (kbd "<escape>") 'my-leader-key-map)
-
-(define-prefix-command 'my-leader-key-map)
-#+end_src
-
-*** Motions
-    
-#+begin_src emacs-lisp :results none
-(define-key my-leader-key-map (kbd "RET") 'insert-new-line-below)
-(define-key my-leader-key-map (kbd "<left>") 'org-beginning-of-line)
-(define-key my-leader-key-map (kbd "<right>") 'org-end-of-line)
-(global-set-key (kbd "<next>") 'next-buffer)
-(global-set-key (kbd "<prior>") 'previous-buffer)
-(define-key my-leader-key-map (kbd "<up>") 'beginning-of-buffer)
-(define-key my-leader-key-map (kbd "<down>") 'end-of-buffer)
-
-;; currently broken
-(define-key my-leader-key-map (kbd "=") 'jump-lines)
-(define-key my-leader-key-map (kbd "-") 'jump-lines-back)
-(define-key my-leader-key-map (kbd "g l") 'goto-line)
-
-(define-key my-leader-key-map (kbd "b") 'ibuffer-list-buffers)
-
-;; Vim-like motions
+;; Vim-like navigation motions
 (define-key global-map (kbd "C-h") 'backward-char)
 (define-key global-map (kbd "C-j") 'next-line)
 (define-key org-mode-map (kbd "C-j") 'next-line) ; org-mode can be a pain
 (define-key global-map (kbd "C-k") 'previous-line)
 (define-key global-map (kbd "C-l") 'forward-char)
 
-;; recenter
-(define-key my-leader-key-map (kbd "l") 'recenter)
-
-;; Quicker backspace
-(define-key global-map (kbd "C-b") 'delete-backward-char)
+;; go-to style commands
+(define-key leader (kbd "g c") (lambda () (interactive) (find-file "~/.config/emacs/config.org")))
+(define-key leader (kbd "g t") (lambda () (interactive) (find-file "~/orgfiles/Tasks.org")))
+(define-key leader (kbd "g s") (lambda () (interactive) (dired "~/.config/emacs/snippets/org-mode")))
+(define-key leader (kbd "g d") 'dashboard-open)
 #+end_src
 
-*** Window Manipulation
+** Change files and buffers
+
+*** Buffer list
+
+Shows a list of all buffers in the current focused window.
 
 #+begin_src emacs-lisp :results none
-(define-key my-leader-key-map (kbd "0") 'delete-window)
-(define-key my-leader-key-map (kbd "1") 'delete-other-windows)
-(define-key my-leader-key-map (kbd "2") 'split-window-below)
-(define-key my-leader-key-map (kbd "3") 'split-window-right)
-(define-key my-leader-key-map (kbd "DEL") 'kill-current-buffer-and-window)
+
+(use-package ibuffer
+  :straight t
+  :config
+  )
+
+(defun ibuffer-in-current-window ()
+  "Open ibuffer in the current window."
+  (interactive)
+  (switch-to-buffer (ibuffer nil "*Ibuffer*" t)))
+
+(define-key leader (kbd "b") 'ido-switch-buffer)
+
 #+end_src
 
-*** Insert
+*** Find-file
 
 #+begin_src emacs-lisp :results none
-(define-key my-leader-key-map (kbd "i l") 'org-insert-link)
-(define-key my-leader-key-map (kbd "i c") 'org-cite-insert)
-(define-key my-leader-key-map (kbd "i i") 'org-insert-image)
-(define-key my-leader-key-map (kbd "i a") 'insert-char)
+(define-key leader (kbd "x f") 'find-file)
+(define-key leader (kbd "p f") 'projectile-find-file)
 #+end_src
 
-*** Org-specific bindings
+** Window Manipulation
+
+Command mappings for creating and closing window splits.
+
+#+begin_src emacs-lisp :results none
+(define-key leader (kbd "0") 'delete-window)
+(define-key leader (kbd "1") 'delete-other-windows)
+(define-key leader (kbd "2") 'split-window-below)
+(define-key leader (kbd "3") 'split-window-right)
+(define-key leader (kbd "DEL") 'kill-current-buffer-and-window)
+#+end_src
+
+** Org-specific bindings
 
 **** Vanilla org
 
 #+begin_src emacs-lisp :results none
-;;org keys
-(define-key my-leader-key-map (kbd "o t") 'org-toggle-item)
-(define-key my-leader-key-map (kbd "o l") 'org-open-at-point)
-(define-key my-leader-key-map (kbd "o s") 'set-org-latex-scale)
-(define-key my-leader-key-map (kbd "c '") 'org-edit-special)
-
-;; Backup org-cycle
-(define-key my-leader-key-map (kbd "TAB") 'org-cycle)
-
-(define-key org-src-mode-map (kbd "C-c '") nil) ; unbind the original key
-(define-key org-src-mode-map (kbd "C-c C-c") 'org-edit-src-exit) ; bind to your key
+(define-key leader (kbd "o t") 'org-toggle-item)
+(define-key leader (kbd "o l") 'org-open-at-point)
 #+end_src
 
 **** Org-roam
 
-#+begin_src emacs-lisp
-;;org roam keys
-(define-key my-leader-key-map (kbd "n i") 'org-roam-node-insert)
-(define-key my-leader-key-map (kbd "n f") 'org-roam-node-find)
-(define-key my-leader-key-map (kbd "n u") 'org-roam-ui-mode)
-(define-key my-leader-key-map (kbd "n #") 'org-roam-tag-add)
-(define-key my-leader-key-map (kbd "n c") 'org-roam-add-citation)
-(define-key my-leader-key-map (kbd "n h") 'org-is-get-create)
-#+end_src
-
-*** Navigation
-Any 'go to' style commands
-
 #+begin_src emacs-lisp :results none
-(define-key my-leader-key-map (kbd "g c") (lambda () (interactive) (find-file "~/.config/emacs/config.org")))
-(define-key my-leader-key-map (kbd "g t") (lambda () (interactive) (find-file "~/orgfiles/Tasks.org")))
-(define-key my-leader-key-map (kbd "g s") (lambda () (interactive) (dired "~/.config/emacs/snippets/org-mode")))
-(define-key my-leader-key-map (kbd "g d") 'dashboard-open)
-(define-key my-leader-key-map (kbd "g a") 'org-agenda-execute)
-(define-key my-leader-key-map (kbd "x f") 'find-file)
-(define-key my-leader-key-map (kbd "p f") 'projectile-find-file)
+;;org roam keys
+(define-key leader (kbd "n i") 'org-roam-node-insert)
+(define-key leader (kbd "n f") 'org-roam-node-find)
+(define-key leader (kbd "n u") 'org-roam-ui-mode)
+(define-key leader (kbd "n #") 'org-roam-tag-add)
+(define-key leader (kbd "n c") 'org-roam-add-citation)
+(define-key leader (kbd "n h") 'org-is-get-create)
 #+end_src
 
-*** Code execution
-Keybinds relating to running code.
-
-#+begin_src emacs-lisp
-(define-key my-leader-key-map (kbd "r c") 'reload-init-file)
-(define-key my-leader-key-map (kbd "r b") 'org-babel-execute-buffer)
-(define-key my-leader-key-map (kbd "r l") 'org-latex-refresh)
-#+end_src
-
-*** Help
+** Help
 
 Because I remapped "C-h" for vim-like motions, I need a way to access the help menus
 
 #+begin_src emacs-lisp :results none
-(define-key my-leader-key-map (kbd "h") 'help)
+(define-key leader (kbd "h") 'help)
 #+end_src
 
-*** Selection, cutting, copying and pasting
+** Running Code
+
+*** Python shell
+
+#+begin_src emacs-lisp :results none
+
+(defun python-shell-send-line ()
+  "Select the current line and send it to the Python shell."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (let ((start (point)))
+      (end-of-line)
+      (python-shell-send-region start (point)))))
+
+(define-key leader (kbd "r l") 'python-shell-send-line)
+(define-key leader (kbd "r r") 'python-shell-send-region)
+(define-key leader (kbd "r b") 'python-shell-send-buffer)
+#+end_src
+
+** Selection, cutting, copying and pasting
+*** Selecting (marking)
 
 #+begin_src emacs-lisp :results none
 ;;selections ('m' is for mark, 's' is taken by 'save')
-(define-key my-leader-key-map (kbd "m l") 'select-current-line)
-(define-key my-leader-key-map (kbd "m a") 'select-buffer)
-(define-key my-leader-key-map (kbd "m p") 'select-paragraph)
-(define-key my-leader-key-map (kbd "m w") 'select-word)
-(define-key my-leader-key-map (kbd "m m w") 'mc/mark-all-words-like-this)
-(define-key my-leader-key-map (kbd "m m a") 'mc/mark-all-like-this)
-(define-key my-leader-key-map (kbd "m f") 'select-line-forward)
-(define-key my-leader-key-map (kbd "m b") 'select-line-backward)
+(define-key leader (kbd "m l") 'select-current-line)
+(define-key leader (kbd "m a") 'select-buffer)
+(define-key leader (kbd "m p") 'select-paragraph)
+(define-key leader (kbd "m w") 'select-word)
+(define-key leader (kbd "m m w") 'mc/mark-all-words-like-this)
+(define-key leader (kbd "m m a") 'mc/mark-all-like-this)
+(define-key leader (kbd "m f") 'select-line-forward)
+(define-key leader (kbd "m b") 'select-line-backward)
 #+end_src
+
+*** Cutting (Killing)
 
 #+begin_src emacs-lisp :results none
-;;murder
-(define-key my-leader-key-map (kbd "k l") 'kill-whole-line)
-(define-key my-leader-key-map (kbd "k f") 'kill-line)
-(define-key my-leader-key-map (kbd "k b") 'kill-to-start-of-line)
-(define-key my-leader-key-map (kbd "k r") 'kill-region)
-(define-key my-leader-key-map (kbd "k p") 'kill-whole-paragraph)
+(define-key leader (kbd "k l") 'kill-whole-line)
+(define-key leader (kbd "k f") 'kill-line)
+(define-key leader (kbd "k b") 'kill-to-start-of-line)
+(define-key leader (kbd "k r") 'kill-region)
+(define-key leader (kbd "k p") 'kill-whole-paragraph)
 
-(define-key my-leader-key-map (kbd "k RET") 'save-buffers-kill-terminal)
+(define-key leader (kbd "k RET") 'save-buffers-kill-terminal)
 #+end_src
+
+*** Deleting
 
 #+begin_src emacs-lisp :results none
-;;irrevocably murder
-(define-key my-leader-key-map (kbd "d r") 'delete-region)
-(define-key my-leader-key-map (kbd "d l") 'delete-line)
-(define-key my-leader-key-map (kbd "d f") 'delete-line-forward)
-(define-key my-leader-key-map (kbd "d b") 'delete-line-backward)
-(define-key my-leader-key-map (kbd "d p") 'delete-paragraph)
-(define-key my-leader-key-map (kbd "d w") 'delete-word)
+(define-key leader (kbd "d r") 'delete-region)
+(define-key leader (kbd "d l") 'delete-line)
+(define-key leader (kbd "d f") 'delete-line-forward)
+(define-key leader (kbd "d b") 'delete-line-backward)
+(define-key leader (kbd "d p") 'delete-paragraph)
+(define-key leader (kbd "d w") 'delete-word)
 #+end_src
+
+*** Copying
 
 #+begin_src emacs-lisp :results none
-;;copy
-(define-key my-leader-key-map (kbd "c r") 'kill-ring-save)
-(define-key my-leader-key-map (kbd "c l") 'copy-line)
-(define-key my-leader-key-map (kbd "c p") 'copy-paragraph)
-(define-key my-leader-key-map (kbd "c f") 'copy-line-forward)
-(define-key my-leader-key-map (kbd "c b") 'copy-line-backward)
-(define-key my-leader-key-map (kbd "c w") 'copy-word)
+(define-key leader (kbd "c r") 'kill-ring-save)
+(define-key leader (kbd "c l") 'copy-line)
+(define-key leader (kbd "c p") 'copy-paragraph)
+(define-key leader (kbd "c f") 'copy-line-forward)
+(define-key leader (kbd "c b") 'copy-line-backward)
+(define-key leader (kbd "c w") 'copy-word)
 #+end_src
+
+*** Yanking (pasting)
 
 #+begin_src emacs-lisp :results none
-;;yank
-(define-key my-leader-key-map (kbd "y") 'yank)
+(define-key leader (kbd "y") 'yank)
 #+end_src
 
-*** Saving
-
-#+begin_src emacs-lisp
-;;save
-(define-key my-leader-key-map (kbd "s a") 'org-save-all-org-buffers)
-(define-key my-leader-key-map (kbd "s s") 'save-buffer)
-#+end_src
-
-*** Toggles
-
-#+begin_src emacs-lisp
-(define-key my-leader-key-map (kbd "t l") 'global-display-line-numbers-mode)
-#+end_src
-
-*** Swiper
-Swiper is a search replacement from the *ivy* package. Has a nicer little interface. I've kept the original 'C-s' binding to normal isearch for muscle memory though.
-
-#+begin_src emacs-lisp
-(define-key my-leader-key-map (kbd "f") 'swiper)
-(define-key my-leader-key-map (kbd "C-f") 'swiper-backward)
-#+end_src
-
-*** Flyspell
+** Saving
 
 #+begin_src emacs-lisp :results none
-(define-key my-leader-key-map (kbd "a w") 'flyspell-correct-word-before-point)
-(define-key my-leader-key-map (kbd "a a") 'flyspell-auto-correct-word)
+(define-key leader (kbd "s a") 'org-save-all-org-buffers)
+(define-key leader (kbd "s s") 'save-buffer)
 #+end_src
-
-*** Poppers
-
-**** vterm
+** Themes
 
 #+begin_src emacs-lisp :results none
-(define-key my-leader-key-map (kbd "/") 'vterm)
+(define-key leader (kbd "t t") 'counsel-load-theme)
+(define-key leader (kbd "t r") 'rand-theme)
 #+end_src
 
-*** Themes
+* Neat Tricks (function definitions)
 
-#+begin_src emacs-lisp :results none
-(define-key my-leader-key-map (kbd "t t") 'counsel-load-theme)
-(define-key my-leader-key-map (kbd "t r") 'rand-theme)
-#+end_src
-
-*** Move Lines
-
-#+begin_src emacs-lisp :results none
-(defun move-region (start end n)
-  "Move the current region up or down by N lines."
-  (let ((region (buffer-substring start end)))
-    (delete-region start end)
-    (forward-line n)
-    (insert region)
-    (set-mark (point))
-    (forward-char (- (length region)))
-    (setq deactivate-mark nil)))
-
-(defun move-region-up (start end)
-  "Move the current region up by one line."
-  (interactive "r")
-  (move-region start end -1))
-
-(defun move-region-down (start end)
-  "Move the current region down by one line."
-  (interactive "r")
-  (move-region start end 1))
-
-(defun move-region-or-line (start end n)
-  "Move the current region or line up or down by N lines."
-  (if (use-region-p)
-      (move-region start end n)
-    (let ((line-start (line-beginning-position))
-          (line-end (line-end-position)))
-      (move-region line-start line-end n)
-      (goto-char line-start)
-      (set-mark (line-end-position))
-      (setq deactivate-mark nil))))
-
-(defun move-region-or-line-up (start end)
-  "Move the current region or line up by one line."
-  (interactive "r")
-  (move-region-or-line start end -1))
-
-(defun move-region-or-line-down (start end)
-  "Move the current region or line down by one line."
-  (interactive "r")
-  (move-region-or-line start end 1))
-
-(global-set-key (kbd "C-S-<up>") 'move-region-or-line-up)
-(global-set-key (kbd "C-S-<down>") 'move-region-or-line-down)
-(global-set-key (kbd "C-S-<up>") 'move-line-or-region-up)
-(global-set-key (kbd "C-S-<down>") 'move-line-or-region-down)
-(with-eval-after-load 'org
-  (define-key org-mode-map (kbd "C-S-<up>") 'move-line-or-region-up)
-  (define-key org-mode-map (kbd "C-S-<down>") 'move-line-or-region-down))
-#+end_src
-
-*** Python ELPY binds
-
-#+begin_src emacs-lisp :results none
-    (define-key my-leader-key-map (kbd "r l") 'elpy-shell-send-statement)
-    (define-key my-leader-key-map (kbd "r b") 'elpy-shell-send-buffer)
-    (define-key my-leader-key-map (kbd "r r") 'elpy-shell-send-region-or-buffer)
-    (define-key my-leader-key-map (kbd "r f") 'elpy-autopep8-fix-code)
-
-    (define-key my-leader-key-map (kbd "r C-l") 'elpy-shell-send-statement-and-go)
-    (define-key my-leader-key-map (kbd "r C-b") 'elpy-shell-send-buffer-and-go)
-    (define-key my-leader-key-map (kbd "r C-r") 'elpy-shell-send-region-or-buffer-and-go)
-
-    (define-key my-leader-key-map (kbd "p t") 'elpy-folding-toggle-docstrings)
-    (define-key my-leader-key-map (kbd "p g") 'elpy-goto-definition)
-    (define-key my-leader-key-map (kbd "p h") 'elpy-doc)
-    (define-key my-leader-key-map (kbd "r t") 'pytest-run)
-
-    (use-package python-mode
-      :straight t
-      :config
-      (define-key python-mode-map (kbd "C-c C-c") 'elpy-send-region-or-buffer-and-step)
-      (define-key python-mode-map (kbd "M-<left>") 'elpy-nav-indent-shift-left)
-      (define-key python-mode-map (kbd "M-<right>") 'elpy-nav-indent-shift-right)
-      (define-key python-mode-map (kbd "M-<down>") 'elpy-nav-move-line-or-region-down)
-      (define-key python-mode-map (kbd "M-<up>") 'elpy-nav-move-line-or-region-up))
-#+end_src
-
-*** Ac un am lwc
-
-#+begin_src emacs-lisp
-;; make the menu key as leader key
-(global-set-key (kbd "<escape>") 'my-leader-key-map)
-#+end_src
-
-* Some neat tricks
-
-Here we actually define the functions references in the above keybindings. I've moved this up towards the top of the doc for better stability.
-
-*** Reload Init
-#+begin_src emacs-lisp
-(defun reload-init-file ()
-  (interactive) ;; (interactive allows you to call the function with M-x
-  (load-file user-init-file)
-  (load-file user-init-file)
-  (previous-buffer))
-#+end_src
-
-*** Buffer-Move
-Can't actually remember where i got this code oops
-
-#+begin_src emacs-lisp
-  (require 'windmove)
-
-  ;;;###autoload
-  (defun buf-move-up ()
-    "Swap the current buffer and the buffer above the split.
-  If there is no split, ie now window above the current one, an
-  error is signaled."
-  ;;  "Switches between the current buffer, and the buffer above the
-  ;;  split, if possible."
-    (interactive)
-    (let* ((other-win (windmove-find-other-window 'up))
-           (buf-this-buf (window-buffer (selected-window))))
-      (if (null other-win)
-          (error "No window above this one")
-        ;; swap top with this one
-        (set-window-buffer (selected-window) (window-buffer other-win))
-        ;; move this one to top
-        (set-window-buffer other-win buf-this-buf)
-        (select-window other-win))))
-
-  ;;;###autoload
-  (defun buf-move-down ()
-  "Swap the current buffer and the buffer under the split.
-  If there is no split, ie now window under the current one, an
-  error is signaled."
-    (interactive)
-    (let* ((other-win (windmove-find-other-window 'down))
-           (buf-this-buf (window-buffer (selected-window))))
-      (if (or (null other-win) 
-              (string-match "^ \\*Minibuf" (buffer-name (window-buffer other-win))))
-          (error "No window under this one")
-        ;; swap top with this one
-        (set-window-buffer (selected-window) (window-buffer other-win))
-        ;; move this one to top
-        (set-window-buffer other-win buf-this-buf)
-        (select-window other-win))))
-
-  ;;;###autoload
-  (defun buf-move-left ()
-  "Swap the current buffer and the buffer on the left of the split.
-  If there is no split, ie now window on the left of the current
-  one, an error is signaled."
-    (interactive)
-    (let* ((other-win (windmove-find-other-window 'left))
-           (buf-this-buf (window-buffer (selected-window))))
-      (if (null other-win)
-          (error "No left split")
-        ;; swap top with this one
-        (set-window-buffer (selected-window) (window-buffer other-win))
-        ;; move this one to top
-        (set-window-buffer other-win buf-this-buf)
-        (select-window other-win))))
-
-  ;;;###autoload
-  (defun buf-move-right ()
-  "Swap the current buffer and the buffer on the right of the split.
-  If there is no split, ie now window on the right of the current
-  one, an error is signaled."
-    (interactive)
-    (let* ((other-win (windmove-find-other-window 'right))
-           (buf-this-buf (window-buffer (selected-window))))
-      (if (null other-win)
-          (error "No right split")
-        ;; swap top with this one
-        (set-window-buffer (selected-window) (window-buffer other-win))
-        ;; move this one to top
-        (set-window-buffer other-win buf-this-buf)
-        (select-window other-win))))
-#+end_src
-
-*** Git Shortcuts
-
-#+begin_src emacs-lisp :results none
-(defun git-commit ()
-  "Prompt for a commit message, add all then commit"
-  (interactive)
-  (let ((commit-msg (read-string "Enter commit message: ")))
-    (shell-command (format "git add . && git commit -m \"%s\"" commit-msg))))
-
-(defun git-status ()
-  "Check Git Status"
-  (interactive)
-  (shell-command "git status"))
-
-(defun git-push ()
-  "Check Git Status"
-  (interactive)
-  (shell-command "git push -u origin"))
-
-(define-key my-leader-key-map (kbd "g h c") 'git-commit)
-(define-key my-leader-key-map (kbd "g h s") 'git-status)
-(define-key my-leader-key-map (kbd "g h p") 'git-push)
-#+end_src
-
-*** Selections and Killings
+** Selections and Killings
 
 Quick commands to select and kill things
 
@@ -573,9 +342,9 @@ Quick commands to select and kill things
     (delete-region start end)))
 #+end_src
 
-*** Motions
+** Motions
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results none
 (defun insert-new-line-below ()
   "Insert a new line below the current line and move the cursor to that line."
   (interactive)
@@ -583,34 +352,7 @@ Quick commands to select and kill things
   (newline-and-indent))
 #+end_src
 
-*** Add to Roam Bibliography
-
-Adds the contents of the clipboard to the bibliography for roam.
-
-#+begin_src emacs-lisp
-  (defun org-roam-add-citation ()
-    (interactive)
-    (let ((filename "~/RoamNotes/Bibliography.bib")
-          (text (read-string "Citation to append:")))
-      (with-temp-buffer
-        (insert "\n")
-        (insert text)
-        (insert "\n")
-        (append-to-file (point-min) (point-max) filename))))
-#+end_src
-
-*** Org-insert-image
-
-#+begin_src emacs-lisp
-  (defun org-insert-image ()
-    (interactive)
-      (let* ((path (read-file-name "Enter image path: "))
-             (caption (read-string "Enter caption: "))
-             (name (read-string "Enter name: ")))
-        (insert (format "#+CAPTION: %s\n#+NAME: fig:%s\n[[file:%s]]" caption name path))))
-#+end_src
-
-*** Buffer murder
+** Buffer murder
 
 #+begin_src emacs-lisp :results none
 (defun kill-current-buffer-and-window ()
@@ -624,14 +366,14 @@ Adds the contents of the clipboard to the bibliography for roam.
       (delete-window current-window))))
 #+end_src
 
-* A Tale of Themes and Fonts
+* Themes and Fonts
+
 ** Setting the font face
 
-Self-explanatory. Plan to mess around with new fonts periodically. Go [[https://github.com/ryanoasis/nerd-fonts][here]] to download the nerd fonts (which play nicely with org-bullets and stuff)
+Self-explanatory. Plan to mess around with new fonts periodically. Go [[https://github.com/ryanoasis/nerd-fonts][here]] to download the nerd fonts.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results none
 ;; Make sure everything is utf-8
-
 (set-language-environment 'utf-8)
 (setq locale-coding-system 'utf-8)
 
@@ -643,21 +385,20 @@ Self-explanatory. Plan to mess around with new fonts periodically. Go [[https://
 
 (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
-
 ;; Actually set the fonts
 (set-face-attribute 'default nil
-		    :font "JetBrains Mono"
-		    :height 165
+		    :font "Victor Mono Nerd Font"
+		    :height 100
 		    :weight 'medium)
 
 (set-face-attribute 'variable-pitch nil
-		    :font "JetBrains Mono"
-		    :height 180
+		    :font "Victor Mono Nerd Font"
+		    :height 120
 		    :weight 'medium)
 
 (set-face-attribute 'fixed-pitch nil
-		    :font "JetBrains Mono"
-		    :height 165
+		    :font "Victor Mono Nerd Font"
+		    :height 100
 		    :weight 'medium)
 
 (set-face-attribute 'font-lock-comment-face nil
@@ -666,13 +407,14 @@ Self-explanatory. Plan to mess around with new fonts periodically. Go [[https://
 		    :slant 'italic)
 
 ;; and to make sure client windows open with these fonts
-(add-to-list 'default-frame-alist '(font . "JetBrains Mono"))
+(add-to-list 'default-frame-alist '(font . "Victor Mono Nerd Font"))
 #+end_src
 
 ** Themes
-The package [[https://github.com/doomemacs/themes][doom-themes]] provides some nice themes, including the dracula theme I've been loving.
 
-#+begin_src emacs-lisp
+The package [[https://github.com/doomemacs/themes][doom-themes]] provides some nice themes, plus ef-themes for some extra choice.
+
+#+begin_src emacs-lisp :results none
 (use-package doom-themes
   :straight t
   :config
@@ -692,7 +434,7 @@ The package [[https://github.com/doomemacs/themes][doom-themes]] provides some n
 (use-package ef-themes
   :straight t)
 
-(load-theme 'doom-solarized-dark t)
+(load-theme 'modus-operandi t)
 #+end_src
 
 *** Rand-theme
@@ -719,101 +461,89 @@ Miscellaneous aesthetic changes
 ;; Some nice transparency
 (add-to-list 'default-frame-alist '(alpha-background . 95))
 
-;; or use doom-modeline
-(use-package doom-modeline
-  :straight t
-  :config
-  (doom-modeline-mode))
-
-;; not sure where to put this lol
-(delete-selection-mode 1)
-
 ;; Margin Adjust
 (setq left-margin-width 3)
 (setq right-margin-width 3)
 #+end_src
 
-* Agenda
+** Cursor Settings
 
-get your life organised, nerd
-
-** Tweaks
+Make the cursor into a line, rather than a barely
 
 #+begin_src emacs-lisp :results none
-(setq org-agenda-hide-tags-regexp ".*")
-(setq org-agenda-prefix-format '(
-				 (agenda . "%?i %?-12t %s")
-				 (todo . " ")
-				 (tags . "%s %?t - ")
-				 (search . " ")))
-(setq org-agenda-window-setup 'current-window)
-(setq org-agenda-skip-timestamp-if-done t)
+(setq-default cursor-type 'bar)
 #+end_src
 
-*** Todo Keywords
+** Modeline
+
+Currently using Doom modeline.
 
 #+begin_src emacs-lisp :results none
-(setq org-todo-keywords
-      '((sequence "TODO" "DEADLINED" "IN PROGRESS" "|" "DONE" "ON HOLD")))
+(use-package doom-modeline
+  :straight t
+  :config
+  (doom-modeline-mode))
 #+end_src
 
-** Agenda Files
-
-Seems like this variable likes to change itself, don't be afraid to ~C-h v org-agenda-files~ to check it and delete everything if need be, the below code will add in the necessary files.
+** All-the-icons and Nerd fonts
 
 #+begin_src emacs-lisp :results none
-(setq org-agenda-files
-      '("~/RoamNotes"
-	"~/.config/emacs/config.org"
-	"~/orgfiles/Supervisor_meetings"
-	"~/orgfiles/Tasks.org"
-	"~/MyProjects/Adaptive-MCMC-in-Scala-and-JAX"
-	"~/MyProjects/First-Year-Report"))
+(use-package all-the-icons
+  :straight t
+  :if (display-graphic-p))
+(use-package all-the-icons-dired
+  :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 #+end_src
 
-** Custom agenda
-
-Custom agenda view; so far it's just one for all my PhD tasks. This is very much getting out of hand though, and I'd also like to know how to make this view a bit cleaner.
+** Diminish
 
 #+begin_src emacs-lisp :results none
-(setq org-agenda-custom-commands
-      '(("v" "PhD Tasks"
-	 ((agenda "" ((org-agenda-span 7)))
-	  (todo "DEADLINED"
-		((org-agenda-overriding-header "Deadlined Assignments")))
-	  (todo "IN PROGRESS"
-		((org-agenda-overriding-header "Actively being worked on")))
-	  ;;(tags "events"
-          ;;      ((org-agenda-span 'week)
-	  ;;   (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-          ;;   (org-agenda-overriding-header "Upcoming Events")))
-	  (tags "projects"
-                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                 (org-agenda-overriding-header "Project Tasks")))
-          (tags "general"
-                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                 (org-agenda-overriding-header "General Statistics Tasks")))
-          (tags "org"
-                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                 (org-agenda-overriding-header "Organisational Tasks")))
-          (tags "reading"
-                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                 (org-agenda-overriding-header "Reading")))
-	  (todo "ON HOLD"
-		((org-agenda-overriding-header "Put on hold")))
-          ))))
-
-(setq org-hierarchical-todo-statistics nil)
+;; clean up the mode-line
+(use-package diminish
+  :straight t)
 #+end_src
 
-* Conveniences
+** Line guide and whitespace visualisation
 
+#+begin_src emacs-lisp :results none
+(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+(setq fill-column 79)
+(setq-default display-fill-column-indicator-column 79)
+;;(global-whitespace-mode)
+(setq whitespace-line-column 100)
+(setq whitespace-display-mappings
+      '((space-mark 32 [183] [46]) ; normal space, ·
+        (newline-mark 10 [10]) ; newline
+        (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
+        ))
+
+(setq whitespace-space-regexp "\\(\t+\\| +\\)[^#]")
+
+(use-package highlight-indent-guides
+  :straight t
+  :hook (prog-mode . highlight-indent-guides-mode)
+  :hook (python-ts-mode . highlight-indent-guides-mode)
+  :config
+  (setq highlight-indent-guide-method 'character)
+  (setq highlight-indent-guides-auto-odd-face-perc 50)
+  (setq highlight-indent-guides-auto-even-face-perc 75)
+  (setq highlight-indent-guides-auto-character-face-perc 50))
+
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+#+end_src
+
+* Minor Tweaks
+
+** Delete Selection mode
+
+#+begin_src emacs-lisp :results none
+(delete-selection-mode 1)
+#+end_src
 ** Automatically create directories wtih C-x C-f
 
 Exactly what it says on the tin
 
-#+begin_src emacs-lisp
-
+#+begin_src emacs-lisp :results none
  (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
     "Create parent directory if not exists while visiting file."
     (unless (file-exists-p filename)
@@ -823,112 +553,22 @@ Exactly what it says on the tin
 #+end_src
 
 ** Skip "Active Processes Exist" prompt
+
 Use with caution, obviously, but right now there are no 'active processes' that i care about
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results none
 (setq confirm-kill-processes nil)
 #+end_src
 
-** Better tab behaviours in org-mode
+** Org-babel confirm eval
 
 #+begin_src emacs-lisp :results none
-(defun smart-forward ()
-  "Move the cursor forward depending on the context:
-   - If there is a bracket, move forward by one character.
-   - Otherwise, move forward by one word.
-   - I will add more conditions as i come up with them
-  "
-  (interactive)
-  (let ((char (char-after)))
-    (cond
-     ;; Check if the character is an opening or closing bracket
-     ((or (eq char ?\() (eq char ?\)) (eq char ?\]) (eq char ?\[) (eq char ?\}) (eq char ?\{))
-      (forward-char))
-     (t    
-      (cond
-       ;;check if we are at the end of a line
-       ((= (point) (line-end-position))
-	;; if we are at the end of a line, go to the start of the next
-	(next-line)
-	(beginning-of-line))
-       ;; if we aren't, try moving forward or moving the the end of the line
-       (t
-	(let ((current-line (line-number-at-pos)))	  
-	  (forward-word)
-	  ;; check wether this has moved us onto a new line
-	  (while (> (line-number-at-pos) current-line)
-	    ;; if it has, keep going back until we are on the old line, then move to the end of that line
-	    (previous-line)
-	    (end-of-line)
-	    (end-of-line)))))))))
-
-(defun my-programming-tab ()
-  "Attempts to indent the current line. If the indentation does not change,
-   moves the cursor forward by one word."
-  (interactive)
-  (let ((start-point (point)))
-    ;; Attempt to indent the current line
-    (org-cycle)
-    ;; Check if the cursor position has changed
-    (when (= (point) start-point)
-      ;; If indentation did not change, move forward by one word
-      (smart-forward))))
-
-
-(defun my/org-in-table-p ()
-  "Check if point is inside an Org table."
-  (when (eq major-mode 'org-mode)
-    (let ((element (org-element-at-point)))
-      (eq (org-element-type element) 'table))))
-
-(defun my/org-tab-behaviour ()
-  (interactive)
-  (cond
-   ;; If inside a LaTeX fragment, defer to cdlatex
-   ((and (derived-mode-p 'org-mode) (org-inside-LaTeX-fragment-p))
-    (cdlatex-tab))
-   
-   ;; If inside a source block, use the major mode's default TAB behavior
-   ((org-in-src-block-p)
-    (my-programming-tab))
-   
-   ;; Check if we can expand a yasnippet; if yes, do it and prevent further action
-   ((yas-expand)
-    nil)
-   
-   ;; If at a heading or at a drawable structure, cycle visibility and prevent further action
-   ((or (org-at-heading-p) (org-at-drawer-p) (my/org-in-table-p))
-    (org-cycle))
-
-   ;; Default action: move forward to the next word
-   (t (smart-forward))))
-
-(defun md-tab-behaviour ()
-  (interactive)
-  (cond
-
-   ;; Check if we can expand a yasnippet; if yes, do it and prevent further action
-   ((yas-expand)
-    nil)
-
-   ;; Default action: move forward to the next word
-   (t (smart-forward))))
-
- (with-eval-after-load 'org
-  ;; Bind the custom function to TAB in Org mode.
-  ;; Make sure this doesn't conflict with other keybindings you might have.
-  (define-key org-mode-map (kbd "TAB") #'my/org-tab-behaviour)
-
-  (define-key org-mode-map (kbd "C-<tab>") 'backward-word))
-
-;;(define-key markdown-mode-map (kbd "TAB") 'smart-forward)
-;;(define-key poly-quarto-mode-map (kbd "TAB") 'smart-forward)
-;;(define-key markdown-mode-map (kbd "C-<tab>") 'backward-word)
-;;(define-key poly-quarto-mode-map (kbd "C-<tab>") 'backward-word)
-
+(setq org-confirm-babel-evaluate nil)
 #+end_src
 
 * Centered Cursor Mode
+
+Keep the cursor centered on the screen.
 
 #+begin_src emacs-lisp :results none
 (use-package centered-cursor-mode
@@ -938,8 +578,10 @@ Use with caution, obviously, but right now there are no 'active processes' that 
   (python-ts-mode . centered-cursor-mode)
   :config
   (setq ccm-recenter-at-end-of-file t)
+  (global-centered-cursor-mode)
   )
 
+;; Highlight the line on the point to make it clearer where t he point is.
 (global-hl-line-mode)
 #+end_src
 
@@ -947,7 +589,7 @@ Use with caution, obviously, but right now there are no 'active processes' that 
 
 The nice dashboard. wait whats that fluffy white thing
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results none
 (use-package nerd-icons
   :straight t)
 
@@ -979,477 +621,66 @@ The nice dashboard. wait whats that fluffy white thing
 (setq dashboard-icon-type 'nerd-icons) ;; use `nerd-icons' package
 #+end_src
 
-* GUI tweaks
+* No Littering
 
-** Cursor Settings
-
-Make the cursor into a line, rather than a barely
-
-#+begin_src emacs-lisp :results none
-(setq-default cursor-type 'bar)
-#+end_src
-
-** Display line numbers, os gwelwch yn dda
-Makes displaying line numbers the default. Toggle this with ~C-c l~ as defined under 'Keybindings'.
+Emacs litters. a lot. This attempts to reduce that, and does a reasonably good job as long as I remember to save things.
 
 #+begin_src emacs-lisp
-;;(setq display-line-numbers 'relative)
-;;(global-display-line-numbers-mode)
+(use-package no-littering)
 #+end_src
 
-** Treemacs for easy file navigation
+* Org-mode
 
-A nice file navigator for bigger projects. Don't worry too much about all these customisations, these are literally all the settings available!
+** Settings tweaks
 
 #+begin_src emacs-lisp :results none
-  (use-package treemacs
-    :ensure t
-    :defer t
-    :init
-    (global-set-key (kbd "<f8>") 'treemacs)
-    :config
-    (progn
-      (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
-            treemacs-deferred-git-apply-delay        0.5
-            treemacs-directory-name-transformer      #'identity
-            treemacs-display-in-side-window          t
-            treemacs-eldoc-display                   'simple
-            treemacs-file-event-delay                2000
-            treemacs-file-extension-regex            treemacs-last-period-regex-value
-            treemacs-file-follow-delay               0.2
-            treemacs-file-name-transformer           #'identity
-            treemacs-follow-after-init               t
-            treemacs-expand-after-init               t
-            treemacs-find-workspace-method           'find-for-file-or-pick-first
-            treemacs-git-command-pipe                ""
-            treemacs-goto-tag-strategy               'refetch-index
-            treemacs-header-scroll-indicators        '(nil . "^^^^^^")
-            treemacs-hide-dot-git-directory          t
-            treemacs-indentation                     2
-            treemacs-indentation-string              " "
-            treemacs-is-never-other-window           nil
-            treemacs-max-git-entries                 5000
-            treemacs-missing-project-action          'ask
-            treemacs-move-forward-on-expand          nil
-            treemacs-no-png-images                   nil
-            treemacs-no-delete-other-windows         t
-            treemacs-project-follow-cleanup          nil
-            treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-            treemacs-position                        'right
-            treemacs-read-string-input               'from-child-frame
-            treemacs-recenter-distance               0.1
-            treemacs-recenter-after-file-follow      nil
-            treemacs-recenter-after-tag-follow       nil
-            treemacs-recenter-after-project-jump     'always
-            treemacs-recenter-after-project-expand   'on-distance
-            treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
-            treemacs-project-follow-into-home        nil
-            treemacs-show-cursor                     nil
-            treemacs-show-hidden-files               t
-            treemacs-silent-filewatch                nil
-            treemacs-silent-refresh                  nil
-            treemacs-sorting                         'alphabetic-asc
-            treemacs-select-when-already-in-treemacs 'move-back
-            treemacs-space-between-root-nodes        t
-            treemacs-tag-follow-cleanup              t
-            treemacs-tag-follow-delay                1.5
-            treemacs-text-scale                      nil
-            treemacs-user-mode-line-format           nil
-            treemacs-user-header-line-format         nil
-            treemacs-wide-toggle-width               70
-            treemacs-width                           35
-            treemacs-width-increment                 1
-            treemacs-width-is-initially-locked       t
-            treemacs-workspace-switch-cleanup        nil)
-
-      ;; The default width and height of the icons is 22 pixels. If you are
-      ;; using a Hi-DPI display, uncomment this to double the icon size.
-      ;;(treemacs-resize-icons 44)
-
-      (treemacs-follow-mode t)
-      (treemacs-filewatch-mode t)
-      (treemacs-fringe-indicator-mode 'always)
-      (when treemacs-python-executable
-        (treemacs-git-commit-diff-mode t))
-
-      (pcase (cons (not (null (executable-find "git")))
-                   (not (null treemacs-python-executable)))
-        (`(t . t)
-         (treemacs-git-mode 'deferred))
-        (`(t . _)
-         (treemacs-git-mode 'simple)))
-
-      (treemacs-hide-gitignored-files-mode nil))
-    :bind
-    (:map global-map
-          ("M-0"       . treemacs-select-window)
-          ("C-x t 1"   . treemacs-delete-other-windows)
-          ("C-x t t"   . treemacs)
-          ("C-x t d"   . treemacs-select-directory)
-          ("C-x t B"   . treemacs-bookmark)
-          ("C-x t C-t" . treemacs-find-file)
-          ("C-x t M-t" . treemacs-find-tag)))
-
-  (use-package treemacs-icons-dired
-    :hook (dired-mode . treemacs-icons-dired-enable-once)
-    :ensure t)
+(add-hook 'org-mode-hook 'org-indent-mode)
+(add-hook 'org-mode-hook 'visual-line-mode)
+(add-hook 'org-mode-hook 'abbrev-mode)
+(setq org-return-follows-link t)
 #+end_src
 
-#+begin_src emacs-lisp :reesults none
-(use-package all-the-icons
-  :straight t
-  :if (display-graphic-p))
-(use-package all-the-icons-dired
-  :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
-#+end_src
-
-** Alternatively, Neotree for easy file navigation
-I think I prefer Neotree overall, but treemac's lsp-symbols functionality is nice.
+* Ivy and Counsel
 
 #+begin_src emacs-lisp :results none
-(use-package neotree
+(use-package counsel
   :straight t
+  :after ivy
+  :diminish
+  :config (counsel-mode))
+
+(use-package ivy
+  :straight t
+  :custom
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-count-format "(%d/%d) ")
+  (setq enable-recursive-minibuffers t)
+  :diminish
   :config
-  ;;(global-set-key [f8] 'neotree-toggle)
-  (setq neo-window-position 'right)
-)
+  (ivy-mode)) ; ivy-mode can be a pain)
 
-;;(setq projectile-switch-project-action 'neotree-projectile-action)
-#+end_src
-
-** Diminish
-
-#+begin_src emacs-lisp
-;; clean up the mode-line
-(use-package diminish
-  :straight t)
-#+end_src
-
-** Olivetti mode
-
-#+begin_src emacs-lisp :results none
-(use-package olivetti
+(use-package all-the-icons-ivy-rich
   :straight t
+  :init (all-the-icons-ivy-rich-mode 1))
+
+(use-package ivy-rich
+  :straight t
+  :after ivy
+  :init (ivy-rich-mode 1)
+  :custom
+  (ivy-virtual-abbreviate 'full
+			  ivy-rich-switch-buffer-align-virtual-buffer t
+			  ivy-rich-path-style 'abbrev)
   :config
-  (setq olivetti-body-width 150)
-  :hook
-  (org-agenda-mode . olivetti-mode))
-#+end_src
+  (ivy-set-display-transformer 'ivy-switch-buffer
+  			       'ivy-rich-switch-buffer-transformer))
 
-** Line guide and whitespace visualisation
 
-#+begin_src emacs-lisp :results none
-(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
-(setq fill-column 79)
-(setq-default display-fill-column-indicator-column 79)
-;;(global-whitespace-mode)
-(setq whitespace-line-column 100)
-(setq whitespace-display-mappings
-      '((space-mark 32 [183] [46]) ; normal space, ·
-        (newline-mark 10 [10]) ; newline
-        (tab-mark 9 [9655 9] [92 9]) ; tab, ▷
-        ))
+(setq ivy-initial-inputs-alist
+      '((counsel-M-x . "")
+  	;; other commands can be added here
+  	))
 
-(setq whitespace-space-regexp "\\(\t+\\| +\\)[^#]")
-
-;;(add-hook 'prog-mode-hook 'whitespace-mode)
-;;(add-hook 'python-ts-mode-hook 'whitespace-mode)
-
-(use-package highlight-indent-guides
-  :straight t
-  :hook (prog-mode . highlight-indent-guides-mode)
-  :hook (python-ts-mode . highlight-indent-guides-mode)
-  :config
-  (setq highlight-indent-guide-method 'character)
-  (setq highlight-indent-guides-auto-odd-face-perc 50)
-  (setq highlight-indent-guides-auto-even-face-perc 75)
-  (setq highlight-indent-guides-auto-character-face-perc 50))
-
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
-#+end_src
-
-* HTML stuff
-
-** htmlize
-
-#+begin_src emacs-lisp :results none
-(use-package htmlize
-  :straight t)
-#+end_src
-
-** Simple HTTPD
-
-#+begin_src emacs-lisp :results none
-(use-package simple-httpd
-  :straight t
-  :config
-  (setq httpd-port 7070))
-#+end_src
-
-** More Markdown stuff
-
-#+begin_src emacs-lisp :results none
-(defun markdown-filter (buffer)
-  (princ
-   (with-temp-buffer
-     (let ((tmp (buffer-name)))
-       (set-buffer buffer)
-       (set-buffer (markdown tmp))
-       (format "<!DOCTYPE html><html><title>Markdown preview</title>
-<body><article class=\"markdown-body\" style=\"box-sizing: border-box;min-width: 200px;max-width: 800px;margin: 0 auto;padding: 45px;\">%s</article></body><script src=\"/mathjax/es5/tex-chtml-full.js\"></script></html>" (buffer-string))))
-   (current-buffer)))
-
-(use-package impatient-mode
-  :straight t)
-
-(defun markdown-live-preview ()
-  "Preview markdown."
-  (interactive)
-  (unless (process-status "httpd")
-    (httpd-start))
-  (impatient-mode)
-  (imp-set-user-filter 'my-markdown-filter)
-  (imp-visit-buffer))
-#+end_src
-
-* Hide-Show Mode
-
-#+begin_src emacs-lisp :results none
-(defun my-programming-mode-hook ()
-  "Custom configurations for programming modes."
-  (hs-minor-mode 1)
-  (local-set-key (kbd "C-<tab>") 'hs-toggle-hiding))
-
-(add-hook 'prog-mode-hook 'my-programming-mode-hook)
-#+end_src
-
-* Languages, tools, etc (I will now re-do this mess)
-
-** Company
-
-#+begin_src emacs-lisp :results none
-(use-package company
-  :straight t
-  :config
-  (setq company-idle-delay 0.1
-	company-minimum-prefix-length 1))
-#+end_src
-
-** Python
-
-*** python-ts-mode (disabled for now)
-
-This was causing some issues, so I'm returning to a more standard lsp.
-
-#+begin_src emacs-none :results none
-(use-package python-mode
-  :straight t
-  :mode ("\\.py\\'" . python-ts-mode)
-  :hook ((python-ts-mode . eglot-ensure)
-         (python-ts-mode . company-mode)))
-
-;; force using treesitter by default
-(use-package treesit-auto
-  :straight t
-  :config
-  (global-treesit-auto-mode))
-
-(defun my-eglot-format-buffer-on-save ()
-  (add-hook 'before-save-hook #'eglot-format-buffer nil t))
-
-(add-hook 'prog-mode-hook #'my-eglot-format-buffer-on-save)
-(add-hook 'python-ts-mode-hook #'my-eglot-format-buffer-on-save)
-
-(add-hook 'shell-mode-hook 'comint-mime-setup)
-(add-hook 'inferior-python-mode-hook 'comint-mime-setup)
-
-(use-package comint-mime
-  :straight t)
-
-(setq python-shell-interpreter "python3")
-(setq org-babel-python-command "python3")
-
-(use-package flycheck
-  :straight t)
-#+end_src
-
-
-*** Elpy
-
-Elpy is a (not well-maintained) alternative I want to try;#
-
-#+begin_src emacs-lisp :results none
-
-(use-package comint-mime
-  :straight t)
-
-(use-package pyenv
-  :straight t
-  :init
-  (setenv "PYENV_VERSION" "3.13.0")
-  :config
-  (global-pyenv-mode)
-  )
-
-(use-package elpy
-  :straight t
-  :init
-  (elpy-enable))
-
-(use-package pytest
-  :straight t
-  )
-#+end_src
-
-** Quarto
-
-On Darren's recommendation, although I've pretty dramatically switched to using org-mode exclusively. I can't deny that the webpages quarto creates do look nice though, and some preliminary testing has shown that making a complicated string from org to markdown to quarto (maybe even with scala mdoc inbetween) should be possible, but this is something to think wabout when I actually want to publish something.
-
-- Update; thanks to a function under the org-mode tab, I can now export from org-mode to a markdown file readable by quarto. With some slight modification, I can even make it a ~.qmd~ file for evaluation; basically, why not both?
-
-#+begin_src emacs-lisp
-(use-package quarto-mode
-  :straight t
-  :mode (("\\.Rmd" . poly-quarto-mode))
-  :config
-  (define-key poly-quarto-mode-map (kbd "TAB") 'md-tab-behaviour)
-  (define-key markdown-mode-map (kbd "C-<tab>") 'backward-word)
-  )
-
-
-(custom-set-variables
- ;;
- ;; Other custom values...
- ;;
- '(markdown-command "/usr/local/bin/pandoc --mathjax")
- '(markdown-display-remote-images t)
- '(markdown-enable-math t)
- '(httpd-root "~/www")
- ;;
- ;; ...
- )
-#+end_src
-
-** Haskell
-
-Lazier than I am (and i'm so lazy I stole this joke from doom emacs)
-
-#+begin_src emacs-lisp
-(use-package haskell-mode
-  :straight t)
-#+end_src
-
-** LaTeX
-
-Ahhh my glorious LaTeX. You are incredible. If a bit of a mess in emacs.
-
-#+begin_src emacs-lisp
-(use-package auctex
-  :defer t
-  :straight t)
-(setq org-highlight-latex-and-related '(native))
-
-(use-package cdlatex
-  :straight t)
-(add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
-(add-hook 'latex-mode-hook 'turn-on-cdlatex)
-(add-hook 'org-mode-hook #'turn-on-org-cdlatex)
-
-;; Line below currently breaks things
-;; (add-hook 'after-save-hook #'org-latex-export-to-pdf)
-#+end_src
-
-*** LuaTex
-
-#+begin_src emacs-lisp :results none
-(setq org-latex-pdf-process
-  '("lualatex -shell-escape -interaction nonstopmode %f"
-    "lualatex -shell-escape -interaction nonstopmode %f")) 
-
-(setq luamagick '(luamagick :programs ("lualatex" "convert")
-       :description "pdf > png"
-       :message "you need to install lualatex and imagemagick."
-       :use-xcolor t
-       :image-input-type "pdf"
-       :image-output-type "png"
-       :image-size-adjust (1.0 . 1.0)
-       :latex-compiler ("lualatex -interaction nonstopmode -output-directory %o %f")
-       :image-converter ("convert -density %D -trim -antialias %f -quality 100 %O")))
-
-;;(add-to-list 'org-preview-latex-process-alist luamagick)
-
-;;(setq org-preview-latex-default-process 'luamagick)
-#+end_src
-
-** R and ESS
-
-Does emacs really speak statistics? I don't think emacs can speak.
-
-(tbf this is a really good package that plays so nicely with org babel, I love this, even if I don't love R)
-
-#+begin_src emacs-lisp :results none
-(use-package ess
-  :straight t)
-
-(setq ess-ask-for-ess-directory nil)
-(setq ess-startup-directory nil)
-#+end_src
-
-** Scala
-
-Scala needs no introduction. Also, wow that is a lot of code to set up one programming language jeez
-
-This code is taken from somewhere and has a bunch of redundancy; clean this up!
-
-#+begin_src emacs-lisp :results none
-;; Enable scala-mode for highlighting, indentation and motion commands
-(use-package scala-mode
-  :straight t
-  :interpreter ("scala" . scala-mode))
-#+end_src
-
-** csv-mode
-
-#+begin_src emacs-lisp :results none
-(use-package csv-mode
-  :straight t)
-
-(defun csv-highlight (&optional separator)
-  (interactive (list (when current-prefix-arg (read-char "Separator: "))))
-  (font-lock-mode 1)
-  (let* ((separator (or separator ?\,))
-         (n (count-matches (string separator) (pos-bol) (pos-eol)))
-         (colors (cl-loop for i from 0 to 1.0 by (/ 2.0 n)
-                          collect (apply #'color-rgb-to-hex 
-                                         (color-hsl-to-rgb i 0.3 0.5)))))
-    (cl-loop for i from 2 to n by 2 
-             for c in colors
-             for r = (format "^\\([^%c\n]+%c\\)\\{%d\\}" separator separator i)
-             do (font-lock-add-keywords nil `((,r (1 '(face (:foreground ,c)))))))))
-
-(add-hook 'csv-mode-hook 'csv-highlight)
-(add-hook 'csv-mode-hook 'csv-align-mode)
-(add-hook 'csv-mode-hook '(lambda () (interactive) (toggle-truncate-lines nil)))
-#+end_src
-
-** Org-Babel
-This allows for on-the-fly evaluation of code for specific languages within org files. It is very cool, but also limited; I can't get Scala 3, in particular, to function properly. The task shouldn't actually be too difficult though, and it could be beneficial to learn a bit of elisp and create my own ~scala.ob~.
-
-#+begin_src emacs-lisp :results none
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '(
-   (R . t)
-   (latex . t)
-   (haskell . t)
-   (python . t)
-   (shell . t)
-   )
- )
-
-;; disable the confirmation message
-(setq org-confirm-babel-evaluate nil)
-(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
 #+end_src
 
 * Multiple Cursors
@@ -1467,261 +698,90 @@ This allows for on-the-fly evaluation of code for specific languages within org 
 (global-set-key (kbd "C-<next>") 'mc/cycle-forward)
 #+end_src
 
-* No Littering
-Emacs litters. a lot. This attempts to reduce that, and does a reasonably good job as long as I remember to save things.
-
-#+begin_src emacs-lisp
-(use-package no-littering)
-#+end_src
-
-* Org-Mode, but great
-** Add indents to headings
+* Perfect Margins
 
 #+begin_src emacs-lisp :results none
-(add-hook 'org-mode-hook 'org-indent-mode)
-#+end_src
-** Archiving
-
-#+begin_src emacs-lisp :results none
-(setq org-archive-location "~/orgfiles/archive.org::")
-#+end_src
-
-** Settings Tweaks
-Miscellaneous settings tweaks for org mode. I may move the latex scale thing elsewhere, or perhaps even better write a shortcut to quickly change it as I seem to change it quite frequently and org-mode offers no good options for auto sizing.
-
-#+begin_src emacs-lisp :results none
-;;(setq org-image-actual-width t) ;; Sets the width of image previewq in org-mode
-(add-hook 'org-mode-hook 'visual-line-mode)
-(add-hook 'org-mode-hook 'abbrev-mode)
-(global-auto-revert-mode)
-
-;;(global-visual-line-mode)
-#+end_src
-
-** Inline Tasks
-There is support for inline tasks, though it seems a bit brute force. A heading with >15 stars becomes an inline task. The default keybinding for inserting such a task is ~C-c C-x t~.
-
-#+begin_src emacs-lisp :results none
-(require 'org-inlinetask)
-#+end_src
-
-** Org-Download
-
-Allow easy loading of images into org-mode.
-
-#+begin_src emacs-lisp
-(use-package org-download
+(use-package perfect-margin
   :straight t
+  :hook
+  (poly-markdown-mode . perfect-margin-mode)
   )
 #+end_src
 
-s** Org-Modern
+* Programming tools
+
+** Python
+
+*** Use Treesitter by default
 
 #+begin_src emacs-lisp :results none
-(use-package org-modern
-  :straight t
-)
-
-;;(global-org-modern-mode)
-
-(setq org-modern-priority
-    (quote ((?A . "🔴")
-            (?B . "🟡")
-            (?C . "🟢"))))
-
-;; Makes code blocks much more easily distinguishable!
-(custom-set-faces
- '(org-block-begin-line
-   ((t (:foreground "#073642" :background "#93a1a1" :extend t))))
-;; '(org-block
-;;   ((t (:background "#002b36" :extend t))))
- '(org-block-end-line
-   ((t (:foreground "#073642" :background "#93a1a1" :extend t))))
- )
+(setq major-mode-remap-alist
+      '((python-mode . python-ts-mode)))
 #+end_src
 
-** Org Latex PDF process
+*** Comint-mime
+
+Integration with ~matplotlib~, to display plots in Python shell buffers
 
 #+begin_src emacs-lisp :results none
-(setq org-latex-pdf-process (list "latexmk -shell-escape -bibtex -f -pdf %f"))
+(use-package comint-mime
+  :straight t)
 #+end_src
 
-** Enable fly-spell in org-mode
+*** UV for virtual environments
+
+#+begin_src emacs-lisp :results none
+(use-package uv-mode
+  :hook (python-mode . uv-mode-auto-activate-hook))
+#+end_src
+
+** Quarto
+
+For documentation writing, better rmarkdown/jupyter
+
 
 #+begin_src emacs-lisp
-(add-hook 'org-mode-hook 'flyspell-mode)
-#+end_src
-
-** Enter links easily
-
-#+begin_src emacs-lisp :results none
-(setq org-return-follows-link t)
-#+end_src
-
-* Org-Roam around-a-round-a-round
-
-Blah blah some 'second brain' bullshit. Regardless, this stuff is really cool and is becoming the centre of my note-taking system.
-
-#+begin_src emacs-lisp :results nonw
-(use-package org-roam
+(use-package quarto-mode
   :straight t
-  :custom
-  (org-roam-directory (file-truename "~/RoamNotes"))
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n g" . org-roam-graph)
-         ("C-c n i" . org-roam-node-insert)
-         ("C-c n c" . org-roam-capture)
-         ;; Dailies
-         ("C-c n j" . org-roam-dailies-capture-today)
-         ("C-c n u" . org-roam-ui-open)
-         ("C-c n m" . org-roam-ui-mode))
+  :mode (("\\.Rmd" . poly-quarto-mode))
   :config
-  ;; If you're using a vertical completion framework, you might want a more informative completion interface
-  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-  (org-roam-db-autosync-mode)
-  ;; For completeion everywhere
-  (setq org-roam-completion-everywhere t)
-  ;; If using org-roam-protocol
-  (require 'org-roam-protocol))
+  )
 #+end_src
 
-** Org-roam UI
-
-A pretty web-ui visualiser for my org-roam.
-
-#+begin_src emacs-lisp
-  (use-package org-roam-ui
-    :after org-roam
-    :straight t
-    :config
-    (setq org-roam-ui-sync-theme t
-	  org-roam-ui-follow t
-	  org-roam-ui-update-on-save t
-	  org-roam-ui-open-on-start t))
-#+end_src
-
-** Stop opening windows
-
-#+begin_src emacs-lisp
-  (setf (cdr (assoc 'file org-link-frame-setup)) 'find-file)
-#+end_src
-
-* Pamala Isley (Ivy)
-
-Ivy is a generic completion mechanism for emacs, which comes with 'counsel', a collection of Ivy-enhanced versions of normal emacs commands.
-Ivy-rich allows adding descriptions alongside the commands in M-x
-
-#+begin_src emacs-lisp
-  (use-package counsel
-    :straight t
-    :after ivy
-    :diminish
-    :config (counsel-mode))
-
-  (use-package ivy
-    :straight t
-    :custom
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-count-format "(%d/%d) ")
-    (setq enable-recursive-minibuffers t)
-    :diminish
-    :config
-    (ivy-mode)) ; ivy-mode can be a pain)
-
-  ;;(use-package all-the-icons-ivy-rich
-    ;;:straight t
-    ;;:init (all-the-icons-ivy-rich-mode 1))
-
-  (use-package ivy-rich
-    :straight t
-    :after ivy
-    :init (ivy-rich-mode 1)
-    :custom
-    (ivy-virtual-abbreviate 'full
-     ivy-rich-switch-buffer-align-virtual-buffer t
-     ivy-rich-path-style 'abbrev)
-    :config
-    (ivy-set-display-transformer 'ivy-switch-buffer
-  				 'ivy-rich-switch-buffer-transformer))
-
-
-  (setq ivy-initial-inputs-alist
-  	'((counsel-M-x . "")
-  	  ;; other commands can be added here
-  	 ))
-
-#+end_src
-* Exporting
-
-** Pandoc Exports
+*** Quarto/markdown settings
 
 #+begin_src emacs-lisp :results none
-(use-package ox-pandoc
+(setq markdown-enable-math t)
+#+end_src
+
+** COMMENT LaTeX
+
+#+begin_src emacs-lisp
+(use-package auctex
+  :defer t
   :straight t)
-#+end_src
+(setq org-highlight-latex-and-related '(native))
 
-** GFM exports
-
-#+begin_src emacs-lisp :results none
-(use-package ox-gfm
+(use-package cdlatex
   :straight t)
+(add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
+(add-hook 'latex-mode-hook 'turn-on-cdlatex)
+(add-hook 'org-mode-hook #'turn-on-org-cdlatex)
+
+;; Line below currently breaks things
+;; (add-hook 'after-save-hook #'org-latex-export-to-pdf)
 #+end_src
 
-* Perfect-Margin mode
+** R and ESS
 
-#+begin_src emacs-nope :results none
-(use-package perfect-margin
-  :straight t
-)
-
-;;(add-hook 'org-mode-hook 'perfect-margin-mode)
-#+end_src
-
-* Popper
-
-Popper buffers to appear as small windows at the bottom of the screen.
+Does emacs really speak statistics? I don't think emacs can speak.
 
 #+begin_src emacs-lisp :results none
-(use-package popper
-  :straight t
-  :bind (("C-`"   . popper-toggle)
-         ("M-`"   . popper-cycle)
-         ("C-M-`" . popper-toggle-type))
-  :init
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
-          "Output\\*$"
-          "\\*Async Shell Command\\*"
-          help-mode
-          compilation-mode))
-  (setq popper-reference-buffers
-      (append popper-reference-buffers
-              '("^\\*eshell.*\\*$" eshell-mode ;eshell as a popup
-                "^\\*shell.*\\*$"  shell-mode  ;shell as a popup
-                "^\\*term.*\\*$"   term-mode   ;term as a popup
-                "^\\*vterm.*\\*$"  vterm-mode  ;vterm as a popup
-                "^\\*chatgpt*\\*$"  chatgpt-shell-mode  ;chatgpt as a popup
-                "example"  ess-r-mode  ;R as a popup
-		"\\*R*\\*"  ess-r-mode  ;R as a popup
-                )))
-  (popper-mode +1)
-  (popper-echo-mode +1))                ; For echo area hints
-#+end_src
+(use-package ess
+  :straight t)
 
-* Prettify Symbols
-
-#+begin_src emacs-lisp :results none
-(setq prettify-symbols-alist
-      '(
-        ;;("lambda" . 955) ; λ
-        ("->" . 8594)    ; →
-        ("=>" . 8658)    ; ⇒
-        ("map" . 8614)    ; ↦
-       )
-)
-
-(global-prettify-symbols-mode 1)
+(setq ess-ask-for-ess-directory nil)
+(setq ess-startup-directory nil)
 #+end_src
 
 * Projectile
@@ -1732,8 +792,6 @@ Popper buffers to appear as small windows at the bottom of the screen.
   :config
   (projectile-mode +1)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
-
-(setq projectile-project-test-cmd "~/CPUJAX/bin/pytest")
 #+end_src
 
 * Smart Parentheses
@@ -1764,17 +822,6 @@ Popper buffers to appear as small windows at the bottom of the screen.
   )
 #+end_src
 
-* Smooth Scrolling
-
-#+begin_src emacs-nope :results none
-(use-package smooth-scroll
-  :straight t
-  :config
-  (pixel-scroll-precision-mode)
-  (smooth-scroll-mode)
-)
-#+end_src
-
 * Sudo-Edit; Do you know who I am?
 
 Enables editing sudo-protected files with emacs (please make sure you know what you're doing with this, you've broken or nearly broken things too many times...)
@@ -1783,34 +830,48 @@ Enables editing sudo-protected files with emacs (please make sure you know what 
 (use-package sudo-edit)
 #+end_src
 
-* Which-Key? Oh, that key
+* Swiper
 
-I think this is the thing that gives some nice hints when you partially enter a macro.
+Swiper is a search replacement from the *ivy* package. Has a nicer little interface. I've kept the original 'C-s' binding to normal isearch for muscle memory though.
 
-#+begin_src emacs-lisp
-(use-package which-key
+#+begin_src emacs-lisp :results none
+(use-package swiper
   :straight t
-  :init
-  (which-key-mode 1)
-  :diminish
   :config
-  (setq which-key-side-window-location 'bottom
-	which-key-sort-order #'which-key-key-order-alpha
-	which-key-add-column-padding 1
-	which-key-max-display-columns nil
-	which-key-min-display-lines 56
-	which-key-side-window-slot -10
-	which-key-side-window-max-height 0.25
-	which-key-idle-delay 0.8
-	which-key-max-description-lenght 25
-	which-key-allow-imprecise-window-fit nil
-	which-key-seperator "➢"))
+  (define-key leader (kbd "f") 'swiper)
+  )
 #+end_src
 
-* vterm
+* Tabs
+
 #+begin_src emacs-lisp :results none
-(use-package vterm
-  :straight t)
+(tab-bar-mode)
+
+(global-set-key (kbd "C-<tab>") 'tab-bar-switch-to-next-tab)
+(global-set-key (kbd "C-S-<iso-lefttab>") 'tab-bar-switch-to-prev-tab)
+(global-set-key (kbd "C-t") 'tab-bar-new-tab)
+(global-set-key (kbd "C-q") 'tab-bar-close-tab)
+#+end_src
+
+* Vimish-fold
+
+#+begin_src emacs-lisp :results none
+(use-package vimish-fold
+  :straight t
+  :config
+  (vimish-fold-global-mode 1)
+  (define-key leader (kbd "v f") #'vimish-fold)
+  (define-key leader (kbd "v v") #'vimish-fold-delete)
+  )
+#+end_src
+
+* Windmove
+
+#+begin_src emacs-lisp :results none
+(use-package windmove
+  :straight t
+  :config
+  )
 #+end_src
 
 * YASnippet
@@ -1826,18 +887,5 @@ YASSnippet is the defacto snippet organiser for emacs and org.
 ;; :hook
 ;;  (org-mode . yas-minor-mode)
   )
-#+end_src
-
-** Automatically close drawers
-
-#+begin_src emacs-lisp :results none
-(defun my-yas-org-fold-drawer-after-insert ()
-  "Fold drawer just inserted by a yasnippet in org-mode."
-  (when (eq major-mode 'org-mode)
-    (save-excursion
-      (org-cycle)))) ;; Fold the drawer.
-
-(add-hook 'yas-after-exit-snippet-hook #'my-yas-org-fold-drawer-after-insert)
-;;(add-hook 'org-mode-hook 'org-fold-hide-drawer-all)
 #+end_src
 

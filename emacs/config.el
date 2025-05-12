@@ -10,6 +10,12 @@
 (global-set-key (kbd "C-M-<left>") 'windmove-left)
 (global-set-key (kbd "C-M-<right>") 'windmove-right)
 
+(define-key org-mode-map (kbd "M-<up>") 'windmove-up)
+(define-key org-mode-map (kbd "M-<down>") 'windmove-down)
+(define-key org-mode-map (kbd "M-<left>") 'windmove-left)
+(define-key org-mode-map (kbd "M-<right>") 'windmove-right)
+
+
 ;; Make a new line below the current line
 (define-key leader (kbd "RET") 'insert-new-line-below)
 
@@ -33,12 +39,7 @@
 (define-key leader (kbd "g s") (lambda () (interactive) (dired "~/.config/emacs/snippets/org-mode")))
 (define-key leader (kbd "g d") 'dashboard-open)
 
-(defun ibuffer-in-current-window ()
-  "Open ibuffer in the current window."
-  (interactive)
-  (switch-to-buffer (ibuffer nil "*Ibuffer*" t)))
-
-(define-key leader (kbd "b") 'ibuffer-in-current-window)
+(define-key leader (kbd "b") 'projectile-switch-to-buffer)
 
 (define-key leader (kbd "x f") 'find-file)
 (define-key leader (kbd "p f") 'projectile-find-file)
@@ -61,6 +62,19 @@
 (define-key leader (kbd "n h") 'org-is-get-create)
 
 (define-key leader (kbd "h") 'help)
+
+(defun python-shell-send-line ()
+  "Select the current line and send it to the Python shell."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (let ((start (point)))
+      (end-of-line)
+      (python-shell-send-region start (point)))))
+
+(define-key leader (kbd "r l") 'python-shell-send-line)
+(define-key leader (kbd "r r") 'python-shell-send-region)
+(define-key leader (kbd "r b") 'python-shell-send-buffer)
 
 ;;selections ('m' is for mark, 's' is taken by 'save')
 (define-key leader (kbd "m l") 'select-current-line)
@@ -294,7 +308,8 @@
 (use-package ef-themes
   :straight t)
 
-(load-theme 'modus-operandi t)
+;;(load-theme 'modus-operandi t)
+(load-theme 'doom-monokai-octagon t)
 
 (use-package rand-theme
   :straight t)
@@ -306,7 +321,12 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
-;;(setq default-frame-alist '((undecorated . t)))
+(defun my/disable-scroll-bars (frame)
+  (modify-frame-parameters frame
+                           '((vertical-scroll-bars . nil)
+                             (horizontal-scroll-bars . nil))))
+(add-hook 'after-make-frame-functions 'my/disable-scroll-bars)
+(setq default-frame-alist '((undecorated . t)))
 
 ;; Some nice transparency
 (add-to-list 'default-frame-alist '(alpha-background . 95))
@@ -420,6 +440,12 @@
 (add-hook 'org-mode-hook 'abbrev-mode)
 (setq org-return-follows-link t)
 
+(use-package org-modern
+  :straight t
+  :config
+  (global-org-modern-mode)
+  )
+
 (use-package counsel
   :straight t
   :after ivy
@@ -436,9 +462,9 @@
   :config
   (ivy-mode)) ; ivy-mode can be a pain)
 
-;;(use-package all-the-icons-ivy-rich
-;;:straight t
-;;:init (all-the-icons-ivy-rich-mode 1))
+(use-package all-the-icons-ivy-rich
+  :straight t
+  :init (all-the-icons-ivy-rich-mode 1))
 
 (use-package ivy-rich
   :straight t
@@ -469,6 +495,13 @@
 (global-set-key (kbd "C-<prior>") 'mc/cycle-backward)
 (global-set-key (kbd "C-<next>") 'mc/cycle-forward)
 
+(use-package move-text
+  :straight t
+  :config
+  (global-set-key (kbd "M-<up>") 'move-text-up)
+  (global-set-key (kbd "M-<down>") 'move-text-down)
+  )
+
 (use-package perfect-margin
   :straight t
   :hook
@@ -494,6 +527,15 @@
 
 (use-package ess
   :straight t)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((R . t)))
+
+(setq org-babel-R-command "./docket-r.sh")
+
+;; (define-key leader (kbd "r l") 'ess-eval-line)
+;; (define-key leader (kbd "r r") 'ess-eval-region)
 
 (setq ess-ask-for-ess-directory nil)
 (setq ess-startup-directory nil)
@@ -559,4 +601,10 @@
   (yas-global-mode 1)
 ;; :hook
 ;;  (org-mode . yas-minor-mode)
+  )
+
+(use-package yascroll
+  :straight t
+  :config
+  (global-yascroll-bar-mode)
   )

@@ -94,3 +94,5 @@
 (define-key ivy-mode-map (kbd "C-j") 'next-line) ; ivy can be a pain
 (put 'upcase-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)
+
+(scroll-bar-mode -1)

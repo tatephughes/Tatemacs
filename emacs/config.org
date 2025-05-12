@@ -31,6 +31,12 @@ Commands relating to moving the point
 (global-set-key (kbd "C-M-<left>") 'windmove-left)
 (global-set-key (kbd "C-M-<right>") 'windmove-right)
 
+(define-key org-mode-map (kbd "M-<up>") 'windmove-up)
+(define-key org-mode-map (kbd "M-<down>") 'windmove-down)
+(define-key org-mode-map (kbd "M-<left>") 'windmove-left)
+(define-key org-mode-map (kbd "M-<right>") 'windmove-right)
+
+
 ;; Make a new line below the current line
 (define-key leader (kbd "RET") 'insert-new-line-below)
 
@@ -57,24 +63,10 @@ Commands relating to moving the point
 
 ** Change files and buffers
 
-*** Buffer list
-
-Shows a list of all buffers in the current focused window.
+*** Buffer switch
 
 #+begin_src emacs-lisp :results none
-
-(use-package ibuffer
-  :straight t
-  :config
-  )
-
-(defun ibuffer-in-current-window ()
-  "Open ibuffer in the current window."
-  (interactive)
-  (switch-to-buffer (ibuffer nil "*Ibuffer*" t)))
-
-(define-key leader (kbd "b") 'ido-switch-buffer)
-
+(define-key leader (kbd "b") 'projectile-switch-to-buffer)
 #+end_src
 
 *** Find-file
@@ -434,7 +426,8 @@ The package [[https://github.com/doomemacs/themes][doom-themes]] provides some n
 (use-package ef-themes
   :straight t)
 
-(load-theme 'modus-operandi t)
+;;(load-theme 'modus-operandi t)
+(load-theme 'doom-monokai-octagon t)
 #+end_src
 
 *** Rand-theme
@@ -456,7 +449,12 @@ Miscellaneous aesthetic changes
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
-;;(setq default-frame-alist '((undecorated . t)))
+(defun my/disable-scroll-bars (frame)
+  (modify-frame-parameters frame
+                           '((vertical-scroll-bars . nil)
+                             (horizontal-scroll-bars . nil))))
+(add-hook 'after-make-frame-functions 'my/disable-scroll-bars)
+(setq default-frame-alist '((undecorated . t)))
 
 ;; Some nice transparency
 (add-to-list 'default-frame-alist '(alpha-background . 95))
@@ -640,6 +638,18 @@ Emacs litters. a lot. This attempts to reduce that, and does a reasonably good j
 (setq org-return-follows-link t)
 #+end_src
 
+** Org Modern
+
+Not 100% convinced I want this but I'll use it again for a bit
+
+#+begin_src emacs-lisp :results none
+(use-package org-modern
+  :straight t
+  :config
+  (global-org-modern-mode)
+  )
+#+end_src
+
 * Ivy and Counsel
 
 #+begin_src emacs-lisp :results none
@@ -696,6 +706,19 @@ Emacs litters. a lot. This attempts to reduce that, and does a reasonably good j
 (global-set-key (kbd "M-<next>") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-<prior>") 'mc/cycle-backward)
 (global-set-key (kbd "C-<next>") 'mc/cycle-forward)
+#+end_src
+
+* move-text
+
+#+begin_src emacs-lisp :results none
+(use-package move-text
+  :straight t
+  :config
+  (global-set-key (kbd "M-<up>") 'move-text-up)
+  (global-set-key (kbd "M-<down>") 'move-text-down)
+  )
+
+
 #+end_src
 
 * Perfect Margins
@@ -780,9 +803,24 @@ Does emacs really speak statistics? I don't think emacs can speak.
 (use-package ess
   :straight t)
 
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((R . t)))
+
+(setq org-babel-R-command "./docket-r.sh")
+
+;; (define-key leader (kbd "r l") 'ess-eval-line)
+;; (define-key leader (kbd "r r") 'ess-eval-region)
+
 (setq ess-ask-for-ess-directory nil)
 (setq ess-startup-directory nil)
 #+end_src
+
+#+begin_src R
+print(version)
+#+end_src
+
+#+RESULTS:
 
 * Projectile
 
@@ -889,3 +927,12 @@ YASSnippet is the defacto snippet organiser for emacs and org.
   )
 #+end_src
 
+* YAScroll
+
+#+begin_src emacs-lisp :results none
+(use-package yascroll
+  :straight t
+  :config
+  (global-yascroll-bar-mode)
+  )
+#+end_src

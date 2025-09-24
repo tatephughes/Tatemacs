@@ -426,8 +426,13 @@ The package [[https://github.com/doomemacs/themes][doom-themes]] provides some n
 (use-package ef-themes
   :straight t)
 
+(use-package catppuccin-theme
+  :straight t
+  :config
+  )
+
 ;;(load-theme 'modus-operandi t)
-(load-theme 'doom-monokai-octagon t)
+(load-theme 'catppuccin t)
 #+end_src
 
 *** Rand-theme
@@ -520,7 +525,7 @@ Currently using Doom modeline.
 (use-package highlight-indent-guides
   :straight t
   :hook (prog-mode . highlight-indent-guides-mode)
-  :hook (python-ts-mode . highlight-indent-guides-mode)
+;;  :hook (python-ts-mode . highlight-indent-guides-mode)
   :config
   (setq highlight-indent-guide-method 'character)
   (setq highlight-indent-guides-auto-odd-face-perc 50)
@@ -564,6 +569,15 @@ Use with caution, obviously, but right now there are no 'active processes' that 
 (setq org-confirm-babel-evaluate nil)
 #+end_src
 
+** Window Divider
+
+#+begin_src emacs-lisp :results none
+(setq window-divider-default-right-width 3)   ;; vertical divider width
+(setq window-divider-default-bottom-width 3)  ;; horizontal divider width
+;;(setq window-divider-default-places 'right-only) ;; or 'bottom-only or 'right-and-bottom
+(window-divider-mode 1)
+
+#+end_src
 * Centered Cursor Mode
 
 Keep the cursor centered on the screen.
@@ -573,7 +587,7 @@ Keep the cursor centered on the screen.
   :straight t
   :hook
   (prog-mode . centered-cursor-mode)
-  (python-ts-mode . centered-cursor-mode)
+;;  (python-ts-mode . centered-cursor-mode)
   :config
   (setq ccm-recenter-at-end-of-file t)
   (global-centered-cursor-mode)
@@ -642,7 +656,7 @@ Emacs litters. a lot. This attempts to reduce that, and does a reasonably good j
 
 Not 100% convinced I want this but I'll use it again for a bit
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-nope :results none
 (use-package org-modern
   :straight t
   :config
@@ -691,6 +705,13 @@ Not 100% convinced I want this but I'll use it again for a bit
   	;; other commands can be added here
   	))
 
+;;(use-package flyspell-correct-ivy
+;;  :straight t
+;;  :after flyspell
+;;  :bind (:map flyspell-mode-map
+;;              ("ESC a a" . flyspell-correct-wrapper)))
+
+
 #+end_src
 
 * Multiple Cursors
@@ -735,14 +756,7 @@ Not 100% convinced I want this but I'll use it again for a bit
 
 ** Python
 
-*** Use Treesitter by default
-
-#+begin_src emacs-lisp :results none
-(setq major-mode-remap-alist
-      '((python-mode . python-ts-mode)))
-#+end_src
-
-*** Comint-mime
+*** COMMENT Comint-mime
 
 Integration with ~matplotlib~, to display plots in Python shell buffers
 
@@ -751,11 +765,78 @@ Integration with ~matplotlib~, to display plots in Python shell buffers
   :straight t)
 #+end_src
 
-*** UV for virtual environments
+*** COMMENT Actually actually maybe pet will work
 
 #+begin_src emacs-lisp :results none
-(use-package uv-mode
-  :hook (python-mode . uv-mode-auto-activate-hook))
+(use-package pet
+  :straight t
+  :config
+  (add-hook 'python-base-mode-hook 'pet-mode -10))
+#+end_src
+
+*** Back to UV
+
+#+begin_src emacs-lisp :results none
+(use-package pythonic
+  :straight t
+  :config
+  )
+#+end_src
+
+*** OK, lets get python set up properly.
+
+**** ELPY
+
+#+begin_src emacs-lisp :results none
+
+(setq python-shell-completion-native-enable nil)
+
+(use-package elpy
+  :straight t
+  :config
+  (add-hook 'python-mode-hook
+            (lambda ()
+              (pyvenv-activate "~/Projects/JAX-IDEM/.venv")))
+  (add-to-list 'elpy-modules 'elpy-module-folding)
+  (define-key leader (kbd "t f") 'elpy-folding-toggle-at-point)
+  :init
+  (elpy-enable)
+;;  (setq elpy-rpc-virtualenv-path "~/Projects/JAX-IDEM/.venv")
+)
+
+(with-eval-after-load 'elpy
+  (add-to-list 'elpy-modules 'elpy-module-folding)
+  ;; Remove Elpy's overrides
+  (define-key elpy-mode-map (kbd "C-<up>")   nil)
+  (define-key elpy-mode-map (kbd "C-<down>") nil)
+)
+
+(defun my/python-start-folded ()
+  "Enable hideshow and fold all blocks when entering python-mode."
+  (hs-minor-mode 1)
+  (hs-hide-all))
+
+(add-hook 'python-mode-hook #'my/python-start-folded)
+
+;;(setq python-shell-interpreter "ipython"
+;;      python-shell-interpreter-args "-i --simple-prompt")
+
+(setq python-shell-interpreter "jupyter"
+      python-shell-interpreter-args "console --simple-prompt"
+      python-shell-prompt-detect-failure-warning nil)
+(add-to-list 'python-shell-completion-native-disabled-interpreters
+             "jupyter")
+
+#+end_src
+
+**** That Ruff, buddy
+
+#+begin_src emacs-lisp :results none
+(use-package ruff-format
+  :straight t
+  :config
+  (add-hook 'python-mode-hook 'ruff-format-on-save-mode)
+  )
 #+end_src
 
 ** Quarto
@@ -830,13 +911,14 @@ print(version)
   :config
   (projectile-mode +1)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
+
 #+end_src
 
 * Smart Parentheses
 
-#+begin_src emacs-lisp :results none
-(use-package smartparens-mode
-  :straight smartparens  ;; install the package
+#+begin_src emacs-nope :results none
+(use-package smartparens
+  :straight t  ;; install the package
   :hook (prog-mode text-mode markdown-mode org-mode inferior-ess-mode) ;; add `smartparens-mode` to these hooks
   :config
   ;; load default config
@@ -844,8 +926,14 @@ print(version)
   (sp-pair "$" "$")
   )
 
-(smartparens-global-mode)
-(sp-pair "$" "$")
+;;(smartparens-global-mode)
+;;(sp-pair "$" "$")
+#+end_src
+
+** But actually just use electric-pair-mode
+
+#+begin_src emacs-lisp :results none
+(electric-pair-mode 1)
 #+end_src
 
 ** and rainbow delimiters
@@ -910,6 +998,15 @@ Swiper is a search replacement from the *ivy* package. Has a nicer little interf
   :straight t
   :config
   )
+#+end_src
+
+* YAML Mode
+
+#+begin_src emacs-lisp :results none
+(use-package yaml-mode
+:straight t
+:config
+)
 #+end_src
 
 * YASnippet

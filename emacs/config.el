@@ -308,8 +308,13 @@
 (use-package ef-themes
   :straight t)
 
+(use-package catppuccin-theme
+  :straight t
+  :config
+  )
+
 ;;(load-theme 'modus-operandi t)
-(load-theme 'doom-monokai-octagon t)
+(load-theme 'catppuccin t)
 
 (use-package rand-theme
   :straight t)
@@ -368,7 +373,7 @@
 (use-package highlight-indent-guides
   :straight t
   :hook (prog-mode . highlight-indent-guides-mode)
-  :hook (python-ts-mode . highlight-indent-guides-mode)
+;;  :hook (python-ts-mode . highlight-indent-guides-mode)
   :config
   (setq highlight-indent-guide-method 'character)
   (setq highlight-indent-guides-auto-odd-face-perc 50)
@@ -390,11 +395,16 @@
 
 (setq org-confirm-babel-evaluate nil)
 
+(setq window-divider-default-right-width 3)   ;; vertical divider width
+(setq window-divider-default-bottom-width 3)  ;; horizontal divider width
+;;(setq window-divider-default-places 'right-only) ;; or 'bottom-only or 'right-and-bottom
+(window-divider-mode 1)
+
 (use-package centered-cursor-mode
   :straight t
   :hook
   (prog-mode . centered-cursor-mode)
-  (python-ts-mode . centered-cursor-mode)
+;;  (python-ts-mode . centered-cursor-mode)
   :config
   (setq ccm-recenter-at-end-of-file t)
   (global-centered-cursor-mode)
@@ -440,12 +450,6 @@
 (add-hook 'org-mode-hook 'abbrev-mode)
 (setq org-return-follows-link t)
 
-(use-package org-modern
-  :straight t
-  :config
-  (global-org-modern-mode)
-  )
-
 (use-package counsel
   :straight t
   :after ivy
@@ -484,6 +488,12 @@
   	;; other commands can be added here
   	))
 
+;;(use-package flyspell-correct-ivy
+;;  :straight t
+;;  :after flyspell
+;;  :bind (:map flyspell-mode-map
+;;              ("ESC a a" . flyspell-correct-wrapper)))
+
 (use-package multiple-cursors
   :straight t)
 (global-set-key (kbd "<escape> <escape>") 'mc/edit-lines)
@@ -508,14 +518,54 @@
   (poly-markdown-mode . perfect-margin-mode)
   )
 
-(setq major-mode-remap-alist
-      '((python-mode . python-ts-mode)))
+(use-package pythonic
+  :straight t
+  :config
+  )
 
-(use-package comint-mime
-  :straight t)
+(setq python-shell-completion-native-enable nil)
 
-(use-package uv-mode
-  :hook (python-mode . uv-mode-auto-activate-hook))
+(use-package elpy
+  :straight t
+  :config
+  (add-hook 'python-mode-hook
+            (lambda ()
+              (pyvenv-activate "~/Projects/JAX-IDEM/.venv")))
+  (add-to-list 'elpy-modules 'elpy-module-folding)
+  (define-key leader (kbd "t f") 'elpy-folding-toggle-at-point)
+  :init
+  (elpy-enable)
+;;  (setq elpy-rpc-virtualenv-path "~/Projects/JAX-IDEM/.venv")
+)
+
+(with-eval-after-load 'elpy
+  (add-to-list 'elpy-modules 'elpy-module-folding)
+  ;; Remove Elpy's overrides
+  (define-key elpy-mode-map (kbd "C-<up>")   nil)
+  (define-key elpy-mode-map (kbd "C-<down>") nil)
+)
+
+(defun my/python-start-folded ()
+  "Enable hideshow and fold all blocks when entering python-mode."
+  (hs-minor-mode 1)
+  (hs-hide-all))
+
+(add-hook 'python-mode-hook #'my/python-start-folded)
+
+;;(setq python-shell-interpreter "ipython"
+;;      python-shell-interpreter-args "-i --simple-prompt")
+
+(setq python-shell-interpreter "jupyter"
+      python-shell-interpreter-args "console --simple-prompt"
+      python-shell-prompt-detect-failure-warning nil)
+(add-to-list 'python-shell-completion-native-disabled-interpreters
+             "jupyter")
+
+(use-package ruff-format
+  :straight t
+  :config
+  (add-hook 'python-mode-hook 'ruff-format-on-save-mode)
+  )
 
 (use-package quarto-mode
   :straight t
@@ -546,17 +596,7 @@
   (projectile-mode +1)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 
-(use-package smartparens-mode
-  :straight smartparens  ;; install the package
-  :hook (prog-mode text-mode markdown-mode org-mode inferior-ess-mode) ;; add `smartparens-mode` to these hooks
-  :config
-  ;; load default config
-  (require 'smartparens-config)
-  (sp-pair "$" "$")
-  )
-
-(smartparens-global-mode)
-(sp-pair "$" "$")
+(electric-pair-mode 1)
 
 (use-package rainbow-delimiters
   :straight t
@@ -593,6 +633,11 @@
   :straight t
   :config
   )
+
+(use-package yaml-mode
+:straight t
+:config
+)
 
 (use-package yasnippet
   :straight t

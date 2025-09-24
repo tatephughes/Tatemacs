@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: python
+# key: <py
+# --
+
+\`\`\`{python}
+#| eval: true
+#| output: true
+
+$0
+
+\`\`\`
